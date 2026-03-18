@@ -1,83 +1,62 @@
 # Skills & OpenCode Config
 
-Repositorio con la configuracion de OpenCode y recursos compartidos para el equipo.
+Repositorio con una configuracion de OpenCode lista para compartir en equipo.
 
 ## Estructura
 
-```
+```text
 skills/
-  prd/                          # Skill para generar PRDs
+  prd/
 
 opencode/
-  opencode.json                 # Configuracion principal de agentes y MCPs
-  tui.json                      # Configuracion de la interfaz TUI
-  README.md                     # Guia de uso del flujo de trabajo
+  opencode.json
+  package.json
+  .gitignore
+  tui.json
+  README.md
   commands/
-    plan.md                     # /plan - crear plan de trabajo
-    plan-rewrite.md             # /plan-rewrite - reescribir plan existente
-    execute.md                  # /execute - ejecutar siguiente paso
-    apply-feedback.md           # /apply-feedback - aplicar feedback humano
-    status.md                   # /status - ver progreso del plan
-    onboard.md                  # /onboard - explorar proyecto antes de trabajar
-    commit.md                   # /commit - crear commit convencional
-    pr.md                       # /pr - crear pull request
   plugins/
-    engram.ts                   # Plugin de memoria persistente
   skills/
-    prd/                        # Skill para PRDs
-    typescript-advanced-types/  # Skill para tipos avanzados de TS
   templates/
-    CONVENTIONS.md              # Template de convenciones para copiar a cada proyecto
-    COMMIT-CONVENTIONS.md       # Reglas de commits y PRs
-    PLAN-crud.md                # Template de plan para CRUDs
-    PLAN-bugfix.md              # Template de plan para bugfixes
-    PLAN-integration.md         # Template de plan para integraciones
-    PLAN-refactor.md            # Template de plan para refactors
 ```
 
-## Como usar
+## Qué contiene `opencode/`
 
-### Setup inicial
+- 3 agentes con roles claros: planner, orchestrator y coder
+- 8 commands para onboard, planificar, ejecutar, corregir, revisar estado, commitear y abrir PRs
+- plugin de memoria persistente con Engram
+- templates para convenciones, commits/PRs y planes por tipo de tarea
+- skills compartidas para PRDs y tipos avanzados de TypeScript
 
-1. Clonar este repositorio
-2. Copiar el contenido de `opencode/` a `~/.config/opencode/`
-3. Ejecutar `bun install` en `~/.config/opencode/` para instalar dependencias del plugin
+## Setup rapido
 
-### Para cada proyecto nuevo
+1. Clona este repositorio
+2. Copia `opencode/` a `~/.config/opencode/`
+3. Ejecuta `bun install` dentro de `~/.config/opencode/`
+4. Lee `~/.config/opencode/README.md`
+5. Si quieres Context7, configura tu API key localmente en `opencode.json`
 
-1. Copiar `opencode/templates/CONVENTIONS.md` a la raiz del proyecto y adaptarlo
-2. Ejecutar `/onboard` para que el agente explore el proyecto
-3. Usar `/plan <tarea>` para comenzar a trabajar
-
-### Flujo de trabajo diario
+## Flujo de trabajo
 
 ```text
-/plan implementar feature X        # planificar
-/execute                            # ejecutar paso a paso
-/apply-feedback cambiar Y           # corregir si hace falta
-/status                             # ver progreso
-/commit                             # crear commit convencional
-/pr                                 # crear pull request
+/onboard
+/plan implementar feature X
+/execute
+/apply-feedback cambiar Y
+/status
+/commit
+/pr
 ```
-
-### Templates de plan
-
-Los templates en `opencode/templates/PLAN-*.md` sirven como referencia para el planner. No es necesario copiarlos, el `step-builder-agent` ya conoce la estructura general. Son utiles para:
-- entender que pasos esperar para cada tipo de tarea
-- como referencia manual si quieres armar un plan a mano
-
-## Agentes
-
-| Agente | Rol |
-|---|---|
-| `step-builder-agent` | Planifica. Hace preguntas de negocio y tecnicas. Genera `PLAN.md` |
-| `execution-orchestrator` | Coordina. Ejecuta un paso por vez. Pide review humano |
-| `ts-expert-coder` | Implementa. Worker TS/Node/NestJS. Se auto-verifica |
 
 ## Convenciones clave
 
-- Siempre usar objetos de dominio (Value Objects) en lugar de primitivos en entidades
-- DDD + CQRS: commands por repositorio, queries pueden ir directo a Prisma
-- Todo DTO con decoradores de Swagger y class-validator
-- Commits en formato Conventional Commits
-- Review humano obligatorio entre cada paso de ejecucion
+- usar Value Objects y objetos de dominio, no primitivos, dentro del dominio
+- seguir DDD + CQRS
+- commands por repositorio, queries pueden usar Prisma directo
+- DTOs con Swagger + class-validator
+- review humano obligatorio entre pasos
+- commits con Conventional Commits
+
+## Recomendacion
+
+En cada proyecto nuevo, copia `opencode/templates/CONVENTIONS.md` a la raiz del repo y ajustalo al stack real del proyecto. Eso hace que la IA sea mucho mas consistente para todo el equipo.

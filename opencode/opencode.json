@@ -34,9 +34,9 @@
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
       "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-f9bc5543-149e-4bf4-9515-088123083a35"
+        "CONTEXT7_API_KEY": "SET_IN_LOCAL_CONFIG"
       },
-      "enabled": true
+      "enabled": false
     },
     "engram": {
       "type": "local",

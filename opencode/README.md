@@ -1,51 +1,46 @@
-# OpenCode Setup
+# OpenCode Team Setup
 
-Este directorio contiene una configuracion de OpenCode basada en un flujo simple de planificacion y ejecucion paso a paso.
+Configuracion de OpenCode para trabajo en equipo con un flujo simple y controlado:
 
-## Objetivo
+1. descubrir bien la tarea
+2. generar `PLAN.md`
+3. ejecutar un paso por vez
+4. pedir revision humana
+5. corregir o avanzar
 
-El flujo esta pensado para trabajar asi:
+## Contenido
 
-1. Entender bien la tarea
-2. Hacer preguntas de negocio y tecnicas
-3. Generar un `PLAN.md` accionable
-4. Ejecutar un paso por vez
-5. Pedir revision humana entre cada paso
-6. Corregir feedback o avanzar al siguiente paso
+```text
+opencode/
+  opencode.json
+  package.json
+  .gitignore
+  tui.json
+  README.md
+  commands/
+  plugins/
+  skills/
+  templates/
+```
 
-## Arquitectura Actual
-
-La configuracion gira alrededor de 3 agentes:
+## Agentes
 
 ### `step-builder-agent`
 
-Rol:
 - descubre contexto del proyecto
-- hace preguntas en bloques tematicos
-- cubre negocio, producto, tecnica y riesgos
+- hace preguntas de negocio y tecnicas en bloques
+- recomienda defaults razonables
 - genera `PLAN.md`
-
-No hace:
-- no implementa codigo
-
-Uso ideal:
-- cuando todavia no existe plan
-- cuando el plan actual esta incompleto o quedo viejo
 
 ### `execution-orchestrator`
 
-Rol:
 - lee `PLAN.md`
-- selecciona el siguiente paso
-- delega la implementacion a `ts-expert-coder`
+- ejecuta un solo paso por vez
+- delega implementacion a `ts-expert-coder`
 - actualiza estados del plan
 - obliga a revision humana antes de continuar
 
-No hace:
-- no implementa codigo de aplicacion
-- no avanza al siguiente paso sin aprobacion humana
-
-Estados usados en `PLAN.md`:
+Estados de `PLAN.md`:
 - `[ ] pending`
 - `[~] in progress`
 - `[!] needs fixes`
@@ -53,240 +48,150 @@ Estados usados en `PLAN.md`:
 
 ### `ts-expert-coder`
 
-Rol:
-- implementa una unica tarea acotada
+- implementa una tarea acotada
 - sigue patrones locales del repo
 - trabaja principalmente en TypeScript, Node.js y NestJS
-- ejecuta verificaciones antes de devolver el resultado
+- corre verificaciones antes de devolver exito
 
-No hace:
-- no gestiona el estado global del proyecto
-- no define alcance funcional
-- no cambia arquitectura porque si
+## Commands
 
-## Commands Disponibles
+### Planificacion
 
-Los commands viven en `commands/` y se invocan con `/nombre`.
+- `/onboard`
+  - explora un proyecto antes de trabajar
+  - resume stack, arquitectura, comandos y convenciones
+- `/plan <tarea>`
+  - investiga el codebase
+  - pregunta lo necesario
+  - crea o reemplaza `PLAN.md`
+- `/plan-rewrite`
+  - revisa y mejora `PLAN.md`
+  - rellena huecos y ajusta pasos
 
-### `/plan <tarea>`
+### Ejecucion
 
-Usa `step-builder-agent` para:
-- inspeccionar el codebase
-- hacer preguntas necesarias
-- confirmar entendimiento
-- crear o reemplazar `PLAN.md`
+- `/execute`
+  - toma el siguiente paso pendiente o con fixes
+  - lo delega a `ts-expert-coder`
+  - presenta cambios y pide review humana
+- `/apply-feedback <cambios>`
+  - toma feedback humano
+  - vuelve a delegar correcciones
+- `/status`
+  - muestra completados, paso actual y siguientes pasos
 
-Ejemplo:
+### Git
 
-```text
-/plan agregar autenticacion JWT con refresh token
-```
+- `/commit`
+  - crea un commit local con Conventional Commits
+- `/pr`
+  - crea un pull request con `gh`
+  - resume todos los cambios de la rama
 
-### `/plan-rewrite`
-
-Usa `step-builder-agent` para:
-- releer `PLAN.md`
-- detectar huecos o ambiguedades
-- hacer preguntas faltantes
-- reescribir el plan con mejor detalle
-
-Usalo cuando:
-- cambian requisitos
-- el plan quedo desactualizado
-- los pasos son demasiado grandes o vagos
-
-### `/execute`
-
-Usa `execution-orchestrator` para:
-- leer `PLAN.md`
-- tomar el siguiente paso pendiente o con fixes
-- delegarlo a `ts-expert-coder`
-- mostrar cambios y pedir review humana
-
-Importante:
-- ejecuta un solo paso por vez
-- no deberia avanzar automaticamente al siguiente
-
-### `/apply-feedback <cambios>`
-
-Usa `execution-orchestrator` para:
-- tomar feedback del humano
-- marcar el paso como necesitado de ajustes
-- reenviar las correcciones a `ts-expert-coder`
-- volver a pedir revision
-
-Ejemplo:
+## Flujo recomendado
 
 ```text
-/apply-feedback separar el guard de admin y agregar tests al servicio
-```
-
-### `/status`
-
-Usa `execution-orchestrator` para:
-- leer `PLAN.md`
-- resumir pasos completados
-- indicar paso actual o en review
-- mostrar lo pendiente
-- sugerir la siguiente accion
-
-## Flujo Recomendado
-
-### Flujo minimo
-
-```text
+/onboard
 /plan implementar login con JWT
-/status
 /execute
-/apply-feedback mover validacion al DTO y agregar test del guard
+/apply-feedback separar DTOs y agregar tests
 /execute
 /status
+/commit
+/pr
 ```
 
-### Flujo real esperado
+## Setup para cada miembro del equipo
 
-1. Ejecutas `/plan <tarea>`
-2. Respondes preguntas del planner
-3. Se genera `PLAN.md`
-4. Ejecutas `/execute`
-5. Revisas los cambios locales
-6. Si hay cambios, usas `/apply-feedback ...`
-7. Si esta bien, vuelves a `/execute`
-8. Repites hasta que todo el plan quede en `[x] done`
+1. Copiar el contenido de `opencode/` a `~/.config/opencode/`
+2. Ejecutar `bun install` dentro de `~/.config/opencode/`
+3. Tener instalado el binario `engram` si quieres memoria persistente
+4. Tener `gh` autenticado si quieres usar `/pr`
 
-## Estructura Esperada de `PLAN.md`
+## Configuracion local opcional
 
-El planner genera un plan con esta idea general:
+### Context7
 
-```markdown
-# Plan: Titulo
+Por seguridad, `context7` queda deshabilitado por defecto en `opencode.json`.
 
-## Goal
-...
+Para activarlo, cada persona debe editar localmente `~/.config/opencode/opencode.json` y poner su API key real:
 
-## Business Context
-...
-
-## Technical Context
-...
-
-## Implementation Steps
-
-### Step 1: ...
-- **What**: ...
-- **Why**: ...
-- **Where**: ...
-- **Acceptance**: ...
-- **Status**: [ ] pending
-
-## Verification
-...
-
-## Risks / Notes
-...
+```json
+"context7": {
+  "type": "remote",
+  "url": "https://mcp.context7.com/mcp",
+  "headers": {
+    "CONTEXT7_API_KEY": "TU_API_KEY"
+  },
+  "enabled": true
+}
 ```
 
-Claves:
-- los pasos deben ser pequenos y revisables
-- el acceptance debe ser concreto
-- el plan debe servir para ejecutar sin volver a redefinir producto a mitad de camino
+No subir esa key al repositorio.
 
-## Skills Actuales
+### Engram
 
-Solo quedaron 2 skills activas:
+`engram` ya esta habilitado en la configuracion. Si el binario no existe, el plugin no rompe el flujo: simplemente no habra memoria persistente.
 
-### `prd`
+## Templates
 
-Util para:
-- documentar requisitos
-- estructurar una idea de producto
-- generar PRDs o documentos mas orientados a negocio
+### `templates/CONVENTIONS.md`
 
-### `typescript-advanced-types`
+Template de convenciones para copiar a cada proyecto. Esta basado en el backend real explorado y define:
+- DDD + CQRS + capas
+- uso obligatorio de Value Objects en lugar de primitivos en dominio
+- naming, imports, controllers, DTOs, repositorios y errores
+- como se escriben tests unitarios y E2E
+- stack esperado: NestJS, Fastify, Prisma, SWC, Jest
 
-Util para:
-- tipos complejos en TypeScript
-- generics avanzados
-- mapped types, conditional types, template literal types
+### `templates/PLAN-crud.md`
 
-## Skills Eliminadas
+Referencia para CRUDs completos.
 
-Se eliminaron:
-- toda la familia `sdd-*`
-- `find-skills`
-- `_shared` asociado a SDD
+### `templates/PLAN-bugfix.md`
 
-La razon es que ya no forman parte del flujo actual basado en planner -> orchestrator -> worker.
+Referencia para fixes con enfoque RED -> GREEN -> REFACTOR.
 
-## MCPs Configurados
+### `templates/PLAN-integration.md`
 
-### `engram`
+Referencia para integraciones con servicios externos.
 
-Se usa para memoria persistente:
-- guardar contexto de trabajo
-- registrar decisiones y cambios
-- mantener continuidad entre sesiones
+### `templates/PLAN-refactor.md`
 
-### `context7`
+Referencia para refactors con red de seguridad de tests.
 
-Se usa para consultar documentacion actualizada de librerias.
+### `templates/COMMIT-CONVENTIONS.md`
 
-### `miro`
+Reglas de Conventional Commits y estructura de PR.
 
-Quedo configurado pero sin uso dentro del flujo principal actual.
+## Skills incluidas
 
-## Archivos Importantes
+- `prd`
+- `typescript-advanced-types`
 
-- `opencode.json` - configuracion principal de agentes y MCPs
-- `commands/plan.md` - inicia la planificacion
-- `commands/plan-rewrite.md` - reescribe el plan
-- `commands/execute.md` - ejecuta el siguiente paso
-- `commands/apply-feedback.md` - aplica feedback humano
-- `commands/status.md` - muestra progreso del plan
+No hay familia `sdd-*` ni `find-skills`.
 
-## Como Ajustar el Sistema
+## Regla mas importante
 
-Si algo del comportamiento no te convence:
+En dominio, usar siempre objetos de dominio y Value Objects, no primitivos.
 
-- cambia `opencode.json` si quieres modificar la personalidad o reglas base del agente
-- cambia `commands/*.md` si quieres ajustar el comportamiento de un comando concreto
+Ejemplos:
+- `Money` en lugar de `number` para dinero
+- `Uuid` en lugar de `string` para ids
+- `Email` en lugar de `string` para correos
+- `DateRange` en lugar de dos `Date` sueltas
 
-Regla practica:
-- problema general del agente -> `opencode.json`
-- problema puntual del comando -> `commands/*.md`
+DTOs si pueden usar primitivos porque son la frontera de serializacion.
 
-## Buenas Practicas
+## Que tocar cuando quieras ajustar algo
 
-- usa `/plan` antes de empezar una tarea no trivial
-- no ejecutes varios pasos a la vez si quieres mantener el control del review
-- usa `/apply-feedback` con instrucciones concretas
-- usa `/status` cuando retomes una tarea despues de una pausa
-- manten `PLAN.md` como fuente visible de verdad del trabajo
+- `opencode.json` -> comportamiento base de agentes y MCPs
+- `commands/*.md` -> comportamiento puntual de cada slash command
+- `templates/*.md` -> referencia de convenciones, planes, commits y PRs
 
-## Ejemplo de Sesion
+## Nota practica
 
-```text
-/plan crear modulo de usuarios con CRUD y validaciones
-
-[respondes preguntas del planner]
-
-/execute
-
-[revisas cambios]
-
-/apply-feedback separar DTOs de create y update, y agregar test del service
-
-/execute
-
-/status
-```
-
-## Resumen Corto
-
-- `step-builder-agent` piensa y planifica
-- `execution-orchestrator` coordina y controla el avance
-- `ts-expert-coder` implementa
-- `/plan` crea el plan
-- `/execute` hace un paso
-- `/apply-feedback` corrige
-- `/status` muestra avance
+Este repo esta pensado para ser portable. Por eso:
+- incluye `package.json` para poder correr `bun install`
+- incluye el skill `typescript-advanced-types` como archivo real, no como symlink local
+- no incluye secretos en la configuracion compartida
