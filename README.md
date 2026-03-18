@@ -14,49 +14,83 @@ opencode/
   .gitignore
   tui.json
   README.md
-  commands/
+  commands/         # 15 slash commands
+  evals/            # 9 golden tests para validar comportamiento de agentes
   plugins/
-  skills/
-  templates/
+  skills/           # typescript-advanced-types, nestjs-patterns, prd
+  templates/        # CONVENTIONS.md, COMMIT-CONVENTIONS.md, 5 PLAN-*.md
 ```
 
 ## Qué contiene `opencode/`
 
-- 3 agentes con roles claros: planner, orchestrator y coder
-- 8 commands para onboard, planificar, ejecutar, corregir, revisar estado, commitear y abrir PRs
-- plugin de memoria persistente con Engram
-- templates para convenciones, commits/PRs y planes por tipo de tarea
-- skills compartidas para PRDs y tipos avanzados de TypeScript
+- **3 agentes** con roles claros: planner, orchestrator y coder
+- **15 commands** para todo el ciclo: onboard, planificar, estimar, ejecutar, revisar, testear, commitear, abrir PRs, y guardar memoria
+- **Plugin Engram** para memoria persistente entre sesiones
+- **Context7 MCP** para documentacion en vivo de librerias externas
+- **Templates** para convenciones, commits/PRs, y 5 tipos de plan (CRUD, bugfix, integration, refactor, feature)
+- **Skills** de PRD, TypeScript avanzado, y patrones NestJS DDD+CQRS
+- **Eval framework** con 9 golden tests de regresion para los 3 agentes
 
 ## Setup rapido
 
-1. Clona este repositorio
-2. Copia `opencode/` a `~/.config/opencode/`
-3. Ejecuta `bun install` dentro de `~/.config/opencode/`
-4. Lee `~/.config/opencode/README.md`
-5. Si quieres Context7, configura tu API key localmente en `opencode.json`
+```bash
+# Opcion 1: script automatico (recomendado)
+git clone git@github.com:joeldevz/skills.git
+cd skills
+./setup-opencode.sh
 
-## Flujo de trabajo
+# Opcion 2: manual
+cp -r opencode/ ~/.config/opencode/
+cd ~/.config/opencode && bun install
+```
+
+El script hace backup de tu config anterior, restaura tu API key de Context7 si ya la tenias, e instala las dependencias.
+
+## Flujo de trabajo completo
 
 ```text
-/onboard
-/plan implementar feature X
-/execute
-/apply-feedback cambiar Y
-/status
-/commit
-/pr
+/onboard                        # explorar el proyecto
+/plan <feature>                 # generar PLAN.md
+/estimate                       # estimar esfuerzo por paso
+/execute                        # implementar el siguiente paso
+/diff                           # ver los cambios con anotaciones
+/test                           # generar/correr tests del paso
+/review                         # quality gate antes de commit
+/apply-feedback <correcciones>  # aplicar feedback
+/commit                         # commit con Conventional Commits
+/pr                             # abrir pull request
+/context                        # guardar aprendizajes en memoria
 ```
+
+## Commands disponibles
+
+| Command | Descripcion |
+|---------|-------------|
+| `/onboard` | Explora el proyecto: stack, arquitectura, convenciones |
+| `/plan <tarea>` | Investiga el codebase y genera PLAN.md |
+| `/plan-rewrite` | Revisa y mejora un PLAN.md existente |
+| `/estimate` | Estima esfuerzo (XS-XL) por paso del plan |
+| `/execute` | Ejecuta el siguiente paso del plan |
+| `/apply-feedback <texto>` | Aplica correcciones al paso actual |
+| `/diff` | Muestra cambios del paso con anotaciones |
+| `/test [modulo]` | Genera o corre tests del paso actual |
+| `/review` | Quality gate: verifica convenciones, tipos, arch, tests |
+| `/rollback [step]` | Deshace el ultimo paso (pide confirmacion) |
+| `/status` | Muestra progreso del PLAN.md |
+| `/context [obs]` | Guarda descubrimientos en memoria persistente |
+| `/docs <lib> <tema>` | Busca docs en vivo via Context7 |
+| `/commit` | Crea commit con Conventional Commits |
+| `/pr` | Abre pull request con `gh` |
 
 ## Convenciones clave
 
-- usar Value Objects y objetos de dominio, no primitivos, dentro del dominio
-- seguir DDD + CQRS
-- commands por repositorio, queries pueden usar Prisma directo
-- DTOs con Swagger + class-validator
-- review humano obligatorio entre pasos
-- commits con Conventional Commits
+- Value Objects y objetos de dominio en la capa de dominio — nunca primitivos
+- DDD + CQRS: commands para escritura, queries para lectura
+- Controllers solo inyectan CommandBus/QueryBus
+- DTOs en la frontera HTTP con Swagger + class-validator
+- Review humano obligatorio entre pasos de ejecucion
+- Commits con Conventional Commits
 
 ## Recomendacion
 
-En cada proyecto nuevo, copia `opencode/templates/CONVENTIONS.md` a la raiz del repo y ajustalo al stack real del proyecto. Eso hace que la IA sea mucho mas consistente para todo el equipo.
+En cada proyecto nuevo, copia `opencode/templates/CONVENTIONS.md` a la raiz del repo y ajustalo al stack real del proyecto. Eso hace que los agentes sean mucho mas consistentes para todo el equipo.
