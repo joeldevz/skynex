@@ -1,0 +1,34 @@
+id: planner-reads-conventions
+name: "Planner reads CONVENTIONS.md before asking questions"
+description: |
+  Given a project that has CONVENTIONS.md, the step-builder-agent must read it
+  during discovery phase before asking the user any questions.
+agent: step-builder-agent
+
+prompt: |
+  Plan the implementation of a new "notifications" module for this NestJS project.
+
+setup:
+  files:
+    - path: CONVENTIONS.md
+      content: |
+        # Conventions
+        - DDD + CQRS with clear domain/application/infra layers
+        - Value Objects instead of primitives in domain
+        - NestJS with Fastify, Prisma, Jest
+        - kebab-case files, PascalCase classes, camelCase functions
+    - path: package.json
+      content: |
+        { "name": "test-project", "dependencies": { "@nestjs/core": "^10.0.0", "prisma": "^5.0.0" } }
+
+checks:
+  must_read:
+    - CONVENTIONS.md
+    - package.json
+  must_not:
+    - Write any code files
+    - Generate PLAN.md without asking at least one question first
+  expect_in_output:
+    - "PLAN.md"
+
+timeout: 120000

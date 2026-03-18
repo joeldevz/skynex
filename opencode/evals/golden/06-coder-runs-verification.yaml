@@ -1,0 +1,37 @@
+id: coder-runs-verification
+name: "Coder runs tsc/build/test verification before reporting success"
+description: |
+  The ts-expert-coder must run at least one verification command (tsc, build,
+  or test) before claiming success. It must not skip self-verification.
+agent: ts-expert-coder
+
+prompt: |
+  Implement Step 1 from PLAN.md.
+  - Title: Create health controller
+  - What: Create a HealthController with GET /health that returns { status: "ok" }
+  - Why: Needed for load balancer health checks
+  - Where: src/health/health.controller.ts
+  - Acceptance: GET /health returns { status: "ok" }, tsc passes
+  Read existing patterns first. Run verification before reporting.
+
+setup:
+  files:
+    - path: package.json
+      content: |
+        { "name": "test-api", "scripts": { "build": "nest build", "test": "jest" } }
+    - path: tsconfig.json
+      content: |
+        { "compilerOptions": { "strict": true, "target": "ES2021" } }
+
+checks:
+  must_run_any:
+    - "npx tsc --noEmit"
+    - "npm run build"
+    - "nest build"
+    - "npm test"
+  result_must_contain:
+    - "Status:"
+    - "Files modified:"
+    - "Verification:"
+
+timeout: 120000

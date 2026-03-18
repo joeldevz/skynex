@@ -1,0 +1,42 @@
+id: planner-uses-template
+name: "Planner selects correct template for CRUD task"
+description: |
+  When the task is clearly a CRUD module, the planner should read the
+  PLAN-crud.md template from ~/.config/opencode/templates/ and use it
+  as a starting point.
+agent: step-builder-agent
+
+prompt: |
+  Create a complete CRUD for managing "invoices" in this NestJS backend.
+  Users need to create, read, update, and delete invoices.
+  No questions needed — use sensible defaults based on the project.
+
+setup:
+  files:
+    - path: CONVENTIONS.md
+      content: |
+        # Conventions
+        - DDD + CQRS, Value Objects in domain
+        - NestJS, Fastify, Prisma, Jest
+
+checks:
+  must_read:
+    - CONVENTIONS.md
+  must_read_any:
+    - ~/.config/opencode/templates/PLAN-crud.md
+    - templates/PLAN-crud.md
+  must_produce:
+    - PLAN.md
+  plan_structure:
+    has_sections:
+      - "## Goal"
+      - "## Implementation Steps"
+      - "## Verification"
+    steps_have_fields:
+      - "**What**"
+      - "**Why**"
+      - "**Where**"
+      - "**Acceptance**"
+      - "**Status**"
+
+timeout: 180000

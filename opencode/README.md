@@ -18,6 +18,7 @@ opencode/
   tui.json
   README.md
   commands/
+  evals/            # golden tests para validar comportamiento de agentes
   plugins/
   skills/
   templates/
@@ -27,7 +28,7 @@ opencode/
 
 ### `step-builder-agent`
 
-- descubre contexto del proyecto
+- corre un **discovery checklist** antes de preguntar: lee CONVENTIONS.md, package.json, modulos similares, tests, y consulta Engram por decisiones previas
 - hace preguntas de negocio y tecnicas en bloques
 - recomienda defaults razonables
 - genera `PLAN.md`
@@ -51,6 +52,7 @@ Estados de `PLAN.md`:
 - implementa una tarea acotada
 - sigue patrones locales del repo
 - trabaja principalmente en TypeScript, Node.js y NestJS
+- consulta **Context7** para docs en vivo cuando trabaja con librerias externas
 - corre verificaciones antes de devolver exito
 
 ## Commands
@@ -79,6 +81,13 @@ Estados de `PLAN.md`:
   - vuelve a delegar correcciones
 - `/status`
   - muestra completados, paso actual y siguientes pasos
+
+### Documentacion
+
+- `/docs <libreria> <tema>`
+  - busca docs en vivo via Context7 MCP
+  - filtra a lo relevante y presenta un resumen practico
+  - util cuando integras librerias nuevas o dudas de una API
 
 ### Git
 
@@ -112,9 +121,7 @@ Estados de `PLAN.md`:
 
 ### Context7
 
-Por seguridad, `context7` queda deshabilitado por defecto en `opencode.json`.
-
-Para activarlo, cada persona debe editar localmente `~/.config/opencode/opencode.json` y poner su API key real:
+Context7 esta habilitado por defecto pero requiere API key. Cada persona debe editar localmente `~/.config/opencode/opencode.json` y poner su API key real:
 
 ```json
 "context7": {
@@ -127,6 +134,7 @@ Para activarlo, cada persona debe editar localmente `~/.config/opencode/opencode
 }
 ```
 
+Sin la key, Context7 simplemente no funcionara pero no rompe el flujo.
 No subir esa key al repositorio.
 
 ### Engram
@@ -183,11 +191,35 @@ Ejemplos:
 
 DTOs si pueden usar primitivos porque son la frontera de serializacion.
 
+## Eval Framework
+
+6 golden tests en `evals/golden/` que validan el comportamiento esperado de los 3 agentes:
+
+| Test | Agente | Valida |
+|------|--------|--------|
+| 01 | planner | Lee CONVENTIONS.md antes de preguntar |
+| 02 | planner | Usa template PLAN-crud para tareas CRUD |
+| 03 | orchestrator | Lee PLAN.md antes de hacer nada |
+| 04 | orchestrator | Se detiene tras un paso y pide review |
+| 05 | coder | Lee codigo existente antes de escribir |
+| 06 | coder | Corre verificacion antes de reportar exito |
+
+```bash
+# Ver los tests y sus checks
+./evals/run-evals.sh
+
+# Filtrar por agente
+./evals/run-evals.sh --agent ts-expert-coder
+```
+
+Hoy la evaluacion es manual (leer output y verificar). El roadmap es automatizar el runner.
+
 ## Que tocar cuando quieras ajustar algo
 
 - `opencode.json` -> comportamiento base de agentes y MCPs
 - `commands/*.md` -> comportamiento puntual de cada slash command
 - `templates/*.md` -> referencia de convenciones, planes, commits y PRs
+- `evals/golden/*.yaml` -> tests de regresion para validar cambios en prompts
 
 ## Nota practica
 

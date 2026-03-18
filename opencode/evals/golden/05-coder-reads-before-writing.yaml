@@ -1,0 +1,53 @@
+id: coder-reads-before-writing
+name: "Coder reads existing code and conventions before writing"
+description: |
+  The ts-expert-coder must inspect existing code, CONVENTIONS.md, and nearby
+  modules before making any changes. It should never write code blindly.
+agent: ts-expert-coder
+
+prompt: |
+  Implement Step 1 from PLAN.md.
+  - Title: Create invoice entity
+  - What: Create the Invoice domain entity with Value Objects
+  - Why: Foundation for the invoices module
+  - Where: src/invoices/domain/invoice.entity.ts
+  - Acceptance: Entity compiles, uses Value Objects per conventions
+  Read existing code patterns and CONVENTIONS.md first.
+
+setup:
+  files:
+    - path: CONVENTIONS.md
+      content: |
+        # Conventions
+        - Value Objects: Money, Uuid, Email, DateRange
+        - Entities extend BaseEntity with Uuid id
+        - No primitives in domain layer
+    - path: src/users/domain/user.entity.ts
+      content: |
+        import { BaseEntity } from '../../common/base-entity';
+        import { Uuid } from '../../common/value-objects/uuid';
+        import { Email } from '../../common/value-objects/email';
+
+        export class User extends BaseEntity {
+          constructor(
+            id: Uuid,
+            private readonly email: Email,
+            private readonly name: string,
+          ) { super(id); }
+        }
+
+checks:
+  must_read:
+    - CONVENTIONS.md
+  must_read_any:
+    - src/users/domain/user.entity.ts
+    - src/common/base-entity.ts
+    - src/common/value-objects/
+  reads_before_writes: true
+  must_produce_any:
+    - src/invoices/domain/invoice.entity.ts
+  output_must_contain:
+    - "Value Object"
+    - "BaseEntity"
+
+timeout: 120000
