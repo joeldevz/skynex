@@ -6,10 +6,12 @@ agent: step-builder-agent
 Plan the task "{argument}" for the current project.
 
 Workflow:
-1. Scan the codebase first to gather technical context
-2. Ask the user the minimum necessary business and technical questions in thematic blocks
-3. Confirm your understanding before writing the final plan
-4. Generate or replace PLAN.md in the project root
+1. Read `CONVENTIONS.md` from the project root if it exists
+2. Scan the codebase to gather technical context
+3. Determine if the task matches a known plan template (CRUD, bugfix, integration, refactor) and read it from `~/.config/opencode/templates/` as a starting point
+4. Ask the user the minimum necessary business and technical questions in thematic blocks
+5. Confirm your understanding before writing the final plan
+6. Generate or replace PLAN.md in the project root, adapting the template steps to the actual task
 
 Context:
 - Working directory: {workdir}
