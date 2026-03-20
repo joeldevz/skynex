@@ -1,29 +1,31 @@
-# Skills & OpenCode Config
+# Skills for OpenCode and Claude Code
 
-Repositorio con una configuracion de OpenCode lista para compartir en equipo.
+Repositorio con un workflow compartido de skills, agentes y slash commands para OpenCode y Claude Code.
 
 ## Estructura
 
 ```text
-skills/
-  prd/
-
 opencode/
   opencode.json
-  package.json
-  .gitignore
-  tui.json
-  README.md
-  commands/         # 15 slash commands
-  evals/            # 9 golden tests para validar comportamiento de agentes
+  commands/         # 15 slash commands para OpenCode
+  skills/           # skills compartidas: prd, nestjs-patterns, ts advanced
+  templates/
   plugins/
-  skills/           # typescript-advanced-types, nestjs-patterns, prd
-  templates/        # CONVENTIONS.md, COMMIT-CONVENTIONS.md, 5 PLAN-*.md
+  evals/
+
+claude-code/
+  CLAUDE.md         # overlay para el orquestador en Claude Code
+
+scripts/
+  setup.sh
+  install_claude_assets.py
 ```
 
-## Qué contiene `opencode/`
+## Qué instala en cada herramienta
 
-- **3 agentes** con roles claros: planner, orchestrator y coder
+### OpenCode
+
+- **3 agentes** con roles claros: planner, manager y coder
 - **15 commands** para todo el ciclo: onboard, planificar, estimar, ejecutar, revisar, testear, commitear, abrir PRs, y guardar memoria
 - **Plugin Engram** para memoria persistente entre sesiones
 - **Context7 MCP** para documentacion en vivo de librerias externas
@@ -31,20 +33,29 @@ opencode/
 - **Skills** de PRD, TypeScript avanzado, y patrones NestJS DDD+CQRS
 - **Eval framework** con 9 golden tests de regresion para los 3 agentes
 
+### Claude Code
+
+- **3 agentes instalables** en `~/.claude/agents`: `planner`, `manager`, `coder`
+- **15 slash skills** en `~/.claude/skills` con los mismos nombres operativos: `/plan`, `/execute`, `/review`, etc.
+- **Overlay de `CLAUDE.md`** para mantener el mismo workflow de `PLAN.md`, step-by-step y human review loop
+- **Compatibilidad con Claude subagents**: el hilo principal actua como orquestador y delega trabajo acotado a los agentes instalados
+
 ## Setup rapido
 
 ```bash
-# Opcion 1: script automatico (recomendado)
+# Opcion 1: instalar todo lo compatible en la maquina
 git clone git@github.com:joeldevz/skills.git
 cd skills
-./setup-opencode.sh
+./scripts/setup.sh --all
 
-# Opcion 2: manual
-cp -r opencode/ ~/.config/opencode/
-cd ~/.config/opencode && bun install
+# Opcion 2: instalar solo OpenCode
+./scripts/setup.sh --opencode
+
+# Opcion 3: instalar solo Claude Code
+./scripts/setup.sh --claude
 ```
 
-El script hace backup de tu config anterior, restaura tu API key de Context7 si ya la tenias, e instala las dependencias.
+El setup hace backup de la configuracion existente antes de escribir. En OpenCode tambien restaura tu API key de Context7 si ya la tenias.
 
 ## Flujo de trabajo completo
 
@@ -61,6 +72,8 @@ El script hace backup de tu config anterior, restaura tu API key de Context7 si 
 /pr                             # abrir pull request
 /context                        # guardar aprendizajes en memoria
 ```
+
+En Claude Code esos comandos se instalan como skills slash en `~/.claude/skills/`.
 
 ## Commands disponibles
 
@@ -90,6 +103,17 @@ El script hace backup de tu config anterior, restaura tu API key de Context7 si 
 - DTOs en la frontera HTTP con Swagger + class-validator
 - Review humano obligatorio entre pasos de ejecucion
 - Commits con Conventional Commits
+
+## Claude Code: nota importante
+
+Claude Code no permite que un subagente lance otro subagente. Para mantener el mismo comportamiento general:
+
+- el hilo principal de Claude hace de orquestador
+- `planner` se usa para discovery y planes
+- `coder` se usa para implementacion acotada
+- `manager` se instala como agente de apoyo para scoping y review, pero la orquestacion multi-agente se queda en el hilo principal
+
+Eso mantiene el mismo flujo practico: `PLAN.md` como fuente de verdad, un paso por vez, y review humana obligatoria.
 
 ## Recomendacion
 
