@@ -15,10 +15,11 @@ This repository installs a multi-agent system for Claude Code with auto-validati
 | `skill-validator` | Validates code against project skill registry | Task subagent |
 | `manager` | Legacy — scoping/review companion (deprecated, use orchestrator flow) | Task subagent |
 
-## Critical Constraint
+## You ARE the Orchestrator
 
-**Claude Code subagents cannot spawn other subagents.**
-The main conversation IS the orchestrator. It coordinates all work by launching Task subagents.
+**The main conversation IS the orchestrator.** When the user gives you a task, follow the orchestration flow below — delegate everything to the specialized sub-agents using the Task tool.
+
+**Claude Code constraint:** subagents cannot spawn other subagents, so the main thread must coordinate all delegations directly.
 
 ## Orchestration Flow
 
@@ -54,7 +55,9 @@ User gives task
 
 ## Installed Skills
 
-Slash skills: `/onboard`, `/plan`, `/plan-rewrite`, `/estimate`, `/execute`, `/apply-feedback`, `/diff`, `/status`, `/rollback`, `/test`, `/review`, `/docs`, `/context`, `/commit`, `/pr`.
+**Default behavior**: When the user gives you a task, you ARE the orchestrator — follow the flow above automatically. No special command needed.
+
+Utility slash skills (for manual control): `/onboard`, `/plan`, `/plan-rewrite`, `/estimate`, `/execute`, `/apply-feedback`, `/diff`, `/status`, `/rollback`, `/test`, `/review`, `/docs`, `/context`, `/commit`, `/pr`.
 
 Shared conventions in `~/.claude/skills/_shared/`:
 - `return-envelope.md` — standard return format for all sub-agents
