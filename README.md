@@ -136,6 +136,8 @@ Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [
 |---------|----------|
 | `/test [modulo]` | Genera o corre tests del paso actual |
 | `/review` | Quality gate: verifica convenciones, tipos, arquitectura, tests |
+| `/verify-skill [scope]` | Valida skills, convenciones y cobertura con agentes en paralelo |
+| `/verify-security [scope]` | Valida seguridad con dos jueces adversariales en paralelo |
 
 ### Documentacion y memoria
 
@@ -158,7 +160,7 @@ Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [
 | **Agentes** | planner + manager + coder | 1 solo (`vibe`) |
 | **PLAN.md** | Obligatorio | Opcional |
 | **Review humano** | Despues de cada paso | No existe |
-| **Commands** | 15 | 4 (`/do`, `/fix`, `/commit`, `/done`) |
+| **Commands** | 17 | 4 (`/do`, `/fix`, `/commit`, `/done`) |
 | **Velocidad** | Controlada | Maxima |
 | **Cuando usarlo** | Features grandes, decisiones de arquitectura, equipos | Exploraciones rapidas, bugfixes, features chicos |
 
@@ -174,6 +176,8 @@ Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [
 /diff                           # ver los cambios con anotaciones
 /test                           # generar/correr tests del paso
 /review                         # quality gate antes de commit
+/verify-skill                   # validar skills y convenciones en paralelo
+/verify-security                # validar seguridad en paralelo
 /apply-feedback <correcciones>  # aplicar feedback si hay issues
 /commit                         # commit con Conventional Commits
 /pr                             # abrir pull request
