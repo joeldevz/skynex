@@ -6,7 +6,7 @@
 
 ## Cuando llamar al advisor
 
-Llama al tool `advisor` en estos 4 momentos:
+Llama al tool `advisor_consult` en estos 4 momentos:
 
 | Trigger | Descripcion | Ejemplo |
 |---------|-------------|---------|
