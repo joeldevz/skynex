@@ -122,13 +122,14 @@ Por encima de 100K → el modelo empieza a degradar (context rot, Chroma 2025).
 - ❌ Empezar tarea nueva sin `/clear` → mezcla contextos
 ```
 
-### QW5 · Plugin advisor.ts + línea muerta README
-- **Archivo 1**: mover `opencode/tools/advisor.ts` → `opencode/plugins/advisor.ts` (alineación con docs)
-- **Archivo 2**: actualizar referencias en `opencode.json` y `package.json` si las hay
-- **Archivo 3**: borrar línea 218 README ("No hay familia sdd-* ni find-skills")
-- **Esfuerzo**: 10 min · **Impact**: medio (consistencia)
+### QW5 · Alinear docs con ubicación real de advisor.ts + línea muerta README ✅
+- **Decisión tomada**: mantener `opencode/tools/advisor.ts` (commit `23a7cb7` lo movió allí para arreglar colisión de tool registry — registra correctamente como `advisor_consult`)
+- **Archivo 1**: ✅ `PLAN.md` línea 15 actualizada — refleja ubicación real
+- **Archivo 2**: borrar línea 218 README ("No hay familia sdd-* ni find-skills") (pendiente)
+- **Archivo 3**: confirmar que `gap analysis` (mem_modjtroj_6obphg) interpretó mal — NO hay inconsistencia
+- **Esfuerzo**: 5 min · **Impact**: medio (consistencia)
 
-> **Nota commit reciente** (`23a7cb7 fix: move advisor from plugins/ to tools/`): el cambio fue al revés. Conviene confirmar con el usuario si revertir o mantener `tools/` y actualizar PLAN.md.
+> **Lección aprendida**: el gap analysis original asumió que `plugins/` vacía + archivo en `tools/` = error. En realidad fue un fix deliberado para evitar colisión con el agente `advisor`. Verificar siempre el git log antes de proponer "consistencia".
 
 ### QW6 · Skill `verification-before-completion` (Superpowers, comprimido)
 - **Archivo**: `opencode/skills/verification-before-completion/SKILL.md` (NUEVO)
