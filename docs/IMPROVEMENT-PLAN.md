@@ -1,9 +1,17 @@
 # Skills Repo — Improvement Plan
 
-> **Status**: Active · **Owner**: Christopher · **Created**: 2026-04-25 · **Updated**: 2026-04-25 (added Sprint 0.5)
-> **Source**: Análisis comparativo vs Matt Pocock + comunidad 2026 + Superpowers (obra)
-> **Vault refs**: `Research/Skills-Repo-Improvement-Plan-v2.md`, `Research/Skills-Repo-vs-Matt-Pocock.md`, `Research/Superpowers-vs-Clasing-Skills.md`
-> **Memory refs**: `mem_modkhttv_at7mz4`, `mem_modjtroj_6obphg`, `mem_modb71hc_96q5sf`, `mem_modl8u3x_8bk8rb`
+> **Status**: Active · **Owner**: Christopher · **Created**: 2026-04-25 · **Updated**: 2026-04-25 (refactored to Principle-Driven Design)
+> **Source**: Destilación de Matt Pocock + obra/Superpowers + Gentleman/gentle-ai aplicada al stack propio
+> **Vault refs**: `Research/Skills-Repo-Improvement-Plan-v2.md`, `Research/Skills-Repo-vs-Matt-Pocock.md`, `Research/Superpowers-vs-Clasing-Skills.md`, `Research/Gentle-AI-vs-Clasing-Skills.md`
+> **Memory refs**: `mem_modkhttv_at7mz4`, `mem_modjtroj_6obphg`, `mem_modb71hc_96q5sf`, `mem_modl8u3x_8bk8rb`, `mem_modmkklu_rhc45p`
+
+---
+
+## Filosofía del plan
+
+**No copiamos código ni skills de otros proyectos.** Destilamos los principios validados que han demostrado funcionar y diseñamos NUESTRAS piezas con todo el conocimiento acumulado, encajando en nuestro stack (OpenCode + Claude Code + Neurox + return envelope + 9 agentes coordinados).
+
+Las menciones a Matt Pocock, obra/Superpowers o Gentleman/gentle-ai a lo largo del documento son **referencias de procedencia del principio**, no instrucciones de copia.
 
 ---
 
@@ -11,7 +19,7 @@
 
 El repo coordina muy bien (orchestrator + advisor + dual-judge + return-envelope + Neurox) pero opera muy poco. Faltan: grill-me, TDD Iron Law, vertical slices, AFK loops, deep modules, cross-provider review, disciplina psicológica adversarial.
 
-**Plan ejecutivo**: 5 quick wins (~2h) + Sprint 0.5 Inspiration Lift (~19h, patrones de obra/superpowers) + 3 sprints de 2 semanas. Dirección: simplificar (eliminar SKILLs grandes), añadir fundamentos operacionales con disciplina adversarial, escalar después.
+**Plan ejecutivo**: 5 quick wins (~2h) + Sprint 0.5 (~19h, disciplina adversarial) + Sprint 0.5b (~10h, gobernanza y profiles) + 3 sprints de 2 semanas. Dirección: simplificar (eliminar SKILLs grandes), añadir fundamentos operacionales con disciplina adversarial, escalar después.
 
 ---
 
@@ -23,8 +31,70 @@ El repo coordina muy bien (orchestrator + advisor + dual-judge + return-envelope
 4. **TDD Iron Law** solo cuando `slice.tdd=true` (no fricciona bugfixes triviales)
 5. **Return envelope** con `slice_id` + `mode: hitl|afk` en todos los agentes
 6. **Doc rot prohibido** — toda promesa en README/SPEC/PLAN debe corresponder a archivos reales
-7. **Description Trap rule** (Superpowers) — descripción de skill = SOLO "Use when X", NUNCA resume el workflow
+7. **Description Trap rule** — descripción de skill = SOLO "Use when X", NUNCA resume el workflow
 8. **Disciplina cultural** — ban a "You're absolutely right!" / agradecimientos performativos; usar "your human partner"
+
+---
+
+## Principios rectores (destilación de la investigación)
+
+Estos son los principios que han demostrado funcionar en la industria 2026. Los aplicamos a TODO lo que diseñemos, no como items separados.
+
+### De Matt Pocock — fundamentos cognitivos del trabajo con LLMs
+
+| Principio | Esencia |
+|---|---|
+| **Smart zone** | La atención degrada cuadráticamente; el cap real es ~100K, no el nominal |
+| **Memento problem** | Reset > resumen; los artefactos persistentes son la memoria |
+| **Grilling sobre planning** | Alineación humano-AI antes que documentos prematuros |
+| **Vertical slices** | Feedback temprano > completitud por capas |
+| **Canban DAG** | Plans secuenciales son loops disfrazados; preferir grafos |
+| **Bad codebase = bad agent** | La calidad de los feedback loops es el ceiling del agente |
+| **Push vs Pull** | Standards al reviewer (push); skills al implementer (pull) |
+| **HITL vs AFK** | Distinguir explícitamente qué requiere humano y qué no |
+
+### De obra/Superpowers — disciplina psicológica adversarial
+
+| Principio | Esencia |
+|---|---|
+| **Description Trap** | Descripciones que resumen workflow rompen el matching del agente |
+| **Iron Law adversarial** | Disciplina explícita y nombrada > reglas suaves implícitas |
+| **Anti-rationalization tables** | Anticipar excusas concretas del LLM en el prompt |
+| **Verification before completion** | "Done" sin evidencia es slop; exigir prueba |
+| **"Your human partner"** | Lenguaje colaborativo, no servicial ni jerárquico |
+| **Ban frases performativas** | "You're absolutely right!" es ruido cognitivo |
+| **Subagents NO heredan contexto** | Construir prompts limpios, no transferir mensajes |
+| **Inline-self-review ≥ subagent loop** | Validado empíricamente con 5×5 trials |
+
+### De Gentleman/gentle-ai — operación industrial
+
+| Principio | Esencia |
+|---|---|
+| **TDD Cycle Evidence** | El return debe demostrar el ciclo, no solo afirmar que pasó |
+| **Banned Assertion Patterns** | Tautologías, ghost loops y smoke tests son detectables |
+| **Mock Hygiene cap (max 6)** | Si hay >6 mocks, el módulo está mal diseñado |
+| **Adversarial dual-judge generalizable** | El patrón sirve más allá de seguridad |
+| **PR-issue gating con `status:approved`** | Gobierno duro antes de mergear |
+| **Pre-commit AI gate con cache SHA256** | Validar diff vs convenciones, sin re-validar igual |
+| **Skill-registry físico** | El registry es un archivo escaneable, no un concepto |
+| **Profiles switchables** | Control de costo runtime > config estática |
+| **Skill-creator meta-skill** | Crear skills es trabajo recurrente, mereció skill propia |
+
+### Lo que NOSOTROS ya tenemos (no perder)
+
+| Fortaleza propia | Por qué importa |
+|---|---|
+| **Return envelope estandarizado** | Contrato claro entre agentes — superior a SDD lineal |
+| **9 agentes con responsabilidades claras** | Más maduro que workflows monolíticos |
+| **Advisor strategy con `advisor_consult`** | Senior model bajo demanda, no siempre |
+| **Neurox con kinds + types + 4D scoring + brain power** | Más rico semánticamente que Engram |
+| **Dual-judge ya en `security`** | Solo falta generalizarlo, no inventarlo |
+| **Bilingüe ES/EN** | Refleja contexto real de uso |
+| **Stack TS + OpenCode coherente** | Foco, no genérico |
+
+### Cómo se aplican en este plan
+
+Cada item del plan (QW, IL, GA, M, A, R) se diseña aplicando **estos principios + el stack propio**, no copiando código ajeno. Cuando el documento dice "inspirado en X", significa: "el principio viene de X, el diseño es nuestro".
 
 ---
 
@@ -198,9 +268,9 @@ rm -rf skills/clasing-ui-v2-beta
 
 > Branch: `feat/sprint-0.5-inspiration-lift`
 > Pre-requisito: QW1-QW6 + Fase 1 completados
-> Source: análisis de `obra/superpowers` (`mem_modl8u3x_8bk8rb`, `Research/Superpowers-vs-Clasing-Skills.md`)
+> Principios destilados aplicados: Description Trap, Iron Law adversarial, Anti-rationalization, "your human partner", Verification before completion, Subagent context isolation, Inline-self-review
 
-**Razón**: Superpowers (Jesse Vincent, 167k stars, validado empíricamente con 94% rejection rate de PRs slop) tiene 10 patrones de disciplina adversarial que rellenan huecos reales en nuestro stack. Esta fase los integra ANTES de Sprint 1 para que los fundamentos (vertical slices, TDD) hereden la disciplina correcta.
+**Razón**: la disciplina psicológica adversarial (validada empíricamente en obra/Superpowers con 94% rejection rate de PRs slop) llena huecos reales en nuestro stack. Esta fase aplica los principios destilados ANTES de Sprint 1 para que los fundamentos (vertical slices, TDD, grilling) hereden la disciplina correcta. **Cada item se DISEÑA usando nuestros principios + nuestro stack — no se copia código ajeno.**
 
 ### IL1 · Description Trap audit (CRÍTICO, prerrequisito de TODO)
 - **Archivos**: TODAS las skills, agents y commands del repo
@@ -209,10 +279,19 @@ rm -rf skills/clasing-ui-v2-beta
 - **Patrón bueno**: `description: Use when the user asks for X.`
 - **Esfuerzo**: 2h · **Impact**: 🔴 crítico (afecta toda activación de skills)
 
-### IL2 · Iron Law texto exacto + nuevo skill `tdd-iron-law`
-- **Archivo 1**: `opencode/opencode.json` coder system prompt (ya hecho en QW3 reforzado)
-- **Archivo 2**: `opencode/skills/tdd-iron-law/SKILL.md` (NUEVO, ≤120 líneas)
-- **Esfuerzo**: 1h + 1h · **Impact**: 🔴 crítico (anti-cheating)
+### IL2 · Diseñar skill `tdd-discipline` aplicando principios destilados
+- **Archivo 1**: `opencode/opencode.json` coder system prompt (ya reforzado en QW3 con anti-rationalization)
+- **Archivo 2**: `opencode/skills/tdd-discipline/SKILL.md` (NUEVO, ≤120 líneas)
+- **Principios aplicados**:
+  - Iron Law nombrado y explícito (de Superpowers)
+  - Anti-rationalization table con excusas concretas (de Superpowers)
+  - **TDD Cycle Evidence** en el return envelope (de gentle-ai) — campos `red_proof`, `green_proof`, `assertion_quality`
+  - **Banned Assertion Patterns** detectables: tautologías, ghost loops, smoke tests (de gentle-ai)
+  - **Mock Hygiene cap (max 6)** — si excede, status:blocked con razón "design smell" (de gentle-ai)
+  - Description Trap aplicada (de Superpowers)
+  - Bilingüe ES/EN (nuestro)
+- **Importante**: NO copiamos `strict-tdd.md` de gentle-ai — destilamos sus principios (cycle evidence, banned patterns, mock cap) y los integramos a nuestro return envelope y stack TS.
+- **Esfuerzo**: 1h + 2h · **Impact**: 🔴 crítico (anti-cheating + design smell detection)
 
 ### IL3 · Skill `verification-before-completion` (ya en QW6)
 - Marcar como completado cuando QW6 esté hecho.
@@ -235,7 +314,8 @@ rm -rf skills/clasing-ui-v2-beta
 
 ### IL5 · Anti-rationalization tables en agentes disciplinarios
 - **Archivos**: prompts de `coder`, `verifier`, `test-reviewer`, `security` en `opencode.json`
-- **Acción**: añadir tabla `| Excuse | Reality |` con 3-5 entradas capturadas de evals reales o copiadas de Superpowers como baseline
+- **Acción**: añadir tabla `| Excuse | Reality |` con 3-5 entradas capturadas de evals propios reales (preferido) o derivadas de patrones Superpowers como baseline inicial
+- **Principio aplicado**: anti-rationalization de Superpowers, pero las excusas son las que VEMOS en nuestros logs, no las suyas
 - **Esfuerzo**: 3h · **Impact**: 🟡 alto
 
 ### IL6 · SUBAGENT-STOP gate al inicio de skills disciplinarios
@@ -267,10 +347,89 @@ rm -rf skills/clasing-ui-v2-beta
 
 ---
 
+## Fase 1.6 — Sprint 0.5b: Designs informados por gobernanza y operación (P0, ~10h)
+
+> Branch: `feat/sprint-0.5b-designs`
+> Pre-requisito: Sprint 0.5 (disciplina adversarial) completado
+> Principios destilados aplicados: TDD Cycle Evidence, Banned Assertion Patterns, Mock Hygiene, Adversarial dual-judge generalizable, PR-issue gating, Pre-commit AI gate, Skill-registry físico, Profiles switchables
+
+**Razón**: la operación industrial (gobernanza de contribución, gates pre-commit, profiles de costo) es donde gentle-ai está validado. Destilamos sus principios y diseñamos NUESTRAS piezas — no migramos a Go ni copiamos bash. **Cada item se diseña aplicando los principios + nuestro stack TS + return envelope + Neurox.**
+
+### GA1 · Diseñar gobernanza issue→PR aplicando principios destilados
+- **Archivos NUEVOS**:
+  - `.github/ISSUE_TEMPLATE/bug-report.yml`
+  - `.github/ISSUE_TEMPLATE/feature-request.yml`
+  - `.github/ISSUE_TEMPLATE/skill-proposal.yml`
+  - `.github/PULL_REQUEST_TEMPLATE.md`
+  - `.github/workflows/pr-check.yml`
+- **Principios aplicados**:
+  - **PR-issue gating con `status:approved`** (de gentle-ai) — solo issues aprobadas disparan work
+  - **Type labels obligatorios** (`type:skill`, `type:agent`, `type:plugin`, `type:doc`, `type:meta`)
+  - **Bilingüe ES/EN** (nuestro contexto, no el inglés-only de gentle-ai)
+  - Status labels: `needs-review`, `approved`, `in-progress`, `blocked`
+  - PR template con checklist de tests + lint + doc-rot detection (nuestros checks, no los de gentle-ai)
+- **Diseño propio**: el oro NO son las plantillas yml, es el `pr-check.yml` con github-script para `Closes #N` regex + label gating. Adaptado a nuestros checks (no a los suyos).
+- **Esfuerzo**: 2h · **Impact**: 🟡 alto
+
+### GA2 · Generalizar `security` → `adversarial-review` parameterizado
+- **Archivo**: `opencode/skills/adversarial-review/SKILL.md` (NUEVO, ≤120 líneas)
+- **Principios aplicados**:
+  - **Dual-judge generalizable** (de gentle-ai) — el patrón sirve más allá de seguridad
+  - **Description Trap** (de Superpowers)
+  - Reusar nuestra mecánica dual-judge existente — solo abstraer dominio
+- **Diseño propio**:
+  - Skill nuevo `adversarial-review` con parámetro `domain: security | tests | architecture | refactor | other`
+  - `security` se mantiene como preset (`domain=security`) o se hace alias de `adversarial-review --domain security`
+  - **NO copiamos** `judgment-day` de gentle-ai. Reusamos NUESTRA verdict matrix actual (Confirmed/Suspect/Contradiction) y añadimos Fix Agent + re-judge loop
+  - Return envelope con campo `judges: [verdict_a, verdict_b, synthesis]`
+- **Esfuerzo**: 2h · **Impact**: 🟡 alto
+
+### GA3 · Diseñar pre-commit AI gate en TypeScript (no bash)
+- **Archivo**: `scripts/precommit-ai-gate.ts` (NUEVO)
+- **Principios aplicados**:
+  - **Pre-commit AI gate con cache SHA256** (de gentle-ai) — patrón, no implementación
+  - **Reusar nuestra infraestructura** — `advisor_consult` ya existente
+- **Diseño propio**:
+  - Hook node/bun, no bash (nuestro stack)
+  - Reusa `advisor_consult` para validar `git diff --staged` vs `CONVENTIONS.md`
+  - Cache SHA256 en `.opencode/.cache/precommit/{sha}` (nuestra estructura)
+  - Solo aplica a paths críticos: `opencode/skills/`, `opencode/opencode.json`, `templates/`
+  - Bypass con `SKIP_AI_GATE=1` para emergencias
+  - Multi-provider opcional: si `OPENAI_API_KEY` disponible, second opinion descorrelacionada (cross-provider review de Matt)
+- **Esfuerzo**: 4h · **Impact**: 🟡 alto
+
+### GA4 · Diseñar `_shared/skill-registry.md` físico generado
+- **Archivo**: `opencode/skills/_shared/skill-registry.md` (CONCEPTUAL ya existe en `_shared/skill-resolver.md`)
+- **Acción nueva**: comando `/skills:scan` que escanea `opencode/skills/` y genera `.opencode/skill-registry.md` físico
+- **Principios aplicados**:
+  - **Skill-registry físico** (de gentle-ai) — el registry no es conceptual, es archivo escaneable
+  - **Description Trap** verificada en cada SKILL.md leído
+  - **Smart-zone** — registry compacto (≤200 líneas total)
+- **Diseño propio**:
+  - Auto-actualización con git pre-commit hook (sinergia con GA3)
+  - Formato: nombre + description (validada Description Trap) + triggers + path
+  - Orchestrator inyecta el registry al inicio de cada sesión (push, no pull)
+- **Esfuerzo**: 2h · **Impact**: 🟢 medio
+
+**Quick wins ejecutables HOY del Sprint 0.5b (~4h)**: GA1 + GA2. GA3 + GA4 al día siguiente (~6h).
+
+### Backlog post-Sprint 1 (P1, ~2 días total — NO ejecutar ahora)
+- **GA5 — Profiles switchables**: 3 archivos `opencode/profiles/{explore,balanced,production}.json` con configs de modelos por sprint. Principio: control de costo runtime (de gentle-ai). 4-6h
+- **GA6 — Skill creator meta-skill**: `opencode/skills/skill-creator/SKILL.md` que toma NL → genera SKILL.md válido aplicando Description Trap + ≤120 líneas + bilingüe. Principio: skill-creator (de gentle-ai). 2h
+- **GA7 — Neurox interop study**: documentar similitudes/diferencias con Engram para futura interop opcional (no migración). 1 día
+- **GA8 — Cross-provider advisor**: añadir Codex GPT-5.3 al advisor para reviews descorrelacionados. Principio: cross-provider review (de Matt). 4-6h
+
+### Backlog P2 (post-publicación si abre comunidad)
+- **GA9** — Persona system opt-in bilingüe (no Gentleman-only): 2-3h
+- **GA10** — Backup automático antes de cada `opencode/skills/` write: 4h
+- **GA11** — Commands de comunidad (`/contribute`, `/propose-skill`): 2h
+
+---
+
 ## Fase 2 — Sprint 1: Fundamentos (P0, 2 semanas)
 
 > Branch: `feat/sprint-1-fundamentals`
-> Pre-requisito: QW1-QW6 + Fase 1 + Sprint 0.5 completados
+> Pre-requisito: QW1-QW6 + Fase 1 + Sprint 0.5 + Sprint 0.5b completados
 
 ### M1 · PLAN-feature.md → vertical slices
 - **Archivo**: `templates/PLAN-feature.md` (82 líneas)
@@ -503,18 +662,36 @@ NEUROX (transversal): decisions, patterns, bugfixes, gotchas
 
 ## Decisiones tomadas
 
-- ✅ Eliminar `typescript-advanced-types`, `nestjs-patterns`, `clasing-ui-v2-beta` (simplificación)
-- ✅ Aplicar TDD Iron Law con anti-rationalization table al coder (con excepción para bugfixes triviales)
-- ✅ smart-zone-budget con cap 100K, warning 80K
-- ✅ Adoptar Description Trap rule de Superpowers como compromiso invariante #7
-- ✅ NO importar repo entero de Superpowers — solo extraer patrones (Sprint 0.5)
-- ✅ NO adoptar SessionStart hook de Superpowers tal cual — diseñar uno propio compatible con orchestrator-delegate-first
-- ✅ NO adoptar Visual Companion / brainstorm-server (~1200 LOC) — overengineering
+### Filosofía
+- ✅ **Plan principle-driven, no copy-driven**: destilar principios validados de Matt Pocock + obra/Superpowers + Gentleman/gentle-ai y diseñar piezas propias informadas, no copiar código ajeno
+- ✅ Compromisos invariantes ampliados con #7 (Description Trap) y #8 (Disciplina cultural)
+- ✅ Sección "Principios rectores" como norte del plan
+
+### Simplificación
+- ✅ Eliminar `typescript-advanced-types`, `nestjs-patterns`, `clasing-ui-v2-beta` (modelos modernos ya conocen TS/NestJS suficientemente)
+- ✅ Plugin advisor.ts permanece en `opencode/tools/advisor.ts` (commit `23a7cb7` lo movió allí para arreglar colisión de tool registry — `advisor_consult` registra correctamente)
+
+### Disciplina (de Superpowers)
+- ✅ TDD Iron Law con anti-rationalization table en coder (excepción para bugfixes triviales)
+- ✅ smart-zone-budget con cap 100K, warning 80K, surgical compaction como tercera vía
+- ✅ NO importar repo entero de Superpowers — destilar patrones
+- ✅ NO adoptar SessionStart hook tal cual — diseñar propio compatible con orchestrator-delegate-first
+- ✅ NO adoptar Visual Companion / brainstorm-server — overengineering
 - ✅ Disciplina cultural: ban "You're absolutely right!" + usar "your human partner"
-- ⚠️ Plugin advisor.ts: hay conflicto con commit `23a7cb7` que lo movió de plugins/ a tools/. Decidir antes de QW5: mantener tools/ y actualizar PLAN.md, o revertir a plugins/.
+
+### Operación (de gentle-ai)
+- ✅ NO importar repo entero de gentle-ai — destilar patrones, no migrar a Go
+- ✅ NO adoptar SDD lineal de 9 fases — son ortogonales a vertical slices, mantener nuestro flujo
+- ✅ NO copiar `strict-tdd.md` literal — destilar sus principios (TDD Cycle Evidence, Banned Assertion Patterns, Mock Hygiene cap) e integrarlos a nuestro skill `tdd-discipline` y return envelope
+- ✅ NO copiar `judgment-day` literal — generalizar nuestro `security` existente con parámetro `domain`
+- ✅ Pre-commit AI gate en TypeScript reusando `advisor_consult` (no bash, no GGA binary)
+- ✅ Skill-registry físico generado por comando propio `/skills:scan`
+
+### Pendientes
 - ⏳ Migración orchestrator a Opus → confirmar costo en Sprint 2
 - ⏳ Adoptar Sandcastle externo o construir AFK propio → Sprint 3 decide
 - ⏳ Two-stage review (verifier split): diseñar en Sprint 0.5 (IL10), implementar en Sprint 2 (M3)
+- ⏳ Cross-provider advisor (Codex GPT-5.3): GA8 backlog post-Sprint 1
 
 ---
 
@@ -523,36 +700,66 @@ NEUROX (transversal): decisions, patterns, bugfixes, gotchas
 - ¿Qué task_budget threshold define "tarea trivial" para mantener orchestrator en Sonnet?
 - ¿Activar cross-provider review siempre / solo crítico / opt-in usuario?
 - ¿Qué evals añadir para validar que vertical slices son efectivamente vertical y no falsos positivos?
-- ¿Plugin advisor.ts: revertir a `plugins/` o mantener en `tools/` y actualizar docs? (commit `23a7cb7` es reciente)
 - ¿SessionStart hook custom: opt-in por proyecto o siempre activo?
-- ¿Anti-rationalization tables: capturar empíricamente de evals reales o copiar de Superpowers como baseline?
+- ¿Anti-rationalization tables: capturar empíricamente de evals propios reales (preferido) o partir de patrones Superpowers como baseline temporal?
+- ¿Profiles switchables (GA5): 3 archivos JSON o feature nativa de OpenCode?
+- ¿Bilingüe ES/EN: forzar en TODO el plan o solo en docs públicas + skills?
 
 ---
 
 ## Next steps
 
-1. **HOY (~5h)**:
-   - Quick wins críticos: QW1 (15min) + QW2 (30min) + QW3 (15min) + QW4 (20min) + QW5 (10min) + QW6 (1h)
-   - Sprint 0.5 quick wins: IL1 Description Trap audit (2h) + IL4 disciplina cultural (1h)
-   - Decidir: revertir advisor.ts o actualizar docs
-2. **Esta semana (~14h)**:
-   - Fase 1: simplificación (eliminar 3 SKILLs grandes, ~30 min)
-   - Sprint 0.5 restante: IL5 (3h) + IL6 (30min) + IL7 (2h) + IL8 (1h) + IL9 (4h) + IL10 (3h)
-3. **Próxima semana**: Branch `feat/sprint-1-fundamentals`, ejecutar M1 + A2 + M4 + A11 + A12 (P0 core)
-4. **Después**: re-baseline evals + mergear + comenzar Sprint 2
+### HOY (~5h) — Quick wins desbloqueantes
+- QW1: limpiar README de commands ficticios (15 min)
+- QW2: skill `grill-me` con Description Trap (30 min)
+- QW3: TDD Iron Law + anti-rationalization en coder (15 min)
+- QW4: smart-zone-budget shared (20 min)
+- QW5: ✅ ya hecho (advisor.ts confirmado en `tools/`)
+- QW6: skill `verification-before-completion` (1h)
+- IL1: Description Trap audit (2h, prerrequisito de TODO)
+- IL4: disciplina cultural en CONVENTIONS.md (1h)
+
+### Esta semana (~14h) — Sprint 0.5 + Fase 1
+- Fase 1: eliminar 3 SKILLs grandes (~30 min)
+- Sprint 0.5 restante: IL2 (3h) + IL5 (3h) + IL6 (30min) + IL7 (2h) + IL8 (1h) + IL9 (4h) + IL10 (3h)
+
+### Próxima semana — Sprint 0.5b + start Sprint 1
+- Sprint 0.5b: GA1 (2h) + GA2 (2h) + GA3 (4h) + GA4 (2h) = ~10h
+- Sprint 1 kickoff: branch `feat/sprint-1-fundamentals`, M1 vertical slices + A11/A12 golden tests
+
+### Después — Sprint 1 → Sprint 3
+- Re-baseline evals con golden tests nuevos
+- Mergear Sprint 1 atómico
+- Iniciar Sprint 2 (architect agent + HITL/AFK + Opus orchestrator)
 
 ---
 
 ## Referencias
 
-- Workshop Matt Pocock: `vault://Research/Matt-Pocock-AI-Software-Engineering-Workshop.md`
-- Validación comunitaria: `vault://Research/Matt-Pocock-Community-Validation.md`
-- Gap analysis: `vault://Research/Skills-Repo-vs-Matt-Pocock.md`
-- Plan v2 detallado: `vault://Research/Skills-Repo-Improvement-Plan-v2.md`
-- Análisis Superpowers: `vault://Research/Superpowers-vs-Clasing-Skills.md`
-- Research memory: `mem_modkhttv_at7mz4` (plan), `mem_modjtroj_6obphg` (gap analysis), `mem_modl8u3x_8bk8rb` (Superpowers)
+### Vault notes (síntesis investigada)
+- `vault://Research/Matt-Pocock-AI-Software-Engineering-Workshop.md`
+- `vault://Research/Matt-Pocock-Community-Validation.md`
+- `vault://Research/Skills-Repo-vs-Matt-Pocock.md`
+- `vault://Research/Skills-Repo-Improvement-Plan-v2.md`
+- `vault://Research/Superpowers-vs-Clasing-Skills.md`
+- `vault://Research/Gentle-AI-vs-Clasing-Skills.md`
+
+### Research memory (handoffs entre subagentes)
+- `mem_modkhttv_at7mz4` — plan v2
+- `mem_modjtroj_6obphg` — gap analysis
+- `mem_modl8u3x_8bk8rb` — Superpowers comparación
+- `mem_modmkklu_rhc45p` — gentle-ai verificación profunda
+- `mem_modmilow_epxw7r` — gentle-ai datos duros
+
+### Bibliografía rectora
 - Brooks — *The Design of Design* (shared design concept)
 - Ousterhout — *A Philosophy of Software Design* (deep modules)
 - Pragmatic Programmer — Tracer bullets / vertical slices
-- Chroma research — context rot benchmarks
+- Chroma research — context rot benchmarks empíricos
 - Anthropic Advisor Strategy (abr 2026)
+
+### Repos de referencia analizados
+- [obra/superpowers](https://github.com/obra/superpowers) — Jesse Vincent, disciplina adversarial
+- [Gentleman-Programming/gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) — Alan Buscaglia, operación industrial
+- [Gentleman-Programming/engram](https://github.com/Gentleman-Programming/engram) — memoria persistente Go (referencia para Neurox)
+- [Gentleman-Programming/gentleman-guardian-angel](https://github.com/Gentleman-Programming/gentleman-guardian-angel) — pre-commit AI gate (referencia para GA3)
