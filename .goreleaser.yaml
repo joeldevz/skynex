@@ -63,25 +63,28 @@ release:
     irm https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.ps1 | iex
     ```
 
-brews:
-  - repository:
-      owner: joeldevz
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
-    name: clasing-skill
-    homepage: "https://github.com/joeldevz/skills"
-    description: "AI agent skills installer for OpenCode and Claude Code"
-    license: "MIT"
-    commit_msg_template: "chore: update clasing-skill formula to {{ .Tag }}"
+# Homebrew tap — enable once joeldevz/homebrew-tap repo exists and
+# HOMEBREW_TAP_TOKEN secret is set in GitHub repo settings.
+# brews:
+#   - repository:
+#       owner: joeldevz
+#       name: homebrew-tap
+#       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+#     directory: Formula
+#     name: clasing-skill
+#     homepage: "https://github.com/joeldevz/skills"
+#     description: "AI agent skills installer for OpenCode and Claude Code"
+#     license: "MIT"
+#     commit_msg_template: "chore: update clasing-skill formula to {{ .Tag }}"
 
-scoops:
-  - repository:
-      owner: joeldevz
-      name: scoop-bucket
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    name: clasing-skill
-    homepage: "https://github.com/joeldevz/skills"
-    description: "AI agent skills installer for OpenCode and Claude Code"
-    license: MIT
-    commit_msg_template: "chore: update clasing-skill to {{ .Tag }}"
+# Scoop bucket — enable once joeldevz/scoop-bucket repo exists.
+# scoops:
+#   - repository:
+#       owner: joeldevz
+#       name: scoop-bucket
+#       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+#     name: clasing-skill
+#     homepage: "https://github.com/joeldevz/skills"
+#     description: "AI agent skills installer for OpenCode and Claude Code"
+#     license: MIT
+#     commit_msg_template: "chore: update clasing-skill to {{ .Tag }}"
