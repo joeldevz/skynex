@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/joeldevz/skilar/internal/adapters"
 	"github.com/joeldevz/skilar/internal/catalog"
@@ -11,7 +13,9 @@ import (
 	"github.com/joeldevz/skilar/internal/models"
 	"github.com/joeldevz/skilar/internal/paths"
 	"github.com/joeldevz/skilar/internal/preflight"
+	"github.com/joeldevz/skilar/internal/profiles"
 	"github.com/joeldevz/skilar/internal/prompts"
+	"github.com/joeldevz/skilar/internal/runner"
 )
 
 // version is set by goreleaser via -ldflags "-X main.version=..."
@@ -40,6 +44,36 @@ func main() {
 
 	if args.Help {
 		printUsage()
+		os.Exit(0)
+	}
+
+	// profiles — list
+	if args.ProfileList {
+		handleProfileList()
+		os.Exit(0)
+	}
+
+	// profile create
+	if args.ProfileCreate {
+		handleProfileCreate("")
+		os.Exit(0)
+	}
+
+	// profile edit
+	if args.ProfileEdit != "" {
+		handleProfileEdit(args.ProfileEdit)
+		os.Exit(0)
+	}
+
+	// profile delete
+	if args.ProfileDelete != "" {
+		handleProfileDelete(args.ProfileDelete)
+		os.Exit(0)
+	}
+
+	// up
+	if args.RunUp {
+		handleUp(args.UpProfile, args.UpWeb, args.UpPort)
 		os.Exit(0)
 	}
 
@@ -133,6 +167,14 @@ type cliArgs struct {
 	AdvisorModel   string
 	ShowVersion    bool
 	Doctor         bool
+	ProfileList    bool
+	ProfileCreate  bool
+	ProfileEdit    string
+	ProfileDelete  string
+	UpProfile      string
+	UpWeb          bool
+	UpPort         int
+	RunUp          bool
 }
 
 func parseArgs() *cliArgs {
@@ -147,6 +189,48 @@ func parseArgs() *cliArgs {
 			args.ShowVersion = true
 		case "doctor":
 			args.Doctor = true
+		case "profiles":
+			args.ProfileList = true
+		case "profile":
+			// skilar profile create [name]
+			// skilar profile edit <name>
+			// skilar profile delete <name>
+			if i+1 < len(osArgs) {
+				sub := osArgs[i+1]
+				i++
+				switch sub {
+				case "create":
+					args.ProfileCreate = true
+				case "edit":
+					if i+1 < len(osArgs) {
+						args.ProfileEdit = osArgs[i+1]
+						i++
+					}
+				case "delete":
+					if i+1 < len(osArgs) {
+						args.ProfileDelete = osArgs[i+1]
+						i++
+					}
+				}
+			}
+		case "up":
+			// skilar up [profile] [--web] [--port N]
+			for i+1 < len(osArgs) {
+				next := osArgs[i+1]
+				if next == "--web" {
+					args.UpWeb = true
+					i++
+				} else if next == "--port" && i+2 < len(osArgs) {
+					fmt.Sscanf(osArgs[i+2], "%d", &args.UpPort)
+					i += 2
+				} else if !strings.HasPrefix(next, "-") && args.UpProfile == "" {
+					args.UpProfile = next
+					i++
+				} else {
+					break
+				}
+			}
+			args.RunUp = true
 		case "--list-packages":
 			args.ListPackages = true
 		case "--list-versions":
@@ -269,11 +353,135 @@ func resolveNonInteractive(args *cliArgs, cat *models.Catalog, cfg map[string]in
 	return req, nil
 }
 
+func handleProfileList() {
+	// Show builtin tiers first, then saved profiles
+	fmt.Println("\n  Built-in tiers:")
+	fmt.Printf("  %-16s %s\n", "cheap", "Haiku everywhere — fast & cheap")
+	fmt.Printf("  %-16s %s\n", "balanced", "Sonnet for planning, Haiku for execution (default)")
+	fmt.Printf("  %-16s %s\n", "premium", "Opus for planning, Sonnet for execution")
+	fmt.Println()
+
+	saved, err := profiles.List()
+	if err != nil || len(saved) == 0 {
+		fmt.Println("  No custom profiles saved.")
+		fmt.Println("  Create one: skilar profile create")
+		return
+	}
+
+	fmt.Println("  Custom profiles:")
+	for _, p := range saved {
+		fmt.Printf("  %-16s %d agents configured\n", p.Name, len(p.Models))
+	}
+	fmt.Println()
+	fmt.Println("  Usage: skilar up <profile>")
+}
+
+func handleProfileCreate(initialName string) {
+	// Call the TUI flow
+	result, err := prompts.RunProfileCreationFlow(nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Cancelled.\n")
+		return
+	}
+
+	p := &profiles.Profile{
+		Name:      result.Name,
+		Models:    result.Models,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	if err := profiles.Save(p); err != nil {
+		fmt.Fprintf(os.Stderr, "Error saving profile: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\n  ✓ Profile %q saved.\n", p.Name)
+	fmt.Printf("  Usage: skilar up %s\n\n", p.Name)
+}
+
+func handleProfileEdit(name string) {
+	p, err := profiles.Load(name)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Profile %q not found.\n", name)
+		os.Exit(1)
+	}
+
+	result, err := prompts.RunProfileCreationFlow(p.Models)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Cancelled.\n")
+		return
+	}
+
+	p.Models = result.Models
+	p.UpdatedAt = time.Now()
+
+	if err := profiles.Save(p); err != nil {
+		fmt.Fprintf(os.Stderr, "Error saving: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("\n  ✓ Profile %q updated.\n\n", p.Name)
+}
+
+func handleProfileDelete(name string) {
+	if err := profiles.Delete(name); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("  ✓ Profile %q deleted.\n", name)
+}
+
+func handleUp(profileName string, web bool, port int) {
+	if profileName == "" {
+		profileName = "balanced" // default tier
+	}
+
+	fmt.Printf("\n  Launching OpenCode")
+	if profileName != "" {
+		fmt.Printf(" with profile: %s", profileName)
+	}
+	if web {
+		fmt.Printf(" (web UI)")
+	}
+	if port > 0 {
+		fmt.Printf(" on port %d", port)
+	}
+	fmt.Println()
+
+	if err := runner.Run(runner.Options{
+		Profile: profileName,
+		Web:     web,
+		Port:    port,
+	}); err != nil {
+		// If the process terminated normally (exit 0 or ctrl+c), don't treat as error
+		fmt.Fprintf(os.Stderr, "opencode exited: %v\n", err)
+	}
+}
+
 func printUsage() {
-	fmt.Println(`Usage: skilar [options]
+	fmt.Println(`Usage: skilar [command] [options]
 
 Commands:
-  doctor                  Check environment and dependencies.
+  install                 Interactive installer (TUI)
+  doctor                  Check environment and dependencies
+  version                 Show version
+  profiles                List all profiles (builtin + custom)
+  profile create [name]   Create a new profile (TUI)
+  profile edit <name>     Edit an existing profile
+  profile delete <name>   Delete a custom profile
+  up [profile]            Launch OpenCode with a profile
+                          Builtin: cheap, balanced, premium
+                          Custom: any profile you created
+  up [profile] --web      Launch web UI instead of TUI
+  up [profile] --port N   Use specific port (with --web)
+
+Examples:
+  skilar up                        Launch with balanced profile
+  skilar up cheap                  Haiku everywhere
+  skilar up frontend               Your custom frontend profile
+  skilar up frontend --web --port 3001
+  skilar profile create backend
+  skilar profiles
 
 Options:
   --package PACKAGE       Package to install (skills, neurox). Repeatable.
