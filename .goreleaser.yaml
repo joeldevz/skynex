@@ -63,7 +63,7 @@ release:
     irm https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.ps1 | iex
     ```
 
-brews:
+homebrew_casks:
   - repository:
       owner: joeldevz
       name: homebrew-tap
