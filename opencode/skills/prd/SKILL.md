@@ -1,6 +1,6 @@
 ---
 name: prd
-description: "Triggers when a user says 'write a PRD', 'document requirements', 'plan a feature', 'create a spec', or asks to structure a product idea. Generates production-grade Product Requirements Documents (PRDs) using a Human-in-the-Loop facilitation protocol. Guides the user through Context Ingestion, Alignment, and Technical Drafting, integrating 4-dimensional AI metrics and automated Story Point estimation."
+description: Use when the user requests a PRD, requirements document, feature spec, or product structure. Run AFTER grill-me has resolved the design tree.
 license: MIT
 ---
 

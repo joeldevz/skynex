@@ -185,8 +185,8 @@ skills/
 │   └── CLAUDE.md              # overlay para el orquestador en Claude Code
 ├── opencode/
 │   ├── opencode.json          # configuracion base de agentes y MCPs
-│   ├── commands/              # 12 slash commands
-│   ├── skills/                # prd, nestjs-patterns, ts advanced types
+│   ├── commands/              # 7 slash commands reales
+│   ├── skills/                # grill-me, prd, security, verification-before-completion + _shared
 │   ├── templates/             # convenciones, commits, 5 tipos de plan
 │   ├── evals/                 # 9 golden tests de regresion
 │   └── plugins/

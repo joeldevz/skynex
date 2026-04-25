@@ -1,10 +1,6 @@
 ---
 name: security
-description: >
-  Adversarial dual-judge security review protocol. Launches two independent security judges
-  in parallel, synthesizes findings, auto-fixes confirmed issues, and re-judges until clean.
-  Trigger: When orchestrator reaches the security validation phase, or user says "security review",
-  "revisar seguridad", "security check", "buscar vulnerabilidades".
+description: Use when the orchestrator reaches the security validation phase, or the user requests a security review (English or Spanish).
 ---
 
 # Security Review — Dual-Judge Protocol
