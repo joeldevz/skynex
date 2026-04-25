@@ -494,8 +494,9 @@ func extractTarGz(archivePath, destDir, targetFile string) error {
 			return err
 		}
 
-		// Match by base name (handles nested paths like neurox_linux_amd64/neurox)
-		if filepath.Base(hdr.Name) == targetFile && hdr.Typeflag == tar.TypeReg {
+		// Match by exact name OR by prefix (e.g. neurox_darwin_arm64 matches "neurox")
+		base := filepath.Base(hdr.Name)
+		if hdr.Typeflag == tar.TypeReg && (base == targetFile || strings.HasPrefix(base, targetFile+"_") || strings.HasPrefix(base, targetFile+"-")) {
 			destPath := filepath.Join(destDir, targetFile)
 			out, err := os.Create(destPath)
 			if err != nil {
@@ -521,7 +522,8 @@ func extractZip(archivePath, destDir, targetFile string) error {
 	defer r.Close()
 
 	for _, f := range r.File {
-		if filepath.Base(f.Name) == targetFile {
+		base := filepath.Base(f.Name)
+		if base == targetFile || strings.HasPrefix(base, targetFile+"_") || strings.HasPrefix(base, targetFile+"-") {
 			destPath := filepath.Join(destDir, targetFile)
 			out, err := os.Create(destPath)
 			if err != nil {
