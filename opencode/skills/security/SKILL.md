@@ -1,16 +1,24 @@
 ---
 name: security
-description: >
-  Adversarial dual-judge security review protocol. Launches two independent security judges
-  in parallel, synthesizes findings, auto-fixes confirmed issues, and re-judges until clean.
-  Trigger: When orchestrator reaches the security validation phase, or user says "security review",
-  "revisar seguridad", "security check", "buscar vulnerabilidades".
+description: Use when the orchestrator reaches the security validation phase, or the user requests a security review (English or Spanish).
 ---
 
 # Security Review — Dual-Judge Protocol
 
+> **SUBAGENT-STOP gate**: if you are running as a subagent invoked by another subagent, STOP. Return `status: blocked` with reason `nested-subagent-loop-detected`. This skill must be invoked by the orchestrator or top-level agent only.
+
 The orchestrator NEVER reviews security itself. It launches two independent `security` judge
 sub-agents in parallel, synthesizes their findings, and iterates until the code is clean.
+
+## Anti-rationalization table (judges must reject these excuses)
+
+| Excuse                                          | Reality                                          |
+|-------------------------------------------------|--------------------------------------------------|
+| "It's just a demo, security can wait"           | Demos leak. Flag it.                             |
+| "The framework handles it"                      | Verify the framework actually handles THIS case. |
+| "It's behind auth, no risk"                     | Auth can be bypassed. Defense in depth.          |
+| "I'll add validation later"                     | Now or `status: blocked`.                        |
+| "Tests don't cover this so it's not critical"   | Lack of tests is a finding, not an excuse.       |
 
 ## Phase 1 — Launch both judges in parallel
 

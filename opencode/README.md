@@ -211,11 +211,13 @@ Reglas de Conventional Commits y estructura de PR.
 
 ## Skills incluidas
 
-- `prd`
-- `typescript-advanced-types`
-- `nestjs-patterns` — patrones DDD + CQRS para NestJS: entidades, Value Objects, commands, queries, handlers, controllers, repositorios Prisma, jobs BullMQ, tests
+- `grill-me` — alineación humano-AI antes del PRD (Brooks shared design concept)
+- `prd` — generación de PRDs tras grilling
+- `security` — adversarial dual-judge security review
+- `verification-before-completion` — evidence-based completion claims
 
-No hay familia `sdd-*` ni `find-skills`.
+Compartidas en `_shared/`:
+- `advisor-protocol.md`, `neurox-protocol.md`, `return-envelope.md`, `skill-resolver.md`, `smart-zone-budget.md`
 
 ## Regla mas importante
 
@@ -268,5 +270,5 @@ Hoy la evaluacion es manual (leer output y verificar). El roadmap es automatizar
 Este repo esta pensado para ser portable. Por eso:
 
 - incluye `package.json` para poder correr `bun install`
-- incluye el skill `typescript-advanced-types` como archivo real, no como symlink local
+- las skills se incluyen como archivos reales, no como symlinks locales
 - no incluye secretos en la configuracion compartida

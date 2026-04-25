@@ -1,0 +1,71 @@
+name: 🛠 Skill Proposal
+description: Propose a new SKILL.md following Description Trap and ≤120 lines rule
+title: "[skill] "
+labels: ["type:skill", "status:needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Skill design rules (mandatory)
+
+        - **Description Trap**: el `description:` dice SOLO "Use when X". NUNCA resume el workflow.
+        - **≤120 líneas** SKILL.md. Si necesitas más, parte en `references/*.md` (≤200 c/u).
+        - **Bilingüe ES/EN** cuando aplique al user-facing.
+        - **No copiar código** de otros proyectos. Destilar principios y diseñar propio.
+
+  - type: input
+    id: skill-name
+    attributes:
+      label: Skill name (kebab-case)
+      placeholder: "e.g. tdd-discipline, adversarial-review"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description-trap
+    attributes:
+      label: Proposed `description:` field
+      description: Debe seguir el patrón "Use when X". NO resumas workflow.
+      placeholder: "Use when the user requests Y before doing Z."
+    validations:
+      required: true
+
+  - type: textarea
+    id: trigger
+    attributes:
+      label: Trigger conditions
+      description: ¿Cuándo se invoca este skill? ¿Quién lo invoca?
+    validations:
+      required: true
+
+  - type: textarea
+    id: rules
+    attributes:
+      label: Core rules / reglas principales
+      description: Qué reglas duras (Iron Law, anti-rationalization, etc.)
+
+  - type: textarea
+    id: integration
+    attributes:
+      label: Integration with existing agents
+      description: ¿Qué agentes lo invocan? ¿Cómo encaja con return envelope?
+
+  - type: textarea
+    id: principles
+    attributes:
+      label: Principios destilados aplicados
+      description: De qué fuentes (Matt / obra / Gentleman / propios)
+
+  - type: checkboxes
+    id: compliance
+    attributes:
+      label: Compliance check
+      options:
+        - label: Description follows "Use when X" pattern (no workflow summary)
+          required: true
+        - label: SKILL.md will be ≤120 lines
+          required: true
+        - label: References module for advanced rules if needed
+          required: false
+        - label: No code copied from other projects (only principles destilados)
+          required: true

@@ -1,0 +1,69 @@
+name: ✨ Feature Request
+description: Propose a new skill, agent, command, or improvement
+title: "[feature] "
+labels: ["enhancement", "status:needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de proponer, busca en `docs/IMPROVEMENT-PLAN.md` si la feature ya está planeada.
+        / Before proposing, check `docs/IMPROVEMENT-PLAN.md` for existing planned items.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type label
+      options:
+        - "type:skill"
+        - "type:agent"
+        - "type:plugin"
+        - "type:command"
+        - "type:doc"
+        - "type:meta"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Problema
+      description: ¿Qué dolor resuelve esto? / What pain does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution / Solución propuesta
+      description: Diseño preliminar (no copiar código de otros proyectos — destilar principios)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Qué otras opciones evaluaste / What other options did you consider?
+
+  - type: textarea
+    id: principles
+    attributes:
+      label: Principios destilados aplicables
+      description: ¿De qué proyectos viene la inspiración? (Matt Pocock / obra / Gentleman / propios)
+      placeholder: "Inspirado en Description Trap (Superpowers), TDD Cycle Evidence (gentle-ai)..."
+
+  - type: input
+    id: effort
+    attributes:
+      label: Estimated effort
+      placeholder: "e.g. 2h / 1 day / 1 sprint"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "P0 (critical)"
+        - "P1 (high)"
+        - "P2 (medium)"
+        - "P3 (backlog)"

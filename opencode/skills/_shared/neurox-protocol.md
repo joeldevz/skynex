@@ -1,4 +1,8 @@
-# Neurox Protocol — Memoria persistente entre sesiones
+---
+name: Neurox Protocol
+description: Memoria persistente entre sesiones.
+license: Complete terms in LICENSE.txt
+---
 
 > **REGLA FUNDAMENTAL**: Neurox es OBLIGATORIO en todas las skills y agentes.
 > Cada skill DEBE consultar Neurox al inicio y guardar descubrimientos relevantes.
@@ -31,14 +35,14 @@
 
 ## Cuándo guardar (triggers obligatorios)
 
-| Evento | observation_type | kind |
-|--------|-----------------|------|
-| Decisión de arquitectura o diseño | `decision` | `semantic` |
-| Bug fix completado (con causa raíz) | `bugfix` | `procedural` |
-| Patrón o convención descubierta | `pattern` / `discovery` | `semantic` |
-| Usuario corrige el enfoque o da preferencia | `preference` | `procedural` |
-| Config de entorno o tool aprendida | `config` | `semantic` |
-| Trampa o gotcha encontrada | `gotcha` | `procedural` |
+| Evento                                      | observation_type        | kind         |
+| ------------------------------------------- | ----------------------- | ------------ |
+| Decisión de arquitectura o diseño           | `decision`              | `semantic`   |
+| Bug fix completado (con causa raíz)         | `bugfix`                | `procedural` |
+| Patrón o convención descubierta             | `pattern` / `discovery` | `semantic`   |
+| Usuario corrige el enfoque o da preferencia | `preference`            | `procedural` |
+| Config de entorno o tool aprendida          | `config`                | `semantic`   |
+| Trampa o gotcha encontrada                  | `gotcha`                | `procedural` |
 
 ## Formato de contenido al guardar
 

@@ -113,40 +113,22 @@ Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [
 
 ## Commands
 
-### Planificacion
+> **Nota**: solo se listan los commands realmente disponibles en `opencode/commands/`. Las matrices anteriores prometían commands ficticios (doc rot eliminado en QW1).
+
+### Onboarding y exploracion
 
 | Command | Que hace |
 |---------|----------|
 | `/onboard` | Explora el proyecto: stack, arquitectura, convenciones |
-| `/plan <tarea>` | Investiga el codebase y genera `PLAN.md` |
-| `/plan-rewrite` | Revisa y mejora un `PLAN.md` existente |
-| `/estimate` | Estima esfuerzo (XS–XL) por paso del plan |
+| `/docs <lib> <tema>` | Busca docs en vivo via Context7 MCP |
 
-### Ejecucion
+### Calidad y verificacion
 
 | Command | Que hace |
 |---------|----------|
-| `/execute` | Ejecuta el siguiente paso del plan |
-| `/apply-feedback <texto>` | Aplica correcciones al paso actual |
-| `/diff` | Muestra cambios del paso con anotaciones |
-| `/rollback [step]` | Deshace el ultimo paso (pide confirmacion) |
-| `/status` | Muestra progreso del `PLAN.md` |
-
-### Calidad
-
-| Command | Que hace |
-|---------|----------|
-| `/test [modulo]` | Genera o corre tests del paso actual |
-| `/review` | Quality gate: verifica convenciones, tipos, arquitectura, tests |
 | `/verify-skill [scope]` | Valida skills, convenciones y cobertura con agentes en paralelo |
 | `/verify-security [scope]` | Valida seguridad con dos jueces adversariales en paralelo |
-
-### Documentacion y memoria
-
-| Command | Que hace |
-|---------|----------|
-| `/docs <lib> <tema>` | Busca docs en vivo via Context7 MCP |
-| `/context [obs]` | Guarda descubrimientos en memoria persistente |
+| `/rollback [step]` | Deshace el ultimo paso (pide confirmacion) |
 
 ### Git
 
@@ -154,6 +136,10 @@ Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [
 |---------|----------|
 | `/commit` | Crea commit con Conventional Commits |
 | `/pr` | Abre pull request con `gh` |
+
+### Backlog (commands planeados, aún no implementados)
+
+Los siguientes commands están en el roadmap (`docs/IMPROVEMENT-PLAN.md`) pero **no existen aún**: `/grill`, `/skills:scan`, `/afk-run`. Hasta que se implementen, los flujos equivalentes se hacen invocando skills directamente o via el orchestrator.
 
 ## Modos de trabajo
 
@@ -199,8 +185,8 @@ skills/
 │   └── CLAUDE.md              # overlay para el orquestador en Claude Code
 ├── opencode/
 │   ├── opencode.json          # configuracion base de agentes y MCPs
-│   ├── commands/              # 12 slash commands
-│   ├── skills/                # prd, nestjs-patterns, ts advanced types
+│   ├── commands/              # 7 slash commands reales
+│   ├── skills/                # grill-me, prd, security, verification-before-completion + _shared
 │   ├── templates/             # convenciones, commits, 5 tipos de plan
 │   ├── evals/                 # 9 golden tests de regresion
 │   └── plugins/

@@ -86,11 +86,11 @@ cd skills
 1. Hace backup de `~/.claude/` si ya existe
 2. Renderiza los 10 agentes (`orchestrator`, `advisor`, `coder`, `manager`, `tech-planner`, `product-planner`, `verifier`, `test-reviewer`, `security`, `skill-validator`) en `~/.claude/agents/`
 3. Convierte los 7 commands de OpenCode en skills de Claude Code en `~/.claude/skills/`
-4. Copia skills compartidas (`prd`, `nestjs-patterns`, `typescript-advanced-types`) a `~/.claude/skills/`
+4. Copia skills compartidas (`grill-me`, `prd`, `security`, `verification-before-completion`) a `~/.claude/skills/`
 5. Copia templates a `~/.claude/templates/`
 6. Agrega el bloque del workflow a `~/.claude/CLAUDE.md` (sin borrar contenido existente)
 7. Registra Neurox como MCP server en `~/.claude.json`
-8. Resultado: 10 agentes, 7 skills de comando, skills técnicas (nestjs-patterns, typescript-advanced-types, prd, security), overlay de CLAUDE.md, y Neurox MCP listo
+8. Resultado: 10 agentes, 7 skills de comando, skills core (grill-me, prd, security, verification-before-completion), overlay de CLAUDE.md, y Neurox MCP listo
 
 ## Instalacion manual
 
@@ -165,7 +165,7 @@ ls ~/.claude/agents/
 
 # Verificar skills
 ls ~/.claude/skills/
-# Deberia mostrar: commit/  pr/  docs/  onboard/  rollback/  verify-security/  verify-skill/  nestjs-patterns/  typescript-advanced-types/  prd/  security/
+# Deberia mostrar: commit/  pr/  docs/  onboard/  rollback/  verify-security/  verify-skill/  grill-me/  prd/  security/  verification-before-completion/
 
 # Verificar templates
 ls ~/.claude/templates/

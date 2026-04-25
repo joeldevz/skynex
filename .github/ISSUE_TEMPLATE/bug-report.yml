@@ -1,0 +1,67 @@
+name: 🐞 Bug Report
+description: Report a defect in skills, agents, plugins, or commands
+title: "[bug] "
+labels: ["bug", "status:needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar. Antes de continuar, verifica que no exista un issue similar.
+        / Thanks for reporting. Please check for duplicate issues first.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type label
+      description: Selecciona el tipo de componente afectado / Select the affected component
+      options:
+        - "type:skill"
+        - "type:agent"
+        - "type:plugin"
+        - "type:command"
+        - "type:doc"
+        - "type:meta"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description / Descripción
+      description: Qué está pasando vs qué esperabas / What is happening vs what you expected
+      placeholder: |
+        ES: El skill X no se invoca cuando...
+        EN: The skill X doesn't trigger when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Pasos exactos para reproducir / Exact steps to reproduce
+      placeholder: |
+        1. Run /onboard
+        2. Create a session...
+        3. Observe...
+    validations:
+      required: true
+
+  - type: input
+    id: opencode-version
+    attributes:
+      label: OpenCode version
+      placeholder: "e.g. 0.5.x"
+
+  - type: input
+    id: model
+    attributes:
+      label: Model used
+      placeholder: "e.g. claude-haiku-4-5, claude-sonnet-4-6"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / Logs relevantes
+      description: Copy any error messages or unusual output
+      render: shell

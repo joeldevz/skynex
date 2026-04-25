@@ -12,9 +12,9 @@ Add the Advisor Strategy pattern to the skills system: a tool that lets worker a
   - Add `"advisor": true` to coder and tech-planner tools maps
   - Append compact advisor protocol reference (3-4 lines) to coder and tech-planner prompts
 
-- [x] **Step 2 — Advisor plugin `opencode/plugins/advisor.ts`**
-  - Plugin captures `client` in closure from plugin context
-  - Registers `advisor` tool with args: `question` (string)
+- [x] **Step 2 — Advisor tool `opencode/tools/advisor.ts`** (moved from `plugins/` in commit 23a7cb7 to fix tool registry collision; registers as `advisor_consult`)
+  - Tool file uses `export const consult = tool({...})` direct export (not plugin Hooks.tool)
+  - Registers `advisor_consult` tool with args: `question` (string)
   - Reads full transcript via `client.session.messages({ path: { id: ctx.sessionID } })`
   - Smart truncation: if transcript > 100K tokens (~400K chars), keep first 5 messages + last 50K tokens
   - Creates temp session with `advisor` agent via `client.session.create()`
