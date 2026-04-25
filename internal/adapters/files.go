@@ -55,9 +55,15 @@ func copyDirExcluding(src, dst string, exclude []string) error {
 }
 
 // copyFile copies a single file from src to dst.
+// If dst already exists with restrictive permissions, chmod it first.
 func copyFile(src, dst string) error {
 	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 		return err
+	}
+
+	// If destination exists with restrictive perms, make it writable first
+	if _, err := os.Stat(dst); err == nil {
+		_ = os.Chmod(dst, 0o644)
 	}
 
 	in, err := os.Open(src)
@@ -66,12 +72,7 @@ func copyFile(src, dst string) error {
 	}
 	defer in.Close()
 
-	info, err := in.Stat()
-	if err != nil {
-		return err
-	}
-
-	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, info.Mode())
+	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
