@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/joeldevz/skills/internal/models"
+	"github.com/joeldevz/skilar/internal/models"
 )
 
 var (

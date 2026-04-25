@@ -3,19 +3,19 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 # Try Go binary first (preferred), fall back to Python
-GO_BINARY="$REPO_ROOT/.build/clasing-skill"
+GO_BINARY="$REPO_ROOT/.build/skilar"
 
 if [ ! -f "$GO_BINARY" ] && command -v go >/dev/null 2>&1; then
-  echo "Building clasing-skill..."
+  echo "Building skilar..."
   mkdir -p "$REPO_ROOT/.build"
-  (cd "$REPO_ROOT" && go build -o "$GO_BINARY" ./cmd/clasing-skill/) || {
+  (cd "$REPO_ROOT" && go build -o "$GO_BINARY" ./cmd/skilar/) || {
     echo "Go build failed, falling back to Python installer"
-    exec python3 -m scripts.clasing_skill "$@"
+    exec python3 -m scripts.skilar "$@"
   }
 fi
 
 if [ -f "$GO_BINARY" ]; then
   exec "$GO_BINARY" "$@"
 else
-  exec python3 -m scripts.clasing_skill "$@"
+  exec python3 -m scripts.skilar "$@"
 fi

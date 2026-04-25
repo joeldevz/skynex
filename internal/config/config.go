@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/joeldevz/skills/internal/models"
+	"github.com/joeldevz/skilar/internal/models"
 )
 
 // LoadOrDefault loads config from path or returns a default.

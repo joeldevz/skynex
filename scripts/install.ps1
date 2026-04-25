@@ -1,11 +1,11 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  clasing-skill — Install Script for Windows
+  skilar — Install Script for Windows
   AI agent skills installer for OpenCode and Claude Code.
 
 .DESCRIPTION
-  Downloads and installs the clasing-skill binary for Windows.
+  Downloads and installs the skilar binary for Windows.
   Supports installation via Go or pre-built binary from GitHub Releases.
 
 .EXAMPLE
@@ -28,7 +28,7 @@ $ErrorActionPreference = "Stop"
 
 $GITHUB_OWNER = "joeldevz"
 $GITHUB_REPO  = "skills"
-$BINARY_NAME  = "clasing-skill"
+$BINARY_NAME  = "skilar"
 
 # ============================================================================
 # Logging
@@ -153,7 +153,7 @@ function Get-LatestVersion {
   $url = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/latest"
 
   try {
-    $response = Invoke-RestMethod -Uri $url -Headers @{ "User-Agent" = "clasing-skill-installer" } -UseBasicParsing
+    $response = Invoke-RestMethod -Uri $url -Headers @{ "User-Agent" = "skilar-installer" } -UseBasicParsing
   } catch {
     Stop-WithError "Failed to fetch latest release. Rate limited? Try again later or use -Method go"
   }
@@ -179,7 +179,7 @@ function Install-ViaBinary {
   $downloadUrl  = "https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/download/$version/$archiveName"
   $checksumsUrl = "https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/download/$version/checksums.txt"
 
-  $tmpDir = Join-Path $env:TEMP "clasing-skill-install-$(Get-Random)"
+  $tmpDir = Join-Path $env:TEMP "skilar-install-$(Get-Random)"
   New-Item -ItemType Directory -Path $tmpDir -Force | Out-Null
 
   try {
@@ -229,7 +229,7 @@ function Install-ViaBinary {
     # Determine install directory
     $installDir = $InstallDir
     if (-not $installDir) {
-      $installDir = Join-Path $env:LOCALAPPDATA "clasing-skill\bin"
+      $installDir = Join-Path $env:LOCALAPPDATA "skilar\bin"
     }
 
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
@@ -272,7 +272,7 @@ function Test-Installation {
   }
 
   $locations = @(
-    (Join-Path $env:LOCALAPPDATA "clasing-skill\bin\$BINARY_NAME.exe")
+    (Join-Path $env:LOCALAPPDATA "skilar\bin\$BINARY_NAME.exe")
   )
   if (Get-Command "go" -ErrorAction SilentlyContinue) {
     $gopath = & go env GOPATH 2>$null

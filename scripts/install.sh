@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# clasing-skill — Install Script
+# skilar — Install Script
 # One command to install AI agent skills for OpenCode and Claude Code.
 #
 # Usage:
@@ -16,7 +16,7 @@ set -euo pipefail
 
 GITHUB_OWNER="joeldevz"
 GITHUB_REPO="skills"
-BINARY_NAME="clasing-skill"
+BINARY_NAME="skilar"
 BREW_TAP="joeldevz/tap"
 
 # ============================================================================
@@ -55,7 +55,7 @@ step()    { echo -e "\n${CYAN}${BOLD}==>${NC} ${BOLD}$*${NC}"; }
 
 show_help() {
   cat <<EOF
-clasing-skill installer
+skilar installer
 
 USAGE:
   curl -fsSL https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.sh | bash

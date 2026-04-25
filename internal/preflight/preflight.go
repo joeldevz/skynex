@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/joeldevz/skills/internal/models"
-	"github.com/joeldevz/skills/internal/paths"
+	"github.com/joeldevz/skilar/internal/models"
+	"github.com/joeldevz/skilar/internal/paths"
 )
 
 // Run executes all preflight validations.
@@ -58,7 +58,7 @@ func Run(req *models.InstallRequest, cat *models.Catalog) []*models.ValidationIs
 					Level:     "error",
 					PackageID: pkgID,
 					Message:   "neurox not found in PATH (required by this package)",
-					FixHint:   "Install neurox first: clasing-skill --package neurox",
+					FixHint:   "Install neurox first: skilar --package neurox",
 				})
 			}
 		}
@@ -142,7 +142,7 @@ func ensureWritable(dir string) error {
 		return os.MkdirAll(dir, 0o755)
 	}
 	// Try to create a temp file to check writability
-	tmp := filepath.Join(dir, ".clasing-skill-preflight-check")
+	tmp := filepath.Join(dir, ".skilar-preflight-check")
 	f, err := os.Create(tmp)
 	if err != nil {
 		return err

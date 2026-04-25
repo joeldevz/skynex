@@ -1,6 +1,6 @@
 version: 2
 
-project_name: clasing-skill
+project_name: skilar
 
 before:
   hooks:
@@ -8,8 +8,8 @@ before:
     - go run ./cmd/tools/sync-assets/
 
 builds:
-  - main: ./cmd/clasing-skill
-    binary: clasing-skill
+  - main: ./cmd/skilar
+    binary: skilar
     env:
       - CGO_ENABLED=0
     goos:
@@ -46,21 +46,21 @@ changelog:
 release:
   github:
     owner: joeldevz
-    name: skills
+    name: skilar
   draft: false
   prerelease: auto
   name_template: "v{{.Version}}"
   header: |
-    ## clasing-skill v{{.Version}}
+    ## skilar v{{.Version}}
 
     ### Install
     **macOS / Linux:**
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/joeldevz/skilar/main/scripts/install.sh | bash
     ```
     **Windows (PowerShell):**
     ```powershell
-    irm https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.ps1 | iex
+    irm https://raw.githubusercontent.com/joeldevz/skilar/main/scripts/install.ps1 | iex
     ```
 
 homebrew_casks:
@@ -69,19 +69,19 @@ homebrew_casks:
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     directory: Formula
-    name: clasing-skill
-    homepage: "https://github.com/joeldevz/skills"
+    name: skilar
+    homepage: "https://github.com/joeldevz/skilar"
     description: "AI agent skills installer for OpenCode and Claude Code"
     license: "MIT"
-    commit_msg_template: "chore: update clasing-skill formula to {{ .Tag }}"
+    commit_msg_template: "chore: update skilar formula to {{ .Tag }}"
 
 scoops:
   - repository:
       owner: joeldevz
       name: scoop-bucket
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    name: clasing-skill
-    homepage: "https://github.com/joeldevz/skills"
+    name: skilar
+    homepage: "https://github.com/joeldevz/skilar"
     description: "AI agent skills installer for OpenCode and Claude Code"
     license: MIT
-    commit_msg_template: "chore: update clasing-skill to {{ .Tag }}"
+    commit_msg_template: "chore: update skilar to {{ .Tag }}"

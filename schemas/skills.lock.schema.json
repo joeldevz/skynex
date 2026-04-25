@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://clasing.dev/schemas/skills.lock.schema.json",
-  "title": "Clasing Skill Lock File",
-  "description": "Resolved and installed state for clasing-skill packages",
+  "$id": "https://skilar.dev/schemas/skills.lock.schema.json",
+  "title": "Skilar Lock File",
+  "description": "Resolved and installed state for skilar packages",
   "type": "object",
   "required": ["version", "generatedAt", "packages"],
   "properties": {

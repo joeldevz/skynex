@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joeldevz/skills/internal/adapters"
-	"github.com/joeldevz/skills/internal/catalog"
-	"github.com/joeldevz/skills/internal/config"
-	"github.com/joeldevz/skills/internal/doctor"
-	"github.com/joeldevz/skills/internal/models"
-	"github.com/joeldevz/skills/internal/paths"
-	"github.com/joeldevz/skills/internal/preflight"
-	"github.com/joeldevz/skills/internal/prompts"
+	"github.com/joeldevz/skilar/internal/adapters"
+	"github.com/joeldevz/skilar/internal/catalog"
+	"github.com/joeldevz/skilar/internal/config"
+	"github.com/joeldevz/skilar/internal/doctor"
+	"github.com/joeldevz/skilar/internal/models"
+	"github.com/joeldevz/skilar/internal/paths"
+	"github.com/joeldevz/skilar/internal/preflight"
+	"github.com/joeldevz/skilar/internal/prompts"
 )
 
 // version is set by goreleaser via -ldflags "-X main.version=..."
@@ -25,7 +25,7 @@ func main() {
 	args := parseArgs()
 
 	if args.ShowVersion {
-		fmt.Printf("clasing-skill %s (%s) built %s\n", version, commit, date)
+		fmt.Printf("skilar %s (%s) built %s\n", version, commit, date)
 		os.Exit(0)
 	}
 
@@ -270,7 +270,7 @@ func resolveNonInteractive(args *cliArgs, cat *models.Catalog, cfg map[string]in
 }
 
 func printUsage() {
-	fmt.Println(`Usage: clasing-skill [options]
+	fmt.Println(`Usage: skilar [options]
 
 Commands:
   doctor                  Check environment and dependencies.
@@ -283,7 +283,7 @@ Options:
   --non-interactive       Skip prompts, require all inputs via flags.
   --yes, -y               Skip confirmation prompt.
   --trust-setup-scripts   Trust external setup scripts.
-  --state-dir DIR         State directory (default: ~/.config/clasing-skill).
+  --state-dir DIR         State directory (default: ~/.config/skilar).
   --list-packages         List available packages.
   --list-versions PKG     List versions for a package.
   --version               Show version and exit.

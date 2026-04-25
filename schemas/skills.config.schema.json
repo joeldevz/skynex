@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://clasing.dev/schemas/skills.config.schema.json",
-  "title": "Clasing Skill Configuration",
-  "description": "User intent and defaults for clasing-skill installations",
+  "$id": "https://skilar.dev/schemas/skills.config.schema.json",
+  "title": "Skilar Configuration",
+  "description": "User intent and defaults for skilar installations",
   "type": "object",
   "required": ["version", "defaults", "packages"],
   "properties": {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/joeldevz/skills/internal/paths"
+	"github.com/joeldevz/skilar/internal/paths"
 )
 
 func TestClaudeDir_Unix(t *testing.T) {
@@ -38,8 +38,8 @@ func TestStateDir_Unix(t *testing.T) {
 		t.Skip("Unix-only test")
 	}
 	got := paths.StateDir()
-	if !strings.Contains(got, "clasing-skill") {
-		t.Errorf("StateDir() = %q, want to contain 'clasing-skill'", got)
+	if !strings.Contains(got, "skilar") {
+		t.Errorf("StateDir() = %q, want to contain 'skilar'", got)
 	}
 }
 

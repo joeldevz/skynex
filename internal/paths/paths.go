@@ -28,15 +28,15 @@ func OpencodeDir() string {
 	return filepath.Join(home, ".config", "opencode")
 }
 
-// StateDir returns ~/.config/clasing-skill on Unix, %LOCALAPPDATA%\clasing-skill on Windows
+// StateDir returns ~/.config/skilar on Unix, %LOCALAPPDATA%\skilar on Windows
 func StateDir() string {
 	if runtime.GOOS == "windows" {
 		if local := os.Getenv("LOCALAPPDATA"); local != "" {
-			return filepath.Join(local, "clasing-skill")
+			return filepath.Join(local, "skilar")
 		}
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "clasing-skill")
+	return filepath.Join(home, ".config", "skilar")
 }
 
 // NeuroxBinDir returns ~/.local/bin on Unix, %LOCALAPPDATA%\neurox on Windows

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/joeldevz/skills/internal/models"
+	"github.com/joeldevz/skilar/internal/models"
 )
 
 //go:embed catalog.json

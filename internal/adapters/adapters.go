@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/joeldevz/skills/internal/assets"
-	"github.com/joeldevz/skills/internal/models"
-	"github.com/joeldevz/skills/internal/paths"
+	"github.com/joeldevz/skilar/internal/assets"
+	"github.com/joeldevz/skilar/internal/models"
+	"github.com/joeldevz/skilar/internal/paths"
 )
 
 // InstallAll installs all packages in the request.
@@ -60,7 +60,7 @@ func installSkillsRepo(pkg *models.PackageDefinition, req *models.InstallRequest
 	if assets.Available() && version == "latest" {
 		fmt.Println("    Using embedded assets (self-contained mode)...")
 		// Extract to temp dir
-		tmpDir, err := os.MkdirTemp("", "clasing-skill-assets-*")
+		tmpDir, err := os.MkdirTemp("", "skilar-assets-*")
 		if err != nil {
 			return nil, fmt.Errorf("create temp dir: %w", err)
 		}
@@ -198,7 +198,7 @@ func checkoutPackage(pkg *models.PackageDefinition, version string) (string, str
 	}
 
 	// Clone to temp dir
-	tmpDir, err := os.MkdirTemp("", "clasing-skill-*")
+	tmpDir, err := os.MkdirTemp("", "skilar-*")
 	if err != nil {
 		return "", "", err
 	}
@@ -375,7 +375,7 @@ func fetchLatestTag(owner, repo string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "clasing-skill-installer")
+	req.Header.Set("User-Agent", "skilar-installer")
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
 	resp, err := http.DefaultClient.Do(req)
@@ -406,7 +406,7 @@ func downloadFile(url, destPath string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "clasing-skill-installer")
+	req.Header.Set("User-Agent", "skilar-installer")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

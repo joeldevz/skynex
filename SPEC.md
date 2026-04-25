@@ -1,6 +1,6 @@
 ## Goal
 
-Introduce a versioned CLI installer named `clasing-skill` that gives users one consistent way to install and manage this skills repository and other supported packages or repositories such as `neurox` across Claude Code and OpenCode. This matters because the current install flow is repo-specific and tool-specific, while the product now needs a reusable, interactive installer that can validate prerequisites up front, let users choose versions intentionally, and keep a durable record of what was requested versus what was actually installed.
+Introduce a versioned CLI installer named `skilar` that gives users one consistent way to install and manage this skills repository and other supported packages or repositories such as `neurox` across Claude Code and OpenCode. This matters because the current install flow is repo-specific and tool-specific, while the product now needs a reusable, interactive installer that can validate prerequisites up front, let users choose versions intentionally, and keep a durable record of what was requested versus what was actually installed.
 
 ## Users
 
@@ -14,7 +14,7 @@ Introduce a versioned CLI installer named `clasing-skill` that gives users one c
 ### Primary workflows
 
 1. **Interactive install**
-   - The user runs `clasing-skill` and is guided through an interactive flow.
+   - The user runs `skilar` and is guided through an interactive flow.
    - The user selects one or more installable packages/repos.
    - The user selects a target environment: Claude Code, OpenCode, or both.
    - The user selects a repository/package version, or accepts the default suggested version.
@@ -43,7 +43,7 @@ Introduce a versioned CLI installer named `clasing-skill` that gives users one c
 
 ## Acceptance Criteria
 
-- A user can use `clasing-skill` to install this repository into Claude Code, OpenCode, or both from one product entry point.
+- A user can use `skilar` to install this repository into Claude Code, OpenCode, or both from one product entry point.
 - A user can use the same CLI to install another supported package or repository, such as `neurox`, without switching to a different installer.
 - GIVEN the user starts an interactive install, WHEN the CLI runs, THEN it prompts for package/repository choice, target choice, and version choice before installation proceeds.
 - GIVEN the user starts automatic mode, WHEN required inputs or stored defaults are available, THEN the install proceeds without interactive prompts.

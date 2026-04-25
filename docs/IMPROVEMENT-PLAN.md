@@ -335,7 +335,7 @@ rm -rf skills/clasing-ui-v2-beta
 
 ### IL9 · SessionStart hook custom OpenCode
 - **Archivo**: `opencode/hooks/session-start.sh` (NUEVO)
-- **Acción**: hook propio (NO el de Superpowers tal cual) que inyecta `using-clasing-skills` con cap de tokens y compatible con smart-zone budget. NO debe forzar "if 1% chance, invoke skill" (rompe orchestrator-delegate-first).
+- **Acción**: hook propio (NO el de Superpowers tal cual) que inyecta `using-skilars` con cap de tokens y compatible con smart-zone budget. NO debe forzar "if 1% chance, invoke skill" (rompe orchestrator-delegate-first).
 - **Esfuerzo**: 4h · **Impact**: 🟡 alto (auto-bootstrap)
 
 ### IL10 · Diseño two-stage review (verifier split)

@@ -45,20 +45,20 @@ cd skills
 
 ```bash
 # Modo interactivo - selecciona paquetes, targets y versiones
-./clasing-skill
+./skilar
 
 # Instalar skills para ambos targets
-./clasing-skill --non-interactive --package skills --target both --version skills=latest --trust-setup-scripts
+./skilar --non-interactive --package skills --target both --version skills=latest --trust-setup-scripts
 
 # Instalar skills y neurox
-./clasing-skill --non-interactive --package skills --package neurox --target both --trust-setup-scripts
+./skilar --non-interactive --package skills --package neurox --target both --trust-setup-scripts
 ```
 
 `--non-interactive` omite la confirmacion final. Si falta algun valor obligatorio, el comando termina con error antes de instalar.
 
 ### Instalar con el script legacy
 
-> **Nota**: `./scripts/setup.sh` es el instalador interno del paquete `skills`. Se recomienda usar `./clasing-skill` en su lugar.
+> **Nota**: `./scripts/setup.sh` es el instalador interno del paquete `skills`. Se recomienda usar `./skilar` en su lugar.
 
 ```bash
 # Todo lo compatible

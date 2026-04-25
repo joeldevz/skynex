@@ -71,13 +71,13 @@ irm https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.ps1 |
 
 ```bash
 brew tap joeldevz/tap
-brew install clasing-skill
+brew install skilar
 ```
 
 ### Go install (cualquier plataforma con Go 1.23+)
 
 ```bash
-go install github.com/joeldevz/skills/cmd/clasing-skill@latest
+go install github.com/joeldevz/skills/cmd/skilar@latest
 ```
 
 ---
@@ -86,23 +86,23 @@ Una vez instalado:
 
 ```bash
 # Interactivo (recomendado la primera vez)
-clasing-skill
+skilar
 
 # Solo Claude Code
-clasing-skill --package skills --target claude
+skilar --package skills --target claude
 
 # Solo OpenCode
-clasing-skill --package skills --target opencode
+skilar --package skills --target opencode
 
 # Todo (skills + neurox)
-clasing-skill --package skills --package neurox --target both
+skilar --package skills --package neurox --target both
 ```
 
 > **Requisito**: `neurox` debe estar instalado y disponible en `PATH` para memoria persistente.
 
 El setup hace backup de tu configuracion existente antes de escribir.
 
-> **Nota**: `./clasing-skill` es el instalador unificado. El script `./scripts/setup.sh` se usa internamente como instalador especifico del paquete `skills`.
+> **Nota**: `./skilar` es el instalador unificado. El script `./scripts/setup.sh` se usa internamente como instalador especifico del paquete `skills`.
 
 Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [docs/installation.md](docs/installation.md).
 

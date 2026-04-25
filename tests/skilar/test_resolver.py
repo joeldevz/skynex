@@ -8,8 +8,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from scripts.clasing_skill.models import PackageDefinition
-from scripts.clasing_skill.resolver import (
+from scripts.skilar.models import PackageDefinition
+from scripts.skilar.resolver import (
     ResolutionError,
     ResolvedVersion,
     _is_semver,
@@ -119,7 +119,7 @@ class TestListVersions(unittest.TestCase):
             install_strategy="git_checkout_go_build",
         )
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_includes_workspace_for_skills_in_repo(
         self, mock_run_git: MagicMock
     ) -> None:
@@ -140,7 +140,7 @@ class TestListVersions(unittest.TestCase):
 
         self.assertIn("workspace", versions)
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_excludes_workspace_for_neurox(self, mock_run_git: MagicMock) -> None:
         """Workspace should not be included for neurox package."""
         # Note: neurox package skips workspace detection entirely
@@ -152,7 +152,7 @@ class TestListVersions(unittest.TestCase):
 
         self.assertNotIn("workspace", versions)
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_returns_sorted_tags(self, mock_run_git: MagicMock) -> None:
         """Tags should be sorted newest first."""
         mock_run_git.side_effect = [
@@ -165,7 +165,7 @@ class TestListVersions(unittest.TestCase):
         self.assertEqual(versions[0], "v2.0.0")
         self.assertEqual(versions[1], "v1.0.0")
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_skips_annotated_tag_peel_refs(self, mock_run_git: MagicMock) -> None:
         """Annotated tag peel refs (^{}) should be skipped."""
         mock_run_git.side_effect = [
@@ -178,7 +178,7 @@ class TestListVersions(unittest.TestCase):
         self.assertEqual(len(versions), 1)
         self.assertEqual(versions[0], "v1.0.0")
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_raises_resolution_error_on_git_failure(
         self, mock_run_git: MagicMock
     ) -> None:
@@ -208,9 +208,9 @@ class TestResolveVersion(unittest.TestCase):
             install_strategy="git_checkout_setup_script",
         )
 
-    @patch("scripts.clasing_skill.resolver._is_inside_repo")
-    @patch("scripts.clasing_skill.resolver._get_repo_root")
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._is_inside_repo")
+    @patch("scripts.skilar.resolver._get_repo_root")
+    @patch("scripts.skilar.resolver._run_git")
     def test_resolves_workspace_for_skills(
         self,
         mock_run_git: MagicMock,
@@ -233,7 +233,7 @@ class TestResolveVersion(unittest.TestCase):
         self.assertEqual(resolved.commit, "abc123def456789012345678901234567890abcd")
         self.assertFalse(resolved.dirty)
 
-    @patch("scripts.clasing_skill.resolver._is_inside_repo")
+    @patch("scripts.skilar.resolver._is_inside_repo")
     def test_workspace_raises_outside_repo(self, mock_is_inside: MagicMock) -> None:
         """Workspace selector should fail when not in a repo."""
         mock_is_inside.return_value = False
@@ -261,8 +261,8 @@ class TestResolveVersion(unittest.TestCase):
 
         self.assertIn("only valid for the 'skills' package", str(ctx.exception))
 
-    @patch("scripts.clasing_skill.resolver._run_git")
-    @patch("scripts.clasing_skill.resolver.list_versions")
+    @patch("scripts.skilar.resolver._run_git")
+    @patch("scripts.skilar.resolver.list_versions")
     def test_resolves_latest_to_newest_tag(
         self, mock_list_versions: MagicMock, mock_run_git: MagicMock
     ) -> None:
@@ -280,7 +280,7 @@ class TestResolveVersion(unittest.TestCase):
         self.assertEqual(resolved.commit, "abc123")
         self.assertEqual(resolved.resolved_ref, "refs/tags/v2.0.0")
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_resolves_explicit_tag(self, mock_run_git: MagicMock) -> None:
         """Explicit tag selector should resolve to that tag."""
         # resolve_version for explicit tag:
@@ -294,7 +294,7 @@ class TestResolveVersion(unittest.TestCase):
         self.assertEqual(resolved.resolved_version, "v1.2.3")
         self.assertEqual(resolved.commit, "abc123")
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_resolves_branch_name(self, mock_run_git: MagicMock) -> None:
         """Branch name selector should resolve to branch head."""
         # resolve_version for branch:
@@ -311,7 +311,7 @@ class TestResolveVersion(unittest.TestCase):
         self.assertEqual(resolved.commit, "def456")
         self.assertEqual(resolved.resolved_ref, "refs/heads/main")
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_raises_on_unknown_selector(self, mock_run_git: MagicMock) -> None:
         """Unknown selector should raise ResolutionError."""
         # resolve_version for unknown:
@@ -329,7 +329,7 @@ class TestResolveVersion(unittest.TestCase):
 
         self.assertIn("Could not resolve", str(ctx.exception))
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_contains_exact_commit_sha(self, mock_run_git: MagicMock) -> None:
         """Lock entries must contain exact commit SHAs."""
         # resolve_version for explicit tag:
@@ -370,7 +370,7 @@ class TestCheckoutPackage(unittest.TestCase):
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_returns_existing_for_workspace(self, mock_run_git: MagicMock) -> None:
         """Workspace mode should return current repo root."""
         resolved = ResolvedVersion(
@@ -386,7 +386,7 @@ class TestCheckoutPackage(unittest.TestCase):
 
         self.assertEqual(str(checkout_path), "/current/repo")
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_clones_to_temp_directory(self, mock_run_git: MagicMock) -> None:
         """Should clone package to temp directory."""
         resolved = ResolvedVersion(
@@ -404,7 +404,7 @@ class TestCheckoutPackage(unittest.TestCase):
         self.assertIn("skills-abc12345", str(checkout_path))
         mock_run_git.assert_called()
 
-    @patch("scripts.clasing_skill.resolver._run_git")
+    @patch("scripts.skilar.resolver._run_git")
     def test_returns_existing_if_already_cloned(self, mock_run_git: MagicMock) -> None:
         """Should return existing checkout if already present."""
         resolved = ResolvedVersion(
