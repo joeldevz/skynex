@@ -77,6 +77,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	// profile set default
+	if args.ProfileDefault != "" {
+		handleProfileSetDefault(args.ProfileDefault)
+		os.Exit(0)
+	}
+
 	// up
 	if args.RunUp {
 		handleUp(args.UpProfile, args.UpWeb, args.UpPort)
@@ -187,6 +193,7 @@ type cliArgs struct {
 	ProfileCreate  bool
 	ProfileEdit    string
 	ProfileDelete  string
+	ProfileDefault string
 	UpProfile      string
 	UpWeb          bool
 	UpPort         int
@@ -236,6 +243,8 @@ func parseArgs() *cliArgs {
 						args.ProfileEdit = profileName
 					case "delete":
 						args.ProfileDelete = profileName
+					case "default":
+						args.ProfileDefault = profileName
 					default:
 						// unknown verb — treat as profile help
 						args.ProfileHelp = true
@@ -386,11 +395,21 @@ func resolveNonInteractive(args *cliArgs, cat *models.Catalog, cfg map[string]in
 }
 
 func handleProfileList() {
-	// Show builtin tiers first, then saved profiles
+	defaultName := profiles.GetDefault()
+
 	fmt.Println("\n  Built-in tiers:")
-	fmt.Printf("  %-16s %s\n", "cheap", "Haiku everywhere — fast & cheap")
-	fmt.Printf("  %-16s %s\n", "balanced", "Sonnet for planning, Haiku for execution (default)")
-	fmt.Printf("  %-16s %s\n", "premium", "Opus for planning, Sonnet for execution")
+	tiers := []struct{ name, desc string }{
+		{"cheap", "Haiku everywhere — fast & cheap"},
+		{"balanced", "Sonnet for planning, Haiku for execution"},
+		{"premium", "Opus for planning, Sonnet for execution"},
+	}
+	for _, t := range tiers {
+		marker := ""
+		if t.name == defaultName {
+			marker = " ★"
+		}
+		fmt.Printf("  %-16s %s%s\n", t.name, t.desc, marker)
+	}
 	fmt.Println()
 
 	saved, err := profiles.List()
@@ -402,10 +421,15 @@ func handleProfileList() {
 
 	fmt.Println("  Custom profiles:")
 	for _, p := range saved {
-		fmt.Printf("  %-16s %d agents configured\n", p.Name, len(p.Models))
+		marker := ""
+		if p.Name == defaultName {
+			marker = " ★"
+		}
+		fmt.Printf("  %-16s %d agents configured%s\n", p.Name, len(p.Models), marker)
 	}
 	fmt.Println()
-	fmt.Println("  Usage: skilar up <profile>")
+	fmt.Printf("  Default: %s\n", defaultName)
+	fmt.Println("  Usage: skilar up")
 }
 
 func handleProfileCreate(initialName string) {
@@ -463,9 +487,18 @@ func handleProfileDelete(name string) {
 	fmt.Printf("  ✓ Profile %q deleted.\n", name)
 }
 
+func handleProfileSetDefault(name string) {
+	if err := profiles.SetDefault(name); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("  ✓ %q is now the default profile.\n", name)
+	fmt.Printf("  Run skilar up to launch with this profile.\n")
+}
+
 func handleUp(profileName string, web bool, port int) {
 	if profileName == "" {
-		profileName = "balanced" // default tier
+		profileName = profiles.GetDefault()
 	}
 
 	fmt.Printf("\n  Launching OpenCode")
@@ -502,6 +535,7 @@ Commands:
   profile create          Create a new profile (TUI)
   profile <name> edit     Edit an existing profile
   profile <name> delete   Delete a custom profile
+  profile <name> default  Set default profile for skilar up
   up [profile]            Launch OpenCode with a profile
                           Builtin: cheap, balanced, premium
                           Custom: any profile you created
@@ -542,10 +576,12 @@ Commands:
   create                  Create a new profile (TUI)
   <name> edit             Edit an existing profile
   <name> delete           Delete a custom profile
+  <name> default          Set a profile as the default for skilar up
 
 Examples:
   skilar profile list
   skilar profile create
   skilar profile backend edit
-  skilar profile backend delete`)
+  skilar profile backend delete
+  skilar profile backend default`)
 }

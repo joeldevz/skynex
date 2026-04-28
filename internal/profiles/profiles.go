@@ -230,6 +230,48 @@ func ValidateName(name string) error {
 	return nil
 }
 
+// DefaultProfilePath returns the path to the default profile file.
+func DefaultProfilePath() string {
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".config", "skilar", "default-profile")
+}
+
+// SetDefault sets the default profile name. Validates that the profile exists
+// (either as a builtin tier or a saved custom profile).
+func SetDefault(name string) error {
+	// Check builtin tiers first
+	if _, ok := BuiltinTiers[name]; !ok {
+		// Check custom profiles
+		if !Exists(name) {
+			return fmt.Errorf("profile %q not found (not a builtin tier or custom profile)", name)
+		}
+	}
+
+	path := DefaultProfilePath()
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	if err := os.WriteFile(path, []byte(name), 0o644); err != nil {
+		return fmt.Errorf("failed to save default profile: %w", err)
+	}
+	return nil
+}
+
+// GetDefault returns the default profile name, or "balanced" if none is set.
+func GetDefault() string {
+	data, err := os.ReadFile(DefaultProfilePath())
+	if err != nil {
+		return "balanced"
+	}
+	name := strings.TrimSpace(string(data))
+	if name == "" {
+		return "balanced"
+	}
+	return name
+}
+
 // ToEnvContent converts a profile to the JSON string for OPENCODE_CONFIG_CONTENT.
 // Only includes agents that have a model assigned (non-empty).
 func ToEnvContent(p *Profile) (string, error) {
