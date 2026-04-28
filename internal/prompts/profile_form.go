@@ -2,8 +2,8 @@ package prompts
 
 import (
 	"fmt"
-	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -11,14 +11,18 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// ---------------------------------------------------------------------------
+// Styles (shared across this file; titleStyle, dimStyle, etc. live in prompts.go)
+// ---------------------------------------------------------------------------
+
 var (
 	errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("196"))
-	warnStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("214")) // orange for (not set)
-	checkStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("82"))  // green for set models
+	warnStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
+	checkStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("82"))
 	keyStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("243")).Bold(true)
 )
 
-// shortModel strips provider prefix: "anthropic/claude-haiku-4-5" → "claude-haiku-4-5"
+// shortModel strips the provider prefix: "anthropic/claude-haiku-4-5" → "claude-haiku-4-5"
 func shortModel(id string) string {
 	parts := strings.SplitN(id, "/", 2)
 	if len(parts) == 2 {
@@ -27,9 +31,10 @@ func shortModel(id string) string {
 	return id
 }
 
-// helpBar renders a consistent help bar at the bottom
+// helpBar renders a consistent help bar at the bottom.
+// Keys are passed as alternating key/description pairs.
 func helpBar(keys ...string) string {
-	parts := make([]string, 0, len(keys))
+	parts := make([]string, 0, len(keys)/2)
 	for i := 0; i < len(keys)-1; i += 2 {
 		k := keyStyle.Render(keys[i])
 		v := dimStyle.Render(keys[i+1])
@@ -38,204 +43,20 @@ func helpBar(keys ...string) string {
 	return "\n" + strings.Join(parts, dimStyle.Render("   "))
 }
 
-// --- Profile Name Form ---
+// ---------------------------------------------------------------------------
+// Domain types preserved from the old implementation
+// ---------------------------------------------------------------------------
 
-type profileNameForm struct {
-	textInput textinput.Model
-	err       string
-	cancelled bool
-}
-
-func newProfileNameForm(initial string) profileNameForm {
-	ti := textinput.New()
-	ti.Placeholder = "e.g. backend, front-v2"
-	ti.SetValue(initial)
-	ti.Focus()
-	ti.CharLimit = 32
-	ti.Width = 30
-	return profileNameForm{textInput: ti}
-}
-
-func (m profileNameForm) Init() tea.Cmd { return textinput.Blink }
-
-func (m profileNameForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter":
-			name := strings.TrimSpace(m.textInput.Value())
-			if err := validateProfileName(name); err != nil {
-				m.err = err.Error()
-				return m, nil
-			}
-			return m, tea.Quit
-		case "esc", "ctrl+c":
-			m.cancelled = true
-			return m, tea.Quit
-		}
-	}
-	var cmd tea.Cmd
-	m.textInput, cmd = m.textInput.Update(msg)
-	// Live validation
-	name := strings.TrimSpace(m.textInput.Value())
-	if name != "" {
-		if err := validateProfileName(name); err != nil {
-			m.err = err.Error()
-		} else {
-			m.err = ""
-		}
-	} else {
-		m.err = ""
-	}
-	return m, cmd
-}
-
-func (m profileNameForm) View() string {
-	s := "\n"
-	s += titleStyle.Render("  New Profile") + "\n"
-	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
-	s += fmt.Sprintf("  Profile name: %s\n\n", m.textInput.View())
-	if m.err != "" {
-		s += "  " + errorStyle.Render("✗ "+m.err) + "\n"
-	} else {
-		s += "  " + dimStyle.Render("lowercase letters and hyphens only") + "\n"
-	}
-	s += helpBar("enter", "confirm", "esc", "cancel")
-	return s
-}
-
-func validateProfileName(name string) error {
-	name = strings.TrimSpace(name)
-	if name == "" {
-		return fmt.Errorf("name cannot be empty")
-	}
-	if len(name) > 32 {
-		return fmt.Errorf("max 32 characters")
-	}
-	if name == "default" {
-		return fmt.Errorf("\"default\" is reserved")
-	}
-	if !regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`).MatchString(name) {
-		return fmt.Errorf("use lowercase letters, numbers and hyphens (e.g. backend, front-v2)")
-	}
-	return nil
-}
-
-func RunProfileNameForm(initial string) (string, error) {
-	m := newProfileNameForm(initial)
-	p := tea.NewProgram(m, tea.WithAltScreen())
-	final, err := p.Run()
-	if err != nil {
-		return "", err
-	}
-	result := final.(profileNameForm)
-	if result.cancelled {
-		return "", fmt.Errorf("cancelled")
-	}
-	name := strings.TrimSpace(result.textInput.Value())
-	if name == "" {
-		return "", fmt.Errorf("cancelled")
-	}
-	return name, nil
-}
-
-// --- Mode Selector ---
-
+// ConfigMode distinguishes simple vs advanced model assignment.
 type ConfigMode int
 
 const (
-	ModeSimple ConfigMode = iota
-	ModeAdvanced
+	ModeSimple   ConfigMode = iota
+	ModeAdvanced ConfigMode = iota
 )
 
-type modeSelector struct {
-	cursor    int
-	cancelled bool
-}
-
-func (m modeSelector) Init() tea.Cmd { return nil }
-
-func (m modeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-		case "down", "j":
-			if m.cursor < 1 {
-				m.cursor++
-			}
-		case "enter":
-			return m, tea.Quit
-		case "esc", "ctrl+c":
-			m.cancelled = true
-			return m, tea.Quit
-		}
-	}
-	return m, nil
-}
-
-func (m modeSelector) View() string {
-	s := "\n"
-	s += titleStyle.Render("  Configure Models") + "\n"
-	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
-
-	options := []struct {
-		label string
-		desc  string
-		hint  string
-	}{
-		{
-			"Simple",
-			"Set one model per role",
-			"Orchestrator · Workers · Advisor",
-		},
-		{
-			"Advanced",
-			"Set model per agent individually",
-			"10 agents: orchestrator, coder, tech-planner...",
-		},
-	}
-
-	for i, opt := range options {
-		indicator := "  ○"
-		labelStyle := dimStyle
-		if i == m.cursor {
-			indicator = "  ●"
-			labelStyle = activeStyle
-		}
-		s += labelStyle.Render(fmt.Sprintf("%s  %s", indicator, opt.label)) + "\n"
-		s += dimStyle.Render(fmt.Sprintf("     %s", opt.desc)) + "\n"
-		s += dimStyle.Render(fmt.Sprintf("     %s", opt.hint)) + "\n\n"
-	}
-
-	s += helpBar("↑↓", "navigate", "enter", "select", "esc", "cancel")
-	return s
-}
-
-func RunModeSelector() (ConfigMode, error) {
-	m := modeSelector{}
-	p := tea.NewProgram(m, tea.WithAltScreen())
-	final, err := p.Run()
-	if err != nil {
-		return ModeSimple, err
-	}
-	result := final.(modeSelector)
-	if result.cancelled {
-		return ModeSimple, fmt.Errorf("cancelled")
-	}
-	if result.cursor == 1 {
-		return ModeAdvanced, nil
-	}
-	return ModeSimple, nil
-}
-
-// --- Simple Model Picker ---
-
 type simpleGroup struct {
-	key    string   // display name
+	key    string   // display name / map key
 	desc   string   // what agents it affects
 	agents []string // agent names in this group
 }
@@ -257,124 +78,6 @@ var simpleGroups = []simpleGroup{
 		agents: []string{"advisor"},
 	},
 }
-
-type simpleModelPicker struct {
-	groups    []simpleGroup
-	models    map[string]string // groupKey -> modelID
-	cursor    int
-	allModels map[string][]string
-	cancelled bool
-}
-
-func newSimpleModelPicker(initial map[string]string) simpleModelPicker {
-	allModels, _ := LoadOpencodeModels()
-	if initial == nil {
-		initial = make(map[string]string)
-	}
-	return simpleModelPicker{
-		groups:    simpleGroups,
-		models:    initial,
-		allModels: allModels,
-	}
-}
-
-func (m simpleModelPicker) Init() tea.Cmd { return nil }
-
-func (m simpleModelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-		case "down", "j":
-			if m.cursor < len(m.groups)-1 {
-				m.cursor++
-			}
-		case "enter":
-			// Open model picker for selected group
-			g := m.groups[m.cursor]
-			modelID, err := RunModelPicker(g.key, m.allModels)
-			if err == nil && modelID != "" {
-				m.models[g.key] = modelID
-			}
-			return m, nil
-		case "s":
-			// Set all groups to same model
-			modelID, err := RunModelPicker("all groups", m.allModels)
-			if err == nil && modelID != "" {
-				for _, g := range m.groups {
-					m.models[g.key] = modelID
-				}
-			}
-			return m, nil
-		case "c":
-			// Confirm/save
-			return m, tea.Quit
-		case "esc", "ctrl+c":
-			m.cancelled = true
-			return m, tea.Quit
-		}
-	}
-	return m, nil
-}
-
-func (m simpleModelPicker) View() string {
-	// Count configured groups
-	configured := 0
-	for _, g := range m.groups {
-		if m.models[g.key] != "" {
-			configured++
-		}
-	}
-	total := len(m.groups)
-
-	s := "\n"
-	s += titleStyle.Render("  Model Setup — Simple") + "\n"
-	if configured == total {
-		s += checkStyle.Render(fmt.Sprintf("  ✓ All %d roles configured — press c to save", total)) + "\n"
-	} else {
-		s += warnStyle.Render(fmt.Sprintf("  %d/%d roles configured", configured, total)) + "\n"
-	}
-	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
-
-	for i, g := range m.groups {
-		isSelected := i == m.cursor
-		modelID := m.models[g.key]
-
-		// Group label
-		cursor := "  "
-		labelStyle := dimStyle
-		if isSelected {
-			cursor = "▶ "
-			labelStyle = activeStyle
-		}
-		s += labelStyle.Render(fmt.Sprintf("%s%s", cursor, g.key)) + "\n"
-
-		// Description
-		s += dimStyle.Render(fmt.Sprintf("     %s", g.desc)) + "\n"
-		s += dimStyle.Render(fmt.Sprintf("     Agents: %s", strings.Join(g.agents, ", "))) + "\n"
-
-		// Current model
-		if modelID == "" {
-			s += "     " + warnStyle.Render("⚠  not set — press enter to pick a model") + "\n"
-		} else {
-			s += "     " + checkStyle.Render("✓  "+shortModel(modelID)) + "  " + dimStyle.Render("("+modelID+")") + "\n"
-		}
-		s += "\n"
-	}
-
-	s += helpBar(
-		"enter", "pick model for selected role",
-		"s", "set all to same model",
-		"c", "save profile",
-		"esc", "cancel",
-	)
-	return s
-}
-
-// --- Advanced Model Picker ---
 
 type agentConfig struct {
 	name  string
@@ -400,54 +103,241 @@ var agentList = []string{
 	"test-reviewer", "security", "skill-validator", "advisor",
 }
 
-type advancedModelPicker struct {
+// ---------------------------------------------------------------------------
+// Wizard state enum
+// ---------------------------------------------------------------------------
+
+type wizardState int
+
+const (
+	stateNameInput        wizardState = iota
+	stateModeSelect                   // choose Simple or Advanced
+	stateSimpleModelPick              // list of groups, press enter to pick model
+	stateAdvancedModelPick            // list of agents, press enter to pick model
+	stateProviderSelect               // sub-state: choose provider
+	stateModelSelect                  // sub-state: choose model within provider
+	stateSummary                      // review and confirm
+)
+
+// ---------------------------------------------------------------------------
+// profileWizard — the single tea.Model that drives the whole flow
+// ---------------------------------------------------------------------------
+
+type profileWizard struct {
+	state     wizardState
+	prevState wizardState // where to return after provider/model selection
+
+	// --- name input ---
+	textInput textinput.Model
+	nameErr   string
+
+	// --- mode select ---
+	modeCursor int
+	mode       ConfigMode
+
+	// --- simple model picker ---
+	simpleModels map[string]string // groupKey -> modelID
+	simpleCursor int
+
+	// --- advanced model picker ---
 	agents    []agentConfig
-	cursor    int
-	allModels map[string][]string
+	advCursor int
+
+	// --- provider/model sub-picker ---
+	pickerContext    string // what we're picking for ("Orchestrator", "coder", etc.)
+	providers        []string
+	provCursor       int
+	provOffset       int
+	allModels        map[string][]string
+	models           []string // models for the selected provider
+	modelCursor      int
+	modelOffset      int
+	selectedProvider string
+
+	// --- summary ---
+	confirmed bool
 	cancelled bool
+
+	// --- terminal size ---
+	width  int
+	height int
 }
 
-func newAdvancedModelPicker(initial map[string]string) advancedModelPicker {
+func newProfileWizard(initialModels map[string]string) profileWizard {
+	ti := textinput.New()
+	ti.Placeholder = "e.g. backend, front-v2"
+	ti.Focus()
+	ti.CharLimit = 32
+	ti.Width = 30
+
 	allModels, _ := LoadOpencodeModels()
+
+	// Build agents list from initialModels.
 	agents := make([]agentConfig, len(agentList))
 	for i, name := range agentList {
-		agents[i] = agentConfig{name: name, model: initial[name]}
+		var model string
+		if initialModels != nil {
+			model = initialModels[name]
+		}
+		agents[i] = agentConfig{name: name, model: model}
 	}
-	return advancedModelPicker{agents: agents, allModels: allModels}
+
+	simpleModels := make(map[string]string)
+	if initialModels != nil {
+		// Pre-fill simple groups from initial models using the first agent of each group.
+		for _, g := range simpleGroups {
+			if len(g.agents) > 0 {
+				if m, ok := initialModels[g.agents[0]]; ok {
+					simpleModels[g.key] = m
+				}
+			}
+		}
+	}
+
+	return profileWizard{
+		state:        stateNameInput,
+		textInput:    ti,
+		allModels:    allModels,
+		agents:       agents,
+		simpleModels: simpleModels,
+	}
 }
 
-func (m advancedModelPicker) Init() tea.Cmd { return nil }
+// ---------------------------------------------------------------------------
+// tea.Model interface
+// ---------------------------------------------------------------------------
 
-func (m advancedModelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m profileWizard) Init() tea.Cmd {
+	return tea.Batch(textinput.Blink, tea.WindowSize())
+}
+
+func (m profileWizard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Always handle terminal resize.
+	if wm, ok := msg.(tea.WindowSizeMsg); ok {
+		m.width = wm.Width
+		m.height = wm.Height
+		return m, nil
+	}
+
+	switch m.state {
+	case stateNameInput:
+		return m.updateNameInput(msg)
+	case stateModeSelect:
+		return m.updateModeSelect(msg)
+	case stateSimpleModelPick:
+		return m.updateSimplePick(msg)
+	case stateAdvancedModelPick:
+		return m.updateAdvancedPick(msg)
+	case stateProviderSelect:
+		return m.updateProviderSelect(msg)
+	case stateModelSelect:
+		return m.updateModelSelect(msg)
+	case stateSummary:
+		return m.updateSummary(msg)
+	}
+	return m, nil
+}
+
+func (m profileWizard) View() string {
+	switch m.state {
+	case stateNameInput:
+		return m.viewNameInput()
+	case stateModeSelect:
+		return m.viewModeSelect()
+	case stateSimpleModelPick:
+		return m.viewSimplePick()
+	case stateAdvancedModelPick:
+		return m.viewAdvancedPick()
+	case stateProviderSelect:
+		return m.viewProviderSelect()
+	case stateModelSelect:
+		return m.viewModelSelect()
+	case stateSummary:
+		return m.viewSummary()
+	}
+	return ""
+}
+
+// ---------------------------------------------------------------------------
+// State: stateNameInput
+// ---------------------------------------------------------------------------
+
+func (m profileWizard) updateNameInput(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			name := strings.TrimSpace(m.textInput.Value())
+			if err := validateProfileName(name); err != nil {
+				m.nameErr = err.Error()
+				return m, nil
+			}
+			m.state = stateModeSelect
+			return m, nil
+		case "esc", "ctrl+c":
+			m.cancelled = true
+			return m, tea.Quit
+		}
+	}
+	var cmd tea.Cmd
+	m.textInput, cmd = m.textInput.Update(msg)
+	// Live validation.
+	name := strings.TrimSpace(m.textInput.Value())
+	if name != "" {
+		if err := validateProfileName(name); err != nil {
+			m.nameErr = err.Error()
+		} else {
+			m.nameErr = ""
+		}
+	} else {
+		m.nameErr = ""
+	}
+	return m, cmd
+}
+
+func (m profileWizard) viewNameInput() string {
+	s := "\n"
+	s += titleStyle.Render("  New Profile") + "\n"
+	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
+	s += fmt.Sprintf("  Profile name: %s\n\n", m.textInput.View())
+	if m.nameErr != "" {
+		s += "  " + errorStyle.Render("✗ "+m.nameErr) + "\n"
+	} else {
+		s += "  " + dimStyle.Render("lowercase letters, numbers and hyphens only") + "\n"
+	}
+	s += helpBar("enter", "next", "esc", "cancel")
+	return s
+}
+
+// ---------------------------------------------------------------------------
+// State: stateModeSelect
+// ---------------------------------------------------------------------------
+
+func (m profileWizard) updateModeSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
+			if m.modeCursor > 0 {
+				m.modeCursor--
 			}
 		case "down", "j":
-			if m.cursor < len(m.agents)-1 {
-				m.cursor++
+			if m.modeCursor < 1 {
+				m.modeCursor++
 			}
 		case "enter":
-			agent := m.agents[m.cursor]
-			modelID, err := RunModelPicker(agent.name, m.allModels)
-			if err == nil && modelID != "" {
-				m.agents[m.cursor].model = modelID
+			if m.modeCursor == 1 {
+				m.mode = ModeAdvanced
+				m.state = stateAdvancedModelPick
+			} else {
+				m.mode = ModeSimple
+				m.state = stateSimpleModelPick
 			}
 			return m, nil
-		case "s":
-			modelID, err := RunModelPicker("all agents", m.allModels)
-			if err == nil && modelID != "" {
-				for i := range m.agents {
-					m.agents[i].model = modelID
-				}
-			}
+		case "esc":
+			m.state = stateNameInput
 			return m, nil
-		case "c":
-			return m, tea.Quit
-		case "esc", "ctrl+c":
+		case "ctrl+c":
 			m.cancelled = true
 			return m, tea.Quit
 		}
@@ -455,7 +345,169 @@ func (m advancedModelPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m advancedModelPicker) View() string {
+func (m profileWizard) viewModeSelect() string {
+	s := "\n"
+	s += titleStyle.Render("  Configure Models") + "\n"
+	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
+
+	options := []struct {
+		label string
+		desc  string
+		hint  string
+	}{
+		{"Simple", "Set one model per role", "Orchestrator · Workers · Advisor"},
+		{"Advanced", "Set model per agent individually", "10 agents: orchestrator, coder, tech-planner..."},
+	}
+
+	for i, opt := range options {
+		indicator := "  ○"
+		labelStyle := dimStyle
+		if i == m.modeCursor {
+			indicator = "  ●"
+			labelStyle = activeStyle
+		}
+		s += labelStyle.Render(fmt.Sprintf("%s  %s", indicator, opt.label)) + "\n"
+		s += dimStyle.Render(fmt.Sprintf("     %s", opt.desc)) + "\n"
+		s += dimStyle.Render(fmt.Sprintf("     %s", opt.hint)) + "\n\n"
+	}
+
+	s += helpBar("↑↓", "navigate", "enter", "select", "esc", "back")
+	return s
+}
+
+// ---------------------------------------------------------------------------
+// State: stateSimpleModelPick
+// ---------------------------------------------------------------------------
+
+func (m profileWizard) updateSimplePick(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "up", "k":
+			if m.simpleCursor > 0 {
+				m.simpleCursor--
+			}
+		case "down", "j":
+			if m.simpleCursor < len(simpleGroups)-1 {
+				m.simpleCursor++
+			}
+		case "enter":
+			g := simpleGroups[m.simpleCursor]
+			m.pickerContext = g.key
+			m.prevState = stateSimpleModelPick
+			m = m.initProviderSelect()
+			return m, nil
+		case "s":
+			// Set all groups to the same model.
+			m.pickerContext = "all groups"
+			m.prevState = stateSimpleModelPick
+			m = m.initProviderSelectForAll()
+			return m, nil
+		case "c":
+			m.state = stateSummary
+			return m, nil
+		case "esc":
+			m.state = stateModeSelect
+			return m, nil
+		case "ctrl+c":
+			m.cancelled = true
+			return m, tea.Quit
+		}
+	}
+	return m, nil
+}
+
+func (m profileWizard) viewSimplePick() string {
+	configured := 0
+	for _, g := range simpleGroups {
+		if m.simpleModels[g.key] != "" {
+			configured++
+		}
+	}
+	total := len(simpleGroups)
+
+	s := "\n"
+	s += titleStyle.Render("  Model Setup — Simple") + "\n"
+	if configured == total {
+		s += checkStyle.Render(fmt.Sprintf("  ✓ All %d roles configured — press c to save", total)) + "\n"
+	} else {
+		s += warnStyle.Render(fmt.Sprintf("  %d/%d roles configured", configured, total)) + "\n"
+	}
+	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
+
+	for i, g := range simpleGroups {
+		isSelected := i == m.simpleCursor
+		modelID := m.simpleModels[g.key]
+
+		cursor := "  "
+		labelStyle := dimStyle
+		if isSelected {
+			cursor = "▶ "
+			labelStyle = activeStyle
+		}
+		s += labelStyle.Render(fmt.Sprintf("%s%s", cursor, g.key)) + "\n"
+		s += dimStyle.Render(fmt.Sprintf("     %s", g.desc)) + "\n"
+		s += dimStyle.Render(fmt.Sprintf("     Agents: %s", strings.Join(g.agents, ", "))) + "\n"
+
+		if modelID == "" {
+			s += "     " + warnStyle.Render("⚠  not set — press enter to pick a model") + "\n"
+		} else {
+			s += "     " + checkStyle.Render("✓  "+shortModel(modelID)) + "  " + dimStyle.Render("("+modelID+")") + "\n"
+		}
+		s += "\n"
+	}
+
+	s += helpBar(
+		"enter", "pick model for selected role",
+		"s", "set all to same model",
+		"c", "save profile",
+		"esc", "back",
+	)
+	return s
+}
+
+// ---------------------------------------------------------------------------
+// State: stateAdvancedModelPick
+// ---------------------------------------------------------------------------
+
+func (m profileWizard) updateAdvancedPick(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "up", "k":
+			if m.advCursor > 0 {
+				m.advCursor--
+			}
+		case "down", "j":
+			if m.advCursor < len(m.agents)-1 {
+				m.advCursor++
+			}
+		case "enter":
+			agent := m.agents[m.advCursor]
+			m.pickerContext = agent.name
+			m.prevState = stateAdvancedModelPick
+			m = m.initProviderSelect()
+			return m, nil
+		case "s":
+			m.pickerContext = "all agents"
+			m.prevState = stateAdvancedModelPick
+			m = m.initProviderSelectForAll()
+			return m, nil
+		case "c":
+			m.state = stateSummary
+			return m, nil
+		case "esc":
+			m.state = stateModeSelect
+			return m, nil
+		case "ctrl+c":
+			m.cancelled = true
+			return m, tea.Quit
+		}
+	}
+	return m, nil
+}
+
+func (m profileWizard) viewAdvancedPick() string {
 	configured := 0
 	for _, a := range m.agents {
 		if a.model != "" {
@@ -474,20 +526,16 @@ func (m advancedModelPicker) View() string {
 	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
 
 	for i, ac := range m.agents {
-		isSelected := i == m.cursor
+		isSelected := i == m.advCursor
 		cursor := "  "
 		nameStyle := dimStyle
 		if isSelected {
 			cursor = "▶ "
 			nameStyle = activeStyle
 		}
-
-		// Agent name + description on one line
 		desc := agentDescriptions[ac.name]
 		s += nameStyle.Render(fmt.Sprintf("%s%-18s", cursor, ac.name))
 		s += dimStyle.Render(desc) + "\n"
-
-		// Model on next line, indented
 		if ac.model == "" {
 			s += "     " + warnStyle.Render("⚠  not set") + "\n"
 		} else {
@@ -499,31 +547,64 @@ func (m advancedModelPicker) View() string {
 		"enter", "pick model",
 		"s", "set all",
 		"c", "save",
-		"esc", "cancel",
+		"esc", "back",
 	)
 	return s
 }
 
-// --- Summary Screen ---
+// ---------------------------------------------------------------------------
+// State: stateProviderSelect
+// ---------------------------------------------------------------------------
 
-type summaryScreen struct {
-	name      string
-	models    map[string]string // agentName or groupKey -> modelID
-	mode      ConfigMode
-	confirmed bool
-	cancelled bool
+// initProviderSelect transitions to provider selection for the currently
+// set pickerContext (single group/agent).
+func (m profileWizard) initProviderSelect() profileWizard {
+	providers := make([]string, 0, len(m.allModels))
+	for p := range m.allModels {
+		providers = append(providers, p)
+	}
+	sort.Strings(providers)
+	m.providers = providers
+	m.provCursor = 0
+	m.provOffset = 0
+	m.state = stateProviderSelect
+	return m
 }
 
-func (m summaryScreen) Init() tea.Cmd { return nil }
+// initProviderSelectForAll is the same but signals "all" via pickerContext.
+func (m profileWizard) initProviderSelectForAll() profileWizard {
+	return m.initProviderSelect()
+}
 
-func (m summaryScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m profileWizard) updateProviderSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "enter", "y", "c":
-			m.confirmed = true
-			return m, tea.Quit
-		case "esc", "n", "q":
+		case "up", "k":
+			if m.provCursor > 0 {
+				m.provCursor--
+				if m.provCursor < m.provOffset {
+					m.provOffset = m.provCursor
+				}
+			}
+		case "down", "j":
+			if m.provCursor < len(m.providers)-1 {
+				m.provCursor++
+				if m.provCursor >= m.provOffset+maxVisible {
+					m.provOffset = m.provCursor - maxVisible + 1
+				}
+			}
+		case "enter":
+			m.selectedProvider = m.providers[m.provCursor]
+			m.models = m.allModels[m.selectedProvider]
+			m.modelCursor = 0
+			m.modelOffset = 0
+			m.state = stateModelSelect
+			return m, nil
+		case "esc", "q":
+			m.state = m.prevState
+			return m, nil
+		case "ctrl+c":
 			m.cancelled = true
 			return m, tea.Quit
 		}
@@ -531,16 +612,184 @@ func (m summaryScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m summaryScreen) View() string {
+func (m profileWizard) viewProviderSelect() string {
+	s := "\n"
+	s += titleStyle.Render("  Select Provider") + "\n"
+	s += groupStyle.Render("  for: "+m.pickerContext) + "\n"
+	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
+
+	start := m.provOffset
+	end := m.provOffset + maxVisible
+	if end > len(m.providers) {
+		end = len(m.providers)
+	}
+
+	if start > 0 {
+		s += dimStyle.Render(fmt.Sprintf("  ↑ %d more\n", start))
+	}
+
+	for i := start; i < end; i++ {
+		p := m.providers[i]
+		count := len(m.allModels[p])
+		cursor := "  "
+		style := dimStyle
+		if i == m.provCursor {
+			cursor = "▶ "
+			style = activeStyle
+		}
+		s += style.Render(fmt.Sprintf("%s%-20s %s", cursor, p, dimStyle.Render(fmt.Sprintf("(%d models)", count)))) + "\n"
+	}
+
+	if end < len(m.providers) {
+		s += dimStyle.Render(fmt.Sprintf("  ↓ %d more\n", len(m.providers)-end))
+	}
+
+	s += helpBar("↑↓", "navigate", "enter", "select", "esc", "back")
+	return s
+}
+
+// ---------------------------------------------------------------------------
+// State: stateModelSelect
+// ---------------------------------------------------------------------------
+
+func (m profileWizard) updateModelSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "up", "k":
+			if m.modelCursor > 0 {
+				m.modelCursor--
+				if m.modelCursor < m.modelOffset {
+					m.modelOffset = m.modelCursor
+				}
+			}
+		case "down", "j":
+			if m.modelCursor < len(m.models)-1 {
+				m.modelCursor++
+				if m.modelCursor >= m.modelOffset+maxVisible {
+					m.modelOffset = m.modelCursor - maxVisible + 1
+				}
+			}
+		case "enter":
+			chosen := m.models[m.modelCursor]
+			m = m.applyModelSelection(chosen)
+			m.state = m.prevState
+			return m, nil
+		case "esc", "q":
+			// Back to provider select.
+			m.state = stateProviderSelect
+			return m, nil
+		case "ctrl+c":
+			m.cancelled = true
+			return m, tea.Quit
+		}
+	}
+	return m, nil
+}
+
+// applyModelSelection writes the chosen model ID back to the appropriate slot(s).
+func (m profileWizard) applyModelSelection(modelID string) profileWizard {
+	ctx := m.pickerContext
+	if m.prevState == stateSimpleModelPick {
+		if ctx == "all groups" {
+			for _, g := range simpleGroups {
+				m.simpleModels[g.key] = modelID
+			}
+		} else {
+			m.simpleModels[ctx] = modelID
+		}
+	} else { // stateAdvancedModelPick
+		if ctx == "all agents" {
+			for i := range m.agents {
+				m.agents[i].model = modelID
+			}
+		} else {
+			for i, a := range m.agents {
+				if a.name == ctx {
+					m.agents[i].model = modelID
+					break
+				}
+			}
+		}
+	}
+	return m
+}
+
+func (m profileWizard) viewModelSelect() string {
+	s := "\n"
+	s += titleStyle.Render("  Select Model") + "\n"
+	s += groupStyle.Render("  for: "+m.pickerContext) + "  " + dimStyle.Render("provider: "+m.selectedProvider) + "\n"
+	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
+
+	start := m.modelOffset
+	end := m.modelOffset + maxVisible
+	if end > len(m.models) {
+		end = len(m.models)
+	}
+
+	if start > 0 {
+		s += dimStyle.Render(fmt.Sprintf("  ↑ %d more\n", start))
+	}
+
+	for i := start; i < end; i++ {
+		model := m.models[i]
+		cursor := "  "
+		style := dimStyle
+		if i == m.modelCursor {
+			cursor = "▶ "
+			style = activeStyle
+		}
+		s += style.Render(fmt.Sprintf("%s%s", cursor, shortModel(model))) + "\n"
+	}
+
+	if end < len(m.models) {
+		s += dimStyle.Render(fmt.Sprintf("  ↓ %d more\n", len(m.models)-end))
+	}
+
+	s += helpBar("↑↓", "navigate", "enter", "select", "esc", "back to providers")
+	return s
+}
+
+// ---------------------------------------------------------------------------
+// State: stateSummary
+// ---------------------------------------------------------------------------
+
+func (m profileWizard) updateSummary(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter", "y", "c":
+			m.confirmed = true
+			return m, tea.Quit
+		case "esc", "n", "q":
+			// Back to the model picker that was active.
+			if m.mode == ModeSimple {
+				m.state = stateSimpleModelPick
+			} else {
+				m.state = stateAdvancedModelPick
+			}
+			return m, nil
+		case "ctrl+c":
+			m.cancelled = true
+			return m, tea.Quit
+		}
+	}
+	return m, nil
+}
+
+func (m profileWizard) viewSummary() string {
+	name := strings.TrimSpace(m.textInput.Value())
+	modeLabel := map[ConfigMode]string{ModeSimple: "Simple", ModeAdvanced: "Advanced"}[m.mode]
+
 	s := "\n"
 	s += titleStyle.Render("  Profile Summary") + "\n"
 	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
-	s += fmt.Sprintf("  Name:  %s\n", activeStyle.Render(m.name))
-	s += fmt.Sprintf("  Mode:  %s\n\n", dimStyle.Render(map[ConfigMode]string{ModeSimple: "Simple", ModeAdvanced: "Advanced"}[m.mode]))
+	s += fmt.Sprintf("  Name:  %s\n", activeStyle.Render(name))
+	s += fmt.Sprintf("  Mode:  %s\n\n", dimStyle.Render(modeLabel))
 
 	if m.mode == ModeSimple {
 		for _, g := range simpleGroups {
-			modelID := m.models[g.key]
+			modelID := m.simpleModels[g.key]
 			if modelID == "" {
 				s += fmt.Sprintf("  %-14s %s\n", g.key, warnStyle.Render("not set"))
 			} else {
@@ -549,12 +798,11 @@ func (m summaryScreen) View() string {
 			}
 		}
 	} else {
-		for _, name := range agentList {
-			modelID := m.models[name]
-			if modelID == "" {
-				s += fmt.Sprintf("  %-18s %s\n", name, warnStyle.Render("not set"))
+		for _, a := range m.agents {
+			if a.model == "" {
+				s += fmt.Sprintf("  %-18s %s\n", a.name, warnStyle.Render("not set"))
 			} else {
-				s += fmt.Sprintf("  %-18s %s\n", name, checkStyle.Render(shortModel(modelID)))
+				s += fmt.Sprintf("  %-18s %s\n", a.name, checkStyle.Render(shortModel(a.model)))
 			}
 		}
 	}
@@ -564,41 +812,30 @@ func (m summaryScreen) View() string {
 	return s
 }
 
-// --- Runners ---
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
 
-func RunSimpleModelPicker(initial map[string]string) (map[string]string, error) {
-	m := newSimpleModelPicker(initial)
-	p := tea.NewProgram(m, tea.WithAltScreen())
-	final, err := p.Run()
-	if err != nil {
-		return nil, err
+func validateProfileName(name string) error {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return fmt.Errorf("name cannot be empty")
 	}
-	result := final.(simpleModelPicker)
-	if result.cancelled {
-		return nil, fmt.Errorf("cancelled")
+	if len(name) > 32 {
+		return fmt.Errorf("max 32 characters")
 	}
-	return result.models, nil
+	if name == "default" {
+		return fmt.Errorf("\"default\" is reserved")
+	}
+	if !regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`).MatchString(name) {
+		return fmt.Errorf("use lowercase letters, numbers and hyphens (e.g. backend, front-v2)")
+	}
+	return nil
 }
 
-func RunAdvancedModelPicker(initial map[string]string) (map[string]string, error) {
-	m := newAdvancedModelPicker(initial)
-	p := tea.NewProgram(m, tea.WithAltScreen())
-	final, err := p.Run()
-	if err != nil {
-		return nil, err
-	}
-	result := final.(advancedModelPicker)
-	if result.cancelled {
-		return nil, fmt.Errorf("cancelled")
-	}
-	models := make(map[string]string)
-	for _, ac := range result.agents {
-		if ac.model != "" {
-			models[ac.name] = ac.model
-		}
-	}
-	return models, nil
-}
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
 // ProfileResult is the output of the creation flow.
 type ProfileResult struct {
@@ -606,80 +843,124 @@ type ProfileResult struct {
 	Models map[string]string
 }
 
-// RunProfileCreationFlow runs the complete flow:
-// name → mode → models → summary/confirm → ProfileResult
+// RunProfileCreationFlow runs the complete wizard as a single fullscreen program.
+// Returns *ProfileResult or an error if cancelled.
 func RunProfileCreationFlow(initialModels map[string]string) (*ProfileResult, error) {
-	// 1. Name
-	name, err := RunProfileNameForm("")
+	wizard := newProfileWizard(initialModels)
+	p := tea.NewProgram(wizard, tea.WithAltScreen())
+	final, err := p.Run()
 	if err != nil {
 		return nil, err
 	}
-
-	// 2. Mode
-	mode, err := RunModeSelector()
-	if err != nil {
-		return nil, err
-	}
-
-	// 3. Models
-	var models map[string]string
-	if mode == ModeSimple {
-		models, err = RunSimpleModelPicker(initialModels)
-	} else {
-		models, err = RunAdvancedModelPicker(initialModels)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	// 4. Summary + confirm
-	summary := summaryScreen{name: name, models: models, mode: mode}
-	prog := tea.NewProgram(summary, tea.WithAltScreen())
-	final, err := prog.Run()
-	if err != nil {
-		return nil, err
-	}
-	summaryResult := final.(summaryScreen)
-	if summaryResult.cancelled {
+	result := final.(profileWizard)
+	if result.cancelled || !result.confirmed {
 		return nil, fmt.Errorf("cancelled")
+	}
+
+	name := strings.TrimSpace(result.textInput.Value())
+	models := make(map[string]string)
+
+	if result.mode == ModeSimple {
+		// Expand group models to individual agent keys.
+		for _, g := range simpleGroups {
+			modelID := result.simpleModels[g.key]
+			if modelID != "" {
+				for _, agentName := range g.agents {
+					models[agentName] = modelID
+				}
+			}
+		}
+	} else {
+		for _, a := range result.agents {
+			if a.model != "" {
+				models[a.name] = a.model
+			}
+		}
 	}
 
 	return &ProfileResult{Name: name, Models: models}, nil
 }
 
-// LoadOpencodeModels executes "opencode models" and returns map[provider][]fullModelID.
-func LoadOpencodeModels() (map[string][]string, error) {
-	out, err := exec.Command("opencode", "models").Output()
+// RunProfileNameForm runs just the name-input screen as a standalone program.
+// Useful in contexts where only a name is needed (rename, etc.).
+func RunProfileNameForm(initial string) (string, error) {
+	ti := textinput.New()
+	ti.Placeholder = "e.g. backend, front-v2"
+	ti.SetValue(initial)
+	ti.Focus()
+	ti.CharLimit = 32
+	ti.Width = 30
+
+	m := profileNameForm{textInput: ti}
+	p := tea.NewProgram(m, tea.WithAltScreen())
+	final, err := p.Run()
 	if err != nil {
-		return defaultModels(), nil
+		return "", err
 	}
-	result := make(map[string][]string)
-	for _, line := range strings.Split(string(out), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-		parts := strings.SplitN(line, "/", 2)
-		if len(parts) == 2 {
-			result[parts[0]] = append(result[parts[0]], line)
-		}
+	result := final.(profileNameForm)
+	if result.cancelled {
+		return "", fmt.Errorf("cancelled")
 	}
-	if len(result) == 0 {
-		return defaultModels(), nil
+	name := strings.TrimSpace(result.textInput.Value())
+	if name == "" {
+		return "", fmt.Errorf("cancelled")
 	}
-	return result, nil
+	return name, nil
 }
 
-func defaultModels() map[string][]string {
-	return map[string][]string{
-		"anthropic": {
-			"anthropic/claude-opus-4-6",
-			"anthropic/claude-sonnet-4-6",
-			"anthropic/claude-haiku-4-5",
-		},
-		"openai": {"openai/gpt-4o", "openai/o3"},
-		"google": {
-			"google/gemini-2.5-pro",
-		},
+// ---------------------------------------------------------------------------
+// profileNameForm — tiny standalone form kept for RunProfileNameForm
+// ---------------------------------------------------------------------------
+
+type profileNameForm struct {
+	textInput textinput.Model
+	err       string
+	cancelled bool
+}
+
+func (m profileNameForm) Init() tea.Cmd { return textinput.Blink }
+
+func (m profileNameForm) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			name := strings.TrimSpace(m.textInput.Value())
+			if err := validateProfileName(name); err != nil {
+				m.err = err.Error()
+				return m, nil
+			}
+			return m, tea.Quit
+		case "esc", "ctrl+c":
+			m.cancelled = true
+			return m, tea.Quit
+		}
 	}
+	var cmd tea.Cmd
+	m.textInput, cmd = m.textInput.Update(msg)
+	name := strings.TrimSpace(m.textInput.Value())
+	if name != "" {
+		if err := validateProfileName(name); err != nil {
+			m.err = err.Error()
+		} else {
+			m.err = ""
+		}
+	} else {
+		m.err = ""
+	}
+	return m, cmd
+}
+
+func (m profileNameForm) View() string {
+	s := "\n"
+	s += titleStyle.Render("  Profile Name") + "\n"
+	s += dimStyle.Render("  ──────────────────────────────") + "\n\n"
+	s += fmt.Sprintf("  Profile name: %s\n\n", m.textInput.View())
+	if m.err != "" {
+		s += "  " + errorStyle.Render("✗ "+m.err) + "\n"
+	} else {
+		s += "  " + dimStyle.Render("lowercase letters, numbers and hyphens only") + "\n"
+	}
+	s += helpBar("enter", "confirm", "esc", "cancel")
+	return s
 }
