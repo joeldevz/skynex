@@ -3,7 +3,7 @@ package catalog_test
 import (
 	"testing"
 
-	"github.com/joeldevz/skilar/internal/catalog"
+	"github.com/joeldevz/skynex/internal/catalog"
 )
 
 func TestLoad_Succeeds(t *testing.T) {

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://skilar.dev/schemas/skills.config.schema.json",
-  "title": "Skilar Configuration",
-  "description": "User intent and defaults for skilar installations",
+  "$id": "https://skynex.dev/schemas/skills.config.schema.json",
+  "title": "Skynex Configuration",
+  "description": "User intent and defaults for skynex installations",
   "type": "object",
   "required": ["version", "defaults", "packages"],
   "properties": {

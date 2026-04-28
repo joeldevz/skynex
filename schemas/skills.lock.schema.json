@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://skilar.dev/schemas/skills.lock.schema.json",
-  "title": "Skilar Lock File",
-  "description": "Resolved and installed state for skilar packages",
+  "$id": "https://skynex.dev/schemas/skills.lock.schema.json",
+  "title": "Skynex Lock File",
+  "description": "Resolved and installed state for skynex packages",
   "type": "object",
   "required": ["version", "generatedAt", "packages"],
   "properties": {

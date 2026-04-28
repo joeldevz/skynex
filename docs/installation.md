@@ -8,7 +8,7 @@ Guia paso a paso para instalar Skills en tu maquina. Puedes usar el instalador a
 |-----------|-------------|----------|
 | `git` | Si | Clonar el repositorio |
 | `python3` | Si | El instalador usa scripts Python internamente |
-| [`neurox`](https://github.com/joeldevz/neurox) | Si | Memoria persistente. Se instala con `skilar install` |
+| [`neurox`](https://github.com/joeldevz/neurox) | Si | Memoria persistente. Se instala con `skynex install` |
 | `bun` o `npm` | Solo OpenCode | Instalar dependencias de plugins |
 | `gh` | Opcional | Para usar `/pr` (crear pull requests desde terminal) |
 | `opencode` | Solo si usas OpenCode | CLI de OpenCode instalado |
@@ -19,8 +19,8 @@ Guia paso a paso para instalar Skills en tu maquina. Puedes usar el instalador a
 [Neurox](https://github.com/joeldevz/neurox) es el sistema de memoria persistente.
 
 ```bash
-# Via skilar (recomendado)
-skilar install    # seleccionar neurox en el instalador
+# Via skynex (recomendado)
+skynex install    # seleccionar neurox en el instalador
 ```
 
 O manual como fallback:
@@ -51,20 +51,20 @@ cd skills
 
 ```bash
 # Modo interactivo - selecciona paquetes, targets y versiones
-skilar install
+skynex install
 
 # Instalar skills para ambos targets
-skilar install --non-interactive --package skills --target both --version skills=latest --trust-setup-scripts
+skynex install --non-interactive --package skills --target both --version skills=latest --trust-setup-scripts
 
 # Instalar skills y neurox
-skilar install --non-interactive --package skills --package neurox --target both --trust-setup-scripts
+skynex install --non-interactive --package skills --package neurox --target both --trust-setup-scripts
 ```
 
 `--non-interactive` omite la confirmacion final. Si falta algun valor obligatorio, el comando termina con error antes de instalar.
 
 ### Instalar con el script legacy
 
-> **Nota**: `./scripts/setup.sh` es el instalador interno del paquete `skills`. Se recomienda usar `skilar install` en su lugar.
+> **Nota**: `./scripts/setup.sh` es el instalador interno del paquete `skills`. Se recomienda usar `skynex install` en su lugar.
 
 ```bash
 # Todo lo compatible
@@ -223,10 +223,10 @@ Editar el archivo para ajustarlo al stack real del proyecto. Esto hace que los a
 ## Actualizacion
 
 ```bash
-skilar update
+skynex update
 ```
 
-Esto actualiza todos los paquetes instalados a la última versión. Para actualizar un paquete específico: `skilar update skills`
+Esto actualiza todos los paquetes instalados a la última versión. Para actualizar un paquete específico: `skynex update skills`
 
 El instalador hace backup automatico antes de sobreescribir, asi que es seguro correr multiples veces.
 
@@ -234,10 +234,10 @@ El instalador hace backup automatico antes de sobreescribir, asi que es seguro c
 
 ```bash
 # Ver estado completo del entorno
-skilar status
+skynex status
 
 # Diagnostico detallado de dependencias
-skilar doctor
+skynex doctor
 ```
 
 ## Desinstalacion

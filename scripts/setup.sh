@@ -134,7 +134,7 @@ import json
 import sys
 from pathlib import Path
 
-from scripts.skilar.opencode_config import merge_opencode_mcp_config
+from scripts.skynex.opencode_config import merge_opencode_mcp_config
 
 target_path = Path(sys.argv[1])
 backup_path = Path(sys.argv[2])

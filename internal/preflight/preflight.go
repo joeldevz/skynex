@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/joeldevz/skilar/internal/models"
-	"github.com/joeldevz/skilar/internal/paths"
+	"github.com/joeldevz/skynex/internal/models"
+	"github.com/joeldevz/skynex/internal/paths"
 )
 
 // Run executes all preflight validations.
@@ -66,7 +66,7 @@ func Run(req *models.InstallRequest, cat *models.Catalog) []*models.ValidationIs
 						Level:     "error",
 						PackageID: pkgID,
 						Message:   "neurox not found in PATH (required by this package)",
-						FixHint:   "Add neurox to the install: skilar --package neurox --package skills",
+						FixHint:   "Add neurox to the install: skynex --package neurox --package skills",
 					})
 				}
 			}
@@ -143,7 +143,7 @@ func ensureWritable(dir string) error {
 		return os.MkdirAll(dir, 0o755)
 	}
 	// Try to create a temp file to check writability
-	tmp := filepath.Join(dir, ".skilar-preflight-check")
+	tmp := filepath.Join(dir, ".skynex-preflight-check")
 	f, err := os.Create(tmp)
 	if err != nil {
 		return err

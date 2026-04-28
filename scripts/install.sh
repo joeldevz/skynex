@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# skilar — Install Script
+# skynex — Install Script
 # One command to install AI agent skills for OpenCode and Claude Code.
 #
 # Usage:
@@ -16,7 +16,7 @@ set -euo pipefail
 
 GITHUB_OWNER="joeldevz"
 GITHUB_REPO="skills"
-BINARY_NAME="skilar"
+BINARY_NAME="skynex"
 BREW_TAP="joeldevz/tap"
 
 # ============================================================================
@@ -55,7 +55,7 @@ step()    { echo -e "\n${CYAN}${BOLD}==>${NC} ${BOLD}$*${NC}"; }
 
 show_help() {
   cat <<EOF
-skilar installer
+skynex installer
 
 USAGE:
   curl -fsSL https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.sh | bash

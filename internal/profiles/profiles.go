@@ -100,7 +100,7 @@ var BuiltinTiers = map[string]*Profile{
 // Dir returns the directory where profiles are stored.
 func Dir() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "skilar", "profiles")
+	return filepath.Join(home, ".config", "skynex", "profiles")
 }
 
 // List returns all saved profiles sorted by name.
@@ -233,7 +233,7 @@ func ValidateName(name string) error {
 // DefaultProfilePath returns the path to the default profile file.
 func DefaultProfilePath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "skilar", "default-profile")
+	return filepath.Join(home, ".config", "skynex", "default-profile")
 }
 
 // SetDefault sets the default profile name. Validates that the profile exists

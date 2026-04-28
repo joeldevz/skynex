@@ -71,13 +71,13 @@ irm https://raw.githubusercontent.com/joeldevz/skills/main/scripts/install.ps1 |
 
 ```bash
 brew tap joeldevz/tap
-brew install skilar
+brew install skynex
 ```
 
 ### Go install (cualquier plataforma con Go 1.23+)
 
 ```bash
-go install github.com/joeldevz/skills/cmd/skilar@latest
+go install github.com/joeldevz/skills/cmd/skynex@latest
 ```
 
 ---
@@ -86,35 +86,35 @@ Una vez instalado:
 
 ```bash
 # Interactivo (recomendado la primera vez)
-skilar install
+skynex install
 
 # Solo Claude Code
-skilar install --package skills --target claude
+skynex install --package skills --target claude
 
 # Solo OpenCode
-skilar install --package skills --target opencode
+skynex install --package skills --target opencode
 
 # Todo (skills + neurox)
-skilar install --package skills --package neurox --target both
+skynex install --package skills --package neurox --target both
 ```
 
 El setup hace backup de tu configuracion existente antes de escribir.
 
 Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [docs/installation.md](docs/installation.md).
 
-## Skilar CLI
+## Skynex CLI
 
-`skilar` es el CLI unificado para instalar, configurar y lanzar tu entorno de agentes.
+`skynex` es el CLI unificado para instalar, configurar y lanzar tu entorno de agentes.
 
 ### Comandos principales
 
 | Comando | Que hace |
 |---------|----------|
-| `skilar install` | Instalador interactivo (TUI) |
-| `skilar update [package]` | Actualiza paquetes instalados a la ultima version |
-| `skilar status` | Dashboard: paquetes instalados, perfiles, herramientas |
-| `skilar doctor` | Diagnostico del entorno y dependencias |
-| `skilar up [profile]` | Lanza OpenCode con un perfil de modelos |
+| `skynex install` | Instalador interactivo (TUI) |
+| `skynex update [package]` | Actualiza paquetes instalados a la ultima version |
+| `skynex status` | Dashboard: paquetes instalados, perfiles, herramientas |
+| `skynex doctor` | Diagnostico del entorno y dependencias |
+| `skynex up [profile]` | Lanza OpenCode con un perfil de modelos |
 
 ### Perfiles de modelos
 
@@ -122,26 +122,26 @@ Los perfiles permiten lanzar OpenCode con diferentes configuraciones de modelos 
 
 ```bash
 # Listar perfiles disponibles
-skilar profile list
+skynex profile list
 
 # Crear un perfil custom
-skilar profile create
+skynex profile create
 
 # Editar un perfil
-skilar profile backend edit
+skynex profile backend edit
 
 # Eliminar un perfil
-skilar profile backend delete
+skynex profile backend delete
 
 # Establecer perfil por defecto
-skilar profile backend default
+skynex profile backend default
 
 # Lanzar con perfil
-skilar up                    # usa el perfil por defecto
-skilar up cheap              # tier builtin: todo Haiku
-skilar up premium            # tier builtin: Opus + Sonnet
-skilar up backend            # tu perfil custom
-skilar up backend --web      # modo web UI
+skynex up                    # usa el perfil por defecto
+skynex up cheap              # tier builtin: todo Haiku
+skynex up premium            # tier builtin: Opus + Sonnet
+skynex up backend            # tu perfil custom
+skynex up backend --web      # modo web UI
 ```
 
 **Tiers builtin:**
@@ -156,15 +156,15 @@ skilar up backend --web      # modo web UI
 
 ```bash
 # Bash
-eval "$(skilar completion bash)"
+eval "$(skynex completion bash)"
 # O permanente:
-skilar completion bash > /etc/bash_completion.d/skilar
+skynex completion bash > /etc/bash_completion.d/skynex
 
 # Zsh
-eval "$(skilar completion zsh)"
+eval "$(skynex completion zsh)"
 
 # Fish
-skilar completion fish > ~/.config/fish/completions/skilar.fish
+skynex completion fish > ~/.config/fish/completions/skynex.fish
 ```
 
 ## Herramientas soportadas
@@ -263,7 +263,7 @@ El setup configura Neurox automaticamente en ambas herramientas.
 
 ```text
 skills/
-├── cmd/skilar/                # CLI entry point
+├── cmd/skynex/                # CLI entry point
 ├── internal/
 │   ├── adapters/              # instalacion (claude, opencode)
 │   ├── completion/            # autocompletado bash/zsh/fish

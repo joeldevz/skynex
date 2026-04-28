@@ -3,7 +3,7 @@ package doctor_test
 import (
 	"testing"
 
-	"github.com/joeldevz/skilar/internal/doctor"
+	"github.com/joeldevz/skynex/internal/doctor"
 )
 
 func TestRun_ReturnsReport(t *testing.T) {

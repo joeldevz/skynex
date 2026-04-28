@@ -1,6 +1,6 @@
 version: 2
 
-project_name: skilar
+project_name: skynex
 
 before:
   hooks:
@@ -8,8 +8,8 @@ before:
     - go run ./cmd/tools/sync-assets/
 
 builds:
-  - main: ./cmd/skilar
-    binary: skilar
+  - main: ./cmd/skynex
+    binary: skynex
     env:
       - CGO_ENABLED=0
     goos:
@@ -46,21 +46,21 @@ changelog:
 release:
   github:
     owner: joeldevz
-    name: skilar
+    name: skynex
   draft: false
   prerelease: auto
   name_template: "v{{.Version}}"
   header: |
-    ## skilar v{{.Version}}
+    ## skynex v{{.Version}}
 
     ### Install
     **macOS / Linux:**
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/joeldevz/skilar/main/scripts/install.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/joeldevz/skynex/main/scripts/install.sh | bash
     ```
     **Windows (PowerShell):**
     ```powershell
-    irm https://raw.githubusercontent.com/joeldevz/skilar/main/scripts/install.ps1 | iex
+    irm https://raw.githubusercontent.com/joeldevz/skynex/main/scripts/install.ps1 | iex
     ```
 
 brews:
@@ -72,22 +72,22 @@ brews:
       pull_request:
         enabled: false
     directory: Formula
-    name: skilar
-    homepage: "https://github.com/joeldevz/skilar"
+    name: skynex
+    homepage: "https://github.com/joeldevz/skynex"
     description: "AI agent skills installer for OpenCode and Claude Code"
     license: "MIT"
-    commit_msg_template: "chore: update skilar formula to {{ .Tag }}"
-    install: bin.install "skilar"
+    commit_msg_template: "chore: update skynex formula to {{ .Tag }}"
+    install: bin.install "skynex"
     test: |
-      system "#{bin}/skilar", "--version"
+      system "#{bin}/skynex", "--version"
 
 scoops:
   - repository:
       owner: joeldevz
       name: scoop-bucket
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    name: skilar
-    homepage: "https://github.com/joeldevz/skilar"
+    name: skynex
+    homepage: "https://github.com/joeldevz/skynex"
     description: "AI agent skills installer for OpenCode and Claude Code"
     license: MIT
-    commit_msg_template: "chore: update skilar to {{ .Tag }}"
+    commit_msg_template: "chore: update skynex to {{ .Tag }}"

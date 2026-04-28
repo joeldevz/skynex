@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/joeldevz/skilar/internal/paths"
+	"github.com/joeldevz/skynex/internal/paths"
 )
 
 // Check represents the result of an individual check.
@@ -36,7 +36,7 @@ func Run() *Report {
 
 	// Core tools
 	r.checkTool("git", "git", "--version", "https://git-scm.com/downloads", true)
-	r.checkTool("neurox", "neurox", "version", "Run: skilar --package neurox", true)
+	r.checkTool("neurox", "neurox", "version", "Run: skynex --package neurox", true)
 
 	// AI tools (optional — detect what's installed)
 	r.checkTool("claude", "claude", "--version", "https://claude.ai/download", false)
@@ -136,7 +136,7 @@ func (r *Report) checkWritable(name, dir, target string) {
 	}
 
 	// Try write
-	tmp := filepath.Join(dir, ".skilar-doctor-check")
+	tmp := filepath.Join(dir, ".skynex-doctor-check")
 	if err := os.WriteFile(tmp, []byte("test"), 0o644); err != nil {
 		r.Checks = append(r.Checks, &Check{
 			Name:    name,
@@ -176,7 +176,7 @@ func (r *Report) Print() {
 	reset := colorFn(useColors, "\033[0m")
 
 	fmt.Println()
-	fmt.Printf("%skilar doctor%s\n", bold, reset)
+	fmt.Printf("%sskynex doctor%s\n", bold, reset)
 	fmt.Println(strings.Repeat("─", 50))
 
 	for _, c := range r.Checks {

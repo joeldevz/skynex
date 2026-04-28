@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/joeldevz/skilar/internal/profiles"
+	"github.com/joeldevz/skynex/internal/profiles"
 )
 
 // Options configures how to launch OpenCode.

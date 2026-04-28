@@ -1,4 +1,4 @@
-module github.com/joeldevz/skilar
+module github.com/joeldevz/skynex
 
 go 1.24.2
 

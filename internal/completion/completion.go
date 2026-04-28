@@ -1,9 +1,9 @@
 package completion
 
-// Bash returns a bash completion script for skilar.
+// Bash returns a bash completion script for skynex.
 func Bash() string {
-	return `# skilar bash completion
-_skilar_completions() {
+	return `# skynex bash completion
+_skynex_completions() {
     local cur prev commands profile_commands
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
@@ -22,13 +22,13 @@ _skilar_completions() {
                 profile)
                     # list, create, or profile names
                     local profiles
-                    profiles=$(skilar profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$\|^Custom$\|^No$\|^Create$\|^Default:\|^Usage:')
+                    profiles=$(skynex profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$\|^Custom$\|^No$\|^Create$\|^Default:\|^Usage:')
                     COMPREPLY=($(compgen -W "${profile_commands} cheap balanced premium ${profiles}" -- "${cur}"))
                     return 0
                     ;;
                 up)
                     local profiles
-                    profiles=$(skilar profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$\|^Custom$\|^No$\|^Create$\|^Default:\|^Usage:')
+                    profiles=$(skynex profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$\|^Custom$\|^No$\|^Create$\|^Default:\|^Usage:')
                     COMPREPLY=($(compgen -W "cheap balanced premium ${profiles} --web --port" -- "${cur}"))
                     return 0
                     ;;
@@ -57,16 +57,16 @@ _skilar_completions() {
             ;;
     esac
 }
-complete -F _skilar_completions skilar
+complete -F _skynex_completions skynex
 `
 }
 
-// Zsh returns a zsh completion script for skilar.
+// Zsh returns a zsh completion script for skynex.
 func Zsh() string {
-	return `#compdef skilar
-# skilar zsh completion
+	return `#compdef skynex
+# skynex zsh completion
 
-_skilar() {
+_skynex() {
     local -a commands profile_subcommands shells tiers
 
     commands=(
@@ -93,7 +93,7 @@ _skilar() {
             if (( CURRENT == 3 )); then
                 # Complete with subcommands + profile names
                 local -a profiles
-                profiles=(${(f)"$(skilar profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$|^Custom$|^No$|^Create$|^Default:|^Usage:')"})
+                profiles=(${(f)"$(skynex profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$|^Custom$|^No$|^Create$|^Default:|^Usage:')"})
                 _describe 'profile command' profile_subcommands
                 compadd -a tiers
                 compadd -a profiles
@@ -106,7 +106,7 @@ _skilar() {
         up)
             if (( CURRENT == 3 )); then
                 local -a profiles
-                profiles=(${(f)"$(skilar profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$|^Custom$|^No$|^Create$|^Default:|^Usage:')"})
+                profiles=(${(f)"$(skynex profile list 2>/dev/null | grep -E '^\s+\S+' | awk '{print $1}' | grep -v '^Built-in$|^Custom$|^No$|^Create$|^Default:|^Usage:')"})
                 compadd -a tiers
                 compadd -a profiles
                 compadd -- --web --port
@@ -123,51 +123,51 @@ _skilar() {
     esac
 }
 
-_skilar "$@"
+_skynex "$@"
 `
 }
 
-// Fish returns a fish completion script for skilar.
+// Fish returns a fish completion script for skynex.
 func Fish() string {
-	return `# skilar fish completion
+	return `# skynex fish completion
 
-# Disable file completions for skilar
-complete -c skilar -f
+# Disable file completions for skynex
+complete -c skynex -f
 
 # Top-level commands
-complete -c skilar -n "__fish_use_subcommand" -a install -d "Interactive installer (TUI)"
-complete -c skilar -n "__fish_use_subcommand" -a doctor -d "Check environment and dependencies"
-complete -c skilar -n "__fish_use_subcommand" -a version -d "Show version"
-complete -c skilar -n "__fish_use_subcommand" -a profile -d "Manage profiles"
-complete -c skilar -n "__fish_use_subcommand" -a up -d "Launch OpenCode with a profile"
-complete -c skilar -n "__fish_use_subcommand" -a completion -d "Generate shell completion script"
-complete -c skilar -n "__fish_use_subcommand" -a status -d "Show environment status"
-complete -c skilar -n "__fish_use_subcommand" -a update -d "Update installed packages"
+complete -c skynex -n "__fish_use_subcommand" -a install -d "Interactive installer (TUI)"
+complete -c skynex -n "__fish_use_subcommand" -a doctor -d "Check environment and dependencies"
+complete -c skynex -n "__fish_use_subcommand" -a version -d "Show version"
+complete -c skynex -n "__fish_use_subcommand" -a profile -d "Manage profiles"
+complete -c skynex -n "__fish_use_subcommand" -a up -d "Launch OpenCode with a profile"
+complete -c skynex -n "__fish_use_subcommand" -a completion -d "Generate shell completion script"
+complete -c skynex -n "__fish_use_subcommand" -a status -d "Show environment status"
+complete -c skynex -n "__fish_use_subcommand" -a update -d "Update installed packages"
 
 # profile subcommands
-complete -c skilar -n "__fish_seen_subcommand_from profile" -a list -d "List all profiles"
-complete -c skilar -n "__fish_seen_subcommand_from profile" -a create -d "Create a new profile"
-complete -c skilar -n "__fish_seen_subcommand_from profile" -a "cheap balanced premium" -d "Built-in tier"
+complete -c skynex -n "__fish_seen_subcommand_from profile" -a list -d "List all profiles"
+complete -c skynex -n "__fish_seen_subcommand_from profile" -a create -d "Create a new profile"
+complete -c skynex -n "__fish_seen_subcommand_from profile" -a "cheap balanced premium" -d "Built-in tier"
 
 # profile <name> verbs
-complete -c skilar -n "__fish_seen_subcommand_from profile; and __fish_is_nth_token 4" -a edit -d "Edit profile"
-complete -c skilar -n "__fish_seen_subcommand_from profile; and __fish_is_nth_token 4" -a delete -d "Delete profile"
-complete -c skilar -n "__fish_seen_subcommand_from profile; and __fish_is_nth_token 4" -a default -d "Set as default"
+complete -c skynex -n "__fish_seen_subcommand_from profile; and __fish_is_nth_token 4" -a edit -d "Edit profile"
+complete -c skynex -n "__fish_seen_subcommand_from profile; and __fish_is_nth_token 4" -a delete -d "Delete profile"
+complete -c skynex -n "__fish_seen_subcommand_from profile; and __fish_is_nth_token 4" -a default -d "Set as default"
 
 # up options
-complete -c skilar -n "__fish_seen_subcommand_from up" -a "cheap balanced premium" -d "Built-in tier"
-complete -c skilar -n "__fish_seen_subcommand_from up" -l web -d "Launch web UI"
-complete -c skilar -n "__fish_seen_subcommand_from up" -l port -d "Specify port" -r
+complete -c skynex -n "__fish_seen_subcommand_from up" -a "cheap balanced premium" -d "Built-in tier"
+complete -c skynex -n "__fish_seen_subcommand_from up" -l web -d "Launch web UI"
+complete -c skynex -n "__fish_seen_subcommand_from up" -l port -d "Specify port" -r
 
 # completion shells
-complete -c skilar -n "__fish_seen_subcommand_from completion" -a "bash zsh fish" -d "Shell type"
+complete -c skynex -n "__fish_seen_subcommand_from completion" -a "bash zsh fish" -d "Shell type"
 
 # install options
-complete -c skilar -n "__fish_seen_subcommand_from install" -l package -d "Package to install" -r
-complete -c skilar -n "__fish_seen_subcommand_from install" -l target -d "Target: claude, opencode, both" -r
-complete -c skilar -n "__fish_seen_subcommand_from install" -l version -d "Package version" -r
-complete -c skilar -n "__fish_seen_subcommand_from install" -l non-interactive -d "Skip prompts"
-complete -c skilar -n "__fish_seen_subcommand_from install" -s y -l yes -d "Skip confirmation"
+complete -c skynex -n "__fish_seen_subcommand_from install" -l package -d "Package to install" -r
+complete -c skynex -n "__fish_seen_subcommand_from install" -l target -d "Target: claude, opencode, both" -r
+complete -c skynex -n "__fish_seen_subcommand_from install" -l version -d "Package version" -r
+complete -c skynex -n "__fish_seen_subcommand_from install" -l non-interactive -d "Skip prompts"
+complete -c skynex -n "__fish_seen_subcommand_from install" -s y -l yes -d "Skip confirmation"
 `
 }
 

@@ -8,17 +8,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/joeldevz/skilar/internal/adapters"
-	"github.com/joeldevz/skilar/internal/catalog"
-	"github.com/joeldevz/skilar/internal/completion"
-	"github.com/joeldevz/skilar/internal/config"
-	"github.com/joeldevz/skilar/internal/doctor"
-	"github.com/joeldevz/skilar/internal/models"
-	"github.com/joeldevz/skilar/internal/paths"
-	"github.com/joeldevz/skilar/internal/preflight"
-	"github.com/joeldevz/skilar/internal/profiles"
-	"github.com/joeldevz/skilar/internal/prompts"
-	"github.com/joeldevz/skilar/internal/runner"
+	"github.com/joeldevz/skynex/internal/adapters"
+	"github.com/joeldevz/skynex/internal/catalog"
+	"github.com/joeldevz/skynex/internal/completion"
+	"github.com/joeldevz/skynex/internal/config"
+	"github.com/joeldevz/skynex/internal/doctor"
+	"github.com/joeldevz/skynex/internal/models"
+	"github.com/joeldevz/skynex/internal/paths"
+	"github.com/joeldevz/skynex/internal/preflight"
+	"github.com/joeldevz/skynex/internal/profiles"
+	"github.com/joeldevz/skynex/internal/prompts"
+	"github.com/joeldevz/skynex/internal/runner"
 )
 
 // version is set by goreleaser via -ldflags "-X main.version=..."
@@ -32,7 +32,7 @@ func main() {
 	args := parseArgs()
 
 	if args.ShowVersion {
-		fmt.Printf("skilar %s (%s) built %s\n", version, commit, date)
+		fmt.Printf("skynex %s (%s) built %s\n", version, commit, date)
 		os.Exit(0)
 	}
 
@@ -244,7 +244,7 @@ func parseArgs() *cliArgs {
 			args.ProfileList = true
 		case "profile":
 			if i+1 >= len(osArgs) {
-				// skilar profile (no subcommand)
+				// skynex profile (no subcommand)
 				args.ProfileHelp = true
 				break
 			}
@@ -287,7 +287,7 @@ func parseArgs() *cliArgs {
 				args.Completion = "help"
 			}
 		case "up":
-			// skilar up [profile] [--web] [--port N]
+			// skynex up [profile] [--web] [--port N]
 			for i+1 < len(osArgs) {
 				next := osArgs[i+1]
 				if next == "--web" {
@@ -456,7 +456,7 @@ func handleProfileList() {
 	saved, err := profiles.List()
 	if err != nil || len(saved) == 0 {
 		fmt.Println("  No custom profiles saved.")
-		fmt.Println("  Create one: skilar profile create")
+		fmt.Println("  Create one: skynex profile create")
 		return
 	}
 
@@ -470,7 +470,7 @@ func handleProfileList() {
 	}
 	fmt.Println()
 	fmt.Printf("  Default: %s\n", defaultName)
-	fmt.Println("  Usage: skilar up")
+	fmt.Println("  Usage: skynex up")
 }
 
 func handleProfileCreate(initialName string) {
@@ -494,7 +494,7 @@ func handleProfileCreate(initialName string) {
 	}
 
 	fmt.Printf("\n  ✓ Profile %q saved.\n", p.Name)
-	fmt.Printf("  Usage: skilar up %s\n\n", p.Name)
+	fmt.Printf("  Usage: skynex up %s\n\n", p.Name)
 }
 
 func handleProfileEdit(name string) {
@@ -534,7 +534,7 @@ func handleProfileSetDefault(name string) {
 		os.Exit(1)
 	}
 	fmt.Printf("  ✓ %q is now the default profile.\n", name)
-	fmt.Printf("  Run skilar up to launch with this profile.\n")
+	fmt.Printf("  Run skynex up to launch with this profile.\n")
 }
 
 func handleUp(profileName string, web bool, port int) {
@@ -573,7 +573,7 @@ func handleCompletion(shell string) {
 	case "fish":
 		fmt.Print(completion.Fish())
 	default:
-		fmt.Fprintf(os.Stderr, "Unknown shell: %s\nSupported: bash, zsh, fish\n\nUsage:\n  skilar completion bash  > /etc/bash_completion.d/skilar\n  skilar completion zsh   > ~/.zfunc/_skilar\n  skilar completion fish  > ~/.config/fish/completions/skilar.fish\n", shell)
+		fmt.Fprintf(os.Stderr, "Unknown shell: %s\nSupported: bash, zsh, fish\n\nUsage:\n  skynex completion bash  > /etc/bash_completion.d/skynex\n  skynex completion zsh   > ~/.zfunc/_skynex\n  skynex completion fish  > ~/.config/fish/completions/skynex.fish\n", shell)
 		os.Exit(1)
 	}
 }
@@ -587,7 +587,7 @@ func handleUpdate(pkg string, stateDir string) {
 	cfg := config.LoadOrDefault(stateDir + "/skills.config.json")
 	pkgsMap, ok := cfg["packages"].(map[string]interface{})
 	if !ok || len(pkgsMap) == 0 {
-		fmt.Fprintln(os.Stderr, "No packages installed yet. Run: skilar install")
+		fmt.Fprintln(os.Stderr, "No packages installed yet. Run: skynex install")
 		os.Exit(1)
 	}
 
@@ -706,7 +706,7 @@ func handleStatus() {
 	reset := colorFn(useColors, "\033[0m")
 
 	// Version
-	fmt.Printf("\n  %sskilar%s %s %s(%s)%s\n", bold, reset, version, dim, commit, reset)
+	fmt.Printf("\n  %sskynex%s %s %s(%s)%s\n", bold, reset, version, dim, commit, reset)
 	fmt.Println()
 
 	// Installed packages
@@ -716,7 +716,7 @@ func handleStatus() {
 
 	fmt.Printf("  %sInstalled packages:%s\n", bold, reset)
 	if err != nil {
-		fmt.Printf("    %sNone — run: skilar install%s\n", dim, reset)
+		fmt.Printf("    %sNone — run: skynex install%s\n", dim, reset)
 	} else {
 		var lock map[string]interface{}
 		if err := json.Unmarshal(lockData, &lock); err == nil {
@@ -794,7 +794,7 @@ func handleStatus() {
 }
 
 func printUsage() {
-	fmt.Println(`Usage: skilar [command] [options]
+	fmt.Println(`Usage: skynex [command] [options]
 
 Commands:
   install                 Interactive installer (TUI)
@@ -807,7 +807,7 @@ Commands:
   profile create          Create a new profile (TUI)
   profile <name> edit     Edit an existing profile
   profile <name> delete   Delete a custom profile
-  profile <name> default  Set default profile for skilar up
+  profile <name> default  Set default profile for skynex up
   up [profile]            Launch OpenCode with a profile
                           Builtin: cheap, balanced, premium
                           Custom: any profile you created
@@ -815,17 +815,17 @@ Commands:
   up [profile] --port N   Use specific port (with --web)
 
 Examples:
-  skilar install
-  skilar update                    Update all installed packages
-  skilar update skills             Update only skills
-  skilar up                        Launch with balanced profile
-  skilar up cheap                  Haiku everywhere
-  skilar up frontend               Your custom frontend profile
-  skilar up frontend --web --port 3001
-  skilar profile list
-  skilar profile create
-  skilar profile backend edit
-  skilar profile backend delete
+  skynex install
+  skynex update                    Update all installed packages
+  skynex update skills             Update only skills
+  skynex up                        Launch with balanced profile
+  skynex up cheap                  Haiku everywhere
+  skynex up frontend               Your custom frontend profile
+  skynex up frontend --web --port 3001
+  skynex profile list
+  skynex profile create
+  skynex profile backend edit
+  skynex profile backend delete
 
 Options:
   --package PACKAGE       Package to install (skills, neurox). Repeatable.
@@ -835,7 +835,7 @@ Options:
   --non-interactive       Skip prompts, require all inputs via flags.
   --yes, -y               Skip confirmation prompt.
   --trust-setup-scripts   Trust external setup scripts.
-  --state-dir DIR         State directory (default: ~/.config/skilar).
+  --state-dir DIR         State directory (default: ~/.config/skynex).
   --list-packages         List available packages.
   --list-versions PKG     List versions for a package.
   --version               Show version and exit.
@@ -843,19 +843,19 @@ Options:
 }
 
 func printProfileUsage() {
-	fmt.Println(`Usage: skilar profile <command>
+	fmt.Println(`Usage: skynex profile <command>
 
 Commands:
   list                    List all profiles (builtin + custom)
   create                  Create a new profile (TUI)
   <name> edit             Edit an existing profile
   <name> delete           Delete a custom profile
-  <name> default          Set a profile as the default for skilar up
+  <name> default          Set a profile as the default for skynex up
 
 Examples:
-  skilar profile list
-  skilar profile create
-  skilar profile backend edit
-  skilar profile backend delete
-  skilar profile backend default`)
+  skynex profile list
+  skynex profile create
+  skynex profile backend edit
+  skynex profile backend delete
+  skynex profile backend default`)
 }
