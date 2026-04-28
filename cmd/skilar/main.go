@@ -1,13 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/joeldevz/skilar/internal/adapters"
 	"github.com/joeldevz/skilar/internal/catalog"
+	"github.com/joeldevz/skilar/internal/completion"
 	"github.com/joeldevz/skilar/internal/config"
 	"github.com/joeldevz/skilar/internal/doctor"
 	"github.com/joeldevz/skilar/internal/models"
@@ -42,8 +45,20 @@ func main() {
 		os.Exit(0)
 	}
 
+	// status
+	if args.Status {
+		handleStatus()
+		os.Exit(0)
+	}
+
 	if args.Help {
 		printUsage()
+		os.Exit(0)
+	}
+
+	// completion
+	if args.Completion != "" {
+		handleCompletion(args.Completion)
 		os.Exit(0)
 	}
 
@@ -96,6 +111,12 @@ func main() {
 			os.Exit(1)
 		}
 		catalog.Print(cat)
+		os.Exit(0)
+	}
+
+	// update
+	if args.Update {
+		handleUpdate(args.UpdatePkg, args.StateDir)
 		os.Exit(0)
 	}
 
@@ -198,6 +219,10 @@ type cliArgs struct {
 	UpWeb          bool
 	UpPort         int
 	RunUp          bool
+	Update         bool
+	UpdatePkg      string
+	Completion     string // bash, zsh, or fish
+	Status         bool
 }
 
 func parseArgs() *cliArgs {
@@ -253,6 +278,13 @@ func parseArgs() *cliArgs {
 					// name with no verb — treat as profile help
 					args.ProfileHelp = true
 				}
+			}
+		case "completion":
+			if i+1 < len(osArgs) {
+				i++
+				args.Completion = osArgs[i]
+			} else {
+				args.Completion = "help"
 			}
 		case "up":
 			// skilar up [profile] [--web] [--port N]
@@ -321,6 +353,15 @@ func parseArgs() *cliArgs {
 				i++
 				args.AdvisorModel = osArgs[i]
 			}
+		case "update":
+			args.Update = true
+			// optional package name
+			if i+1 < len(osArgs) && !isFlag(osArgs[i+1]) {
+				i++
+				args.UpdatePkg = osArgs[i]
+			}
+		case "status":
+			args.Status = true
 		}
 	}
 	return args
@@ -523,11 +564,242 @@ func handleUp(profileName string, web bool, port int) {
 	}
 }
 
+func handleCompletion(shell string) {
+	switch shell {
+	case "bash":
+		fmt.Print(completion.Bash())
+	case "zsh":
+		fmt.Print(completion.Zsh())
+	case "fish":
+		fmt.Print(completion.Fish())
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown shell: %s\nSupported: bash, zsh, fish\n\nUsage:\n  skilar completion bash  > /etc/bash_completion.d/skilar\n  skilar completion zsh   > ~/.zfunc/_skilar\n  skilar completion fish  > ~/.config/fish/completions/skilar.fish\n", shell)
+		os.Exit(1)
+	}
+}
+
+func handleUpdate(pkg string, stateDir string) {
+	if stateDir == "" {
+		stateDir = paths.StateDir()
+	}
+
+	// Load existing config to know what was installed
+	cfg := config.LoadOrDefault(stateDir + "/skills.config.json")
+	pkgsMap, ok := cfg["packages"].(map[string]interface{})
+	if !ok || len(pkgsMap) == 0 {
+		fmt.Fprintln(os.Stderr, "No packages installed yet. Run: skilar install")
+		os.Exit(1)
+	}
+
+	// Load catalog
+	cat, err := catalog.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading catalog: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Determine which packages to update
+	var packagesToUpdate []string
+	if pkg != "" {
+		// Update specific package
+		if _, exists := pkgsMap[pkg]; !exists {
+			fmt.Fprintf(os.Stderr, "Package %q is not installed. Installed: %s\n", pkg, installedPkgNames(pkgsMap))
+			os.Exit(1)
+		}
+		packagesToUpdate = []string{pkg}
+	} else {
+		// Update all
+		for p := range pkgsMap {
+			packagesToUpdate = append(packagesToUpdate, p)
+		}
+	}
+
+	// Resolve targets from config defaults
+	var targets []string
+	if defaults, ok := cfg["defaults"].(map[string]interface{}); ok {
+		if t, ok := defaults["targets"].([]interface{}); ok {
+			for _, v := range t {
+				if s, ok := v.(string); ok {
+					targets = append(targets, s)
+				}
+			}
+		}
+	}
+	if len(targets) == 0 {
+		targets = []string{"claude", "opencode"}
+	}
+
+	// Resolve versions — always use "latest" for updates
+	versions := make(map[string]string)
+	for _, p := range packagesToUpdate {
+		versions[p] = "latest"
+	}
+
+	request := &models.InstallRequest{
+		Packages:    packagesToUpdate,
+		Targets:     targets,
+		Versions:    versions,
+		Interactive: false,
+		StateDir:    stateDir,
+	}
+
+	// Preflight
+	issues := preflight.Run(request, cat)
+	if preflight.HasErrors(issues) {
+		preflight.PrintIssues(issues)
+		fmt.Fprintln(os.Stderr, "\nUpdate aborted due to validation errors.")
+		os.Exit(2)
+	}
+
+	// Install
+	fmt.Printf("\n  Updating %s...\n", strings.Join(packagesToUpdate, ", "))
+	results, err := adapters.InstallAll(request, cat)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\nUpdate failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Save state
+	config.SaveConfig(stateDir+"/skills.config.json", request, cfg)
+	config.SaveLock(stateDir+"/skills.lock.json", results, request)
+
+	// Print results
+	fmt.Println("\n  Update complete!")
+	for _, r := range results {
+		fmt.Printf("    %s @ %s (%s)\n", r.PackageID, r.ResolvedVersion, r.Commit[:8])
+		for target, tr := range r.Targets {
+			fmt.Printf("      [%s] %s\n", target, tr.Status)
+		}
+	}
+	fmt.Println()
+}
+
+func installedPkgNames(pkgs map[string]interface{}) string {
+	names := make([]string, 0, len(pkgs))
+	for k := range pkgs {
+		names = append(names, k)
+	}
+	return strings.Join(names, ", ")
+}
+
+func isTerminal() bool {
+	fi, err := os.Stdout.Stat()
+	if err != nil {
+		return false
+	}
+	return (fi.Mode() & os.ModeCharDevice) != 0
+}
+
+func colorFn(active bool, code string) string {
+	if active {
+		return code
+	}
+	return ""
+}
+
+func handleStatus() {
+	useColors := isTerminal()
+	green := colorFn(useColors, "\033[0;32m")
+	yellow := colorFn(useColors, "\033[1;33m")
+	dim := colorFn(useColors, "\033[2m")
+	bold := colorFn(useColors, "\033[1m")
+	reset := colorFn(useColors, "\033[0m")
+
+	// Version
+	fmt.Printf("\n  %sskilar%s %s %s(%s)%s\n", bold, reset, version, dim, commit, reset)
+	fmt.Println()
+
+	// Installed packages
+	stateDir := paths.StateDir()
+	lockPath := stateDir + "/skills.lock.json"
+	lockData, err := os.ReadFile(lockPath)
+
+	fmt.Printf("  %sInstalled packages:%s\n", bold, reset)
+	if err != nil {
+		fmt.Printf("    %sNone — run: skilar install%s\n", dim, reset)
+	} else {
+		var lock map[string]interface{}
+		if err := json.Unmarshal(lockData, &lock); err == nil {
+			if pkgs, ok := lock["packages"].(map[string]interface{}); ok {
+				for pkgID, v := range pkgs {
+					pkg, ok := v.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					ver := "unknown"
+					if rv, ok := pkg["resolvedVersion"].(string); ok {
+						ver = rv
+					}
+					commitStr := ""
+					if c, ok := pkg["commit"].(string); ok && len(c) >= 8 {
+						commitStr = c[:8]
+					}
+
+					// Get targets
+					targetList := []string{}
+					if targets, ok := pkg["targets"].(map[string]interface{}); ok {
+						for t := range targets {
+							targetList = append(targetList, t)
+						}
+					}
+					targetsStr := strings.Join(targetList, ", ")
+					if targetsStr == "" {
+						targetsStr = "-"
+					}
+
+					fmt.Printf("    %s%-12s%s %s%s%s  → %s", green, pkgID, reset, dim, ver, reset, targetsStr)
+					if commitStr != "" {
+						fmt.Printf("  %s(%s)%s", dim, commitStr, reset)
+					}
+					fmt.Println()
+				}
+			}
+		}
+	}
+	fmt.Println()
+
+	// Profiles
+	defaultProfile := profiles.GetDefault()
+	fmt.Printf("  %sDefault profile:%s %s ★\n", bold, reset, defaultProfile)
+
+	saved, _ := profiles.List()
+	if len(saved) > 0 {
+		names := make([]string, len(saved))
+		for i, p := range saved {
+			names[i] = p.Name
+		}
+		fmt.Printf("  %sCustom profiles:%s  %d (%s)\n", bold, reset, len(saved), strings.Join(names, ", "))
+	} else {
+		fmt.Printf("  %sCustom profiles:%s  none\n", bold, reset)
+	}
+	fmt.Println()
+
+	// Tools
+	fmt.Printf("  %sTools:%s\n", bold, reset)
+	tools := []struct{ name, binary string }{
+		{"opencode", "opencode"},
+		{"claude", "claude"},
+		{"neurox", "neurox"},
+		{"git", "git"},
+	}
+	for _, t := range tools {
+		path, err := exec.LookPath(t.binary)
+		if err != nil {
+			fmt.Printf("    %s✗%s  %-12s %snot found%s\n", yellow, reset, t.name, dim, reset)
+		} else {
+			fmt.Printf("    %s✓%s  %-12s %s%s%s\n", green, reset, t.name, dim, path, reset)
+		}
+	}
+	fmt.Println()
+}
+
 func printUsage() {
 	fmt.Println(`Usage: skilar [command] [options]
 
 Commands:
   install                 Interactive installer (TUI)
+  update [package]        Update installed packages to latest version
+  status                  Show installed packages, profiles, and tools
   doctor                  Check environment and dependencies
   version                 Show version
   profile                 Manage profiles (list, create, edit, delete)
@@ -544,6 +816,8 @@ Commands:
 
 Examples:
   skilar install
+  skilar update                    Update all installed packages
+  skilar update skills             Update only skills
   skilar up                        Launch with balanced profile
   skilar up cheap                  Haiku everywhere
   skilar up frontend               Your custom frontend profile
