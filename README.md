@@ -86,25 +86,86 @@ Una vez instalado:
 
 ```bash
 # Interactivo (recomendado la primera vez)
-skilar
+skilar install
 
 # Solo Claude Code
-skilar --package skills --target claude
+skilar install --package skills --target claude
 
 # Solo OpenCode
-skilar --package skills --target opencode
+skilar install --package skills --target opencode
 
 # Todo (skills + neurox)
-skilar --package skills --package neurox --target both
+skilar install --package skills --package neurox --target both
 ```
-
-> **Requisito**: `neurox` debe estar instalado y disponible en `PATH` para memoria persistente.
 
 El setup hace backup de tu configuracion existente antes de escribir.
 
-> **Nota**: `./skilar` es el instalador unificado. El script `./scripts/setup.sh` se usa internamente como instalador especifico del paquete `skills`.
-
 Para instalacion manual, verificacion post-instalacion, y troubleshooting, ver [docs/installation.md](docs/installation.md).
+
+## Skilar CLI
+
+`skilar` es el CLI unificado para instalar, configurar y lanzar tu entorno de agentes.
+
+### Comandos principales
+
+| Comando | Que hace |
+|---------|----------|
+| `skilar install` | Instalador interactivo (TUI) |
+| `skilar update [package]` | Actualiza paquetes instalados a la ultima version |
+| `skilar status` | Dashboard: paquetes instalados, perfiles, herramientas |
+| `skilar doctor` | Diagnostico del entorno y dependencias |
+| `skilar up [profile]` | Lanza OpenCode con un perfil de modelos |
+
+### Perfiles de modelos
+
+Los perfiles permiten lanzar OpenCode con diferentes configuraciones de modelos sin tocar `opencode.json`.
+
+```bash
+# Listar perfiles disponibles
+skilar profile list
+
+# Crear un perfil custom
+skilar profile create
+
+# Editar un perfil
+skilar profile backend edit
+
+# Eliminar un perfil
+skilar profile backend delete
+
+# Establecer perfil por defecto
+skilar profile backend default
+
+# Lanzar con perfil
+skilar up                    # usa el perfil por defecto
+skilar up cheap              # tier builtin: todo Haiku
+skilar up premium            # tier builtin: Opus + Sonnet
+skilar up backend            # tu perfil custom
+skilar up backend --web      # modo web UI
+```
+
+**Tiers builtin:**
+
+| Tier | Descripcion |
+|------|-------------|
+| `cheap` | Haiku para todo — rapido y barato |
+| `balanced` | Sonnet para planificacion, Haiku para ejecucion (default) |
+| `premium` | Opus para planificacion, Sonnet para ejecucion |
+
+### Autocompletado de shell
+
+```bash
+# Bash
+eval "$(skilar completion bash)"
+# O permanente:
+skilar completion bash > /etc/bash_completion.d/skilar
+
+# Zsh
+eval "$(skilar completion zsh)"
+
+# Fish
+skilar completion fish > ~/.config/fish/completions/skilar.fish
+```
 
 ## Herramientas soportadas
 
@@ -202,6 +263,13 @@ El setup configura Neurox automaticamente en ambas herramientas.
 
 ```text
 skills/
+├── cmd/skilar/                # CLI entry point
+├── internal/
+│   ├── adapters/              # instalacion (claude, opencode)
+│   ├── completion/            # autocompletado bash/zsh/fish
+│   ├── profiles/              # CRUD de perfiles de modelos
+│   ├── runner/                # lanzador de OpenCode con perfiles
+│   └── ...
 ├── claude-code/
 │   └── CLAUDE.md              # overlay para el orquestador en Claude Code
 ├── opencode/
