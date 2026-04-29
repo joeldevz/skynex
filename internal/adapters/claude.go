@@ -317,12 +317,24 @@ func appendMarkedBlock(targetFile, blockFile, marker string) error {
 
 // configureClaudeNeuroxMCP merges neurox MCP into ~/.claude.json
 func configureClaudeNeuroxMCP() error {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("get home directory: %w", err)
+	}
 	claudeJSON := filepath.Join(home, ".claude.json")
 
 	var data map[string]json.RawMessage
+	var rawBackup []byte
 	if raw, err := os.ReadFile(claudeJSON); err == nil {
-		json.Unmarshal(raw, &data)
+		rawBackup = raw
+		if err := json.Unmarshal(raw, &data); err != nil {
+			// File exists but can't be parsed — save backup
+			fmt.Fprintf(os.Stderr, "Warning: existing .claude.json is malformed, preserving as .bak\n")
+			backupPath := claudeJSON + ".bak"
+			if err := writeFile(backupPath, string(rawBackup)); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: could not save backup: %v\n", err)
+			}
+		}
 	}
 	if data == nil {
 		data = make(map[string]json.RawMessage)
@@ -330,7 +342,9 @@ func configureClaudeNeuroxMCP() error {
 
 	var mcpServers map[string]json.RawMessage
 	if raw, ok := data["mcpServers"]; ok {
-		json.Unmarshal(raw, &mcpServers)
+		if err := json.Unmarshal(raw, &mcpServers); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: could not parse mcpServers: %v\n", err)
+		}
 	}
 	if mcpServers == nil {
 		mcpServers = make(map[string]json.RawMessage)
@@ -355,6 +369,11 @@ func configureClaudeNeuroxMCP() error {
 }
 
 func claudeDir() string {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: cannot determine home directory: %v\n", err)
+		// Return a fallback path that will likely fail gracefully downstream
+		return "~/.claude"
+	}
 	return filepath.Join(home, ".claude")
 }

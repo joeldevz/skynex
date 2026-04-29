@@ -229,7 +229,7 @@ func getCommit(dir string) string {
 	cmd.Dir = dir
 	out, err := cmd.Output()
 	if err != nil {
-		return "unknown"
+		return "unknown-"
 	}
 	return trimNewline(string(out))
 }

@@ -21,6 +21,14 @@ import (
 	"github.com/joeldevz/skynex/internal/runner"
 )
 
+// truncate safely truncates a string to n characters
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n]
+}
+
 // version is set by goreleaser via -ldflags "-X main.version=..."
 var (
 	version = "dev"
@@ -180,7 +188,7 @@ func main() {
 		// Print results
 		fmt.Println("\nInstallation complete!")
 		for _, r := range results {
-			fmt.Printf("\n  %s @ %s (%s)\n", r.PackageID, r.ResolvedVersion, r.Commit[:8])
+			fmt.Printf("\n  %s @ %s (%s)\n", r.PackageID, r.ResolvedVersion, truncate(r.Commit, 8))
 			for target, tr := range r.Targets {
 				fmt.Printf("    [%s] %s: %s\n", target, tr.Status, joinStrings(tr.Artifacts))
 			}
@@ -666,7 +674,7 @@ func handleUpdate(pkg string, stateDir string) {
 	// Print results
 	fmt.Println("\n  Update complete!")
 	for _, r := range results {
-		fmt.Printf("    %s @ %s (%s)\n", r.PackageID, r.ResolvedVersion, r.Commit[:8])
+		fmt.Printf("    %s @ %s (%s)\n", r.PackageID, r.ResolvedVersion, truncate(r.Commit, 8))
 		for target, tr := range r.Targets {
 			fmt.Printf("      [%s] %s\n", target, tr.Status)
 		}

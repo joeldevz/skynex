@@ -20,8 +20,17 @@ func InstallOpencode(srcDir string) error {
 	// Read backup of existing config before overwrite
 	existingConfigPath := filepath.Join(target, "opencode.json")
 	var backupConfig map[string]json.RawMessage
+	var rawBackup []byte
 	if data, err := os.ReadFile(existingConfigPath); err == nil {
-		json.Unmarshal(data, &backupConfig)
+		rawBackup = data
+		if err := json.Unmarshal(data, &backupConfig); err != nil {
+			// File exists but can't be parsed — save raw backup before we lose it
+			fmt.Fprintf(os.Stderr, "Warning: existing opencode.json is malformed, preserving as .bak\n")
+			backupPath := existingConfigPath + ".bak"
+			if err := writeFile(backupPath, string(rawBackup)); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: could not save backup: %v\n", err)
+			}
+		}
 	}
 
 	// Backup existing dir
@@ -63,13 +72,16 @@ func mergeOpencodeConfig(installedPath string, backup map[string]json.RawMessage
 
 	var installed map[string]json.RawMessage
 	if err := json.Unmarshal(data, &installed); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: installed opencode.json is malformed: %v\n", err)
 		return err
 	}
 
 	// Get backup MCP
 	var backupMCP map[string]json.RawMessage
 	if raw, ok := backup["mcp"]; ok {
-		json.Unmarshal(raw, &backupMCP)
+		if err := json.Unmarshal(raw, &backupMCP); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: could not parse backup MCP config: %v\n", err)
+		}
 	}
 	if backupMCP == nil {
 		backupMCP = make(map[string]json.RawMessage)
@@ -78,9 +90,12 @@ func mergeOpencodeConfig(installedPath string, backup map[string]json.RawMessage
 	// Installed MCP wins over backup
 	var installedMCP map[string]json.RawMessage
 	if raw, ok := installed["mcp"]; ok {
-		json.Unmarshal(raw, &installedMCP)
-		for k, v := range installedMCP {
-			backupMCP[k] = v
+		if err := json.Unmarshal(raw, &installedMCP); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: could not parse installed MCP config: %v\n", err)
+		} else {
+			for k, v := range installedMCP {
+				backupMCP[k] = v
+			}
 		}
 	}
 
@@ -123,11 +138,25 @@ func backupDirIfExists(dir string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		return
 	}
-	// Just log — actual backup would copy, but we want non-destructive install
-	fmt.Printf("    Note: existing config at %s will be updated\n", dir)
+	
+	// Save opencode.json as backup before overwrite
+	configPath := filepath.Join(dir, "opencode.json")
+	if data, err := os.ReadFile(configPath); err == nil {
+		backupPath := configPath + ".bak"
+		if err := writeFile(backupPath, string(data)); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: could not save opencode.json backup: %v\n", err)
+		} else {
+			fmt.Printf("    Backed up existing config to %s.bak\n", configPath)
+		}
+	}
 }
 
 func opencodeDir() string {
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: cannot determine home directory: %v\n", err)
+		// Return a fallback path that will likely fail gracefully downstream
+		return "~/.config/opencode"
+	}
 	return filepath.Join(home, ".config", "opencode")
 }
