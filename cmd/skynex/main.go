@@ -787,7 +787,6 @@ func handleStatus() {
 	tools := []struct{ name, binary string }{
 		{"opencode", "opencode"},
 		{"claude", "claude"},
-		{"neurox", "neurox"},
 		{"git", "git"},
 	}
 	for _, t := range tools {
@@ -836,7 +835,7 @@ Examples:
   skynex profile backend delete
 
 Options:
-  --package PACKAGE       Package to install (skills, neurox). Repeatable.
+  --package PACKAGE       Package to install (skills). Repeatable.
   --target TARGET         Target: claude, opencode, or both. Repeatable.
   --version PKG=VER       Version for a package (e.g., skills=latest). Repeatable.
   --advisor-model MODEL   Advisor model (e.g., anthropic/claude-opus-4-6).

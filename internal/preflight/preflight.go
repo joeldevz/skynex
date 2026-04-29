@@ -63,10 +63,10 @@ func Run(req *models.InstallRequest, cat *models.Catalog) []*models.ValidationIs
 			if !neuroxAlsoInstalling {
 				if _, err := exec.LookPath("neurox"); err != nil {
 					issues = append(issues, &models.ValidationIssue{
-						Level:     "error",
+						Level:     "warning",
 						PackageID: pkgID,
-						Message:   "neurox not found in PATH (required by this package)",
-						FixHint:   "Add neurox to the install: skynex --package neurox --package skills",
+						Message:   "neurox not found in PATH (recommended for this package)",
+						FixHint:   "Install neurox from https://github.com/joeldevz/neurox",
 					})
 				}
 			}
@@ -98,8 +98,6 @@ func Run(req *models.InstallRequest, cat *models.Catalog) []*models.ValidationIs
 						FixHint:   "Check permissions on " + claudeDir,
 					})
 				}
-			case pkgID == "neurox":
-				// neurox is downloaded as a pre-built binary — no Go toolchain needed
 			}
 		}
 	}

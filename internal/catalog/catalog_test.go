@@ -40,20 +40,6 @@ func TestLoad_SkillsPackageExists(t *testing.T) {
 	}
 }
 
-func TestLoad_NeuroxPackageExists(t *testing.T) {
-	cat, _ := catalog.Load()
-	pkg, ok := cat.Packages["neurox"]
-	if !ok {
-		t.Fatal("'neurox' package not found in catalog")
-	}
-	if pkg.Adapter != "neurox_binary" {
-		t.Errorf("pkg.Adapter = %q, want 'neurox_binary'", pkg.Adapter)
-	}
-	if pkg.RequiresNeurox {
-		t.Error("neurox package should not require neurox (circular dependency)")
-	}
-}
-
 func TestLoad_AllPackagesHaveRepoURL(t *testing.T) {
 	cat, _ := catalog.Load()
 	for id, pkg := range cat.Packages {

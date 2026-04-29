@@ -9,15 +9,6 @@
       "defaultVersion": "latest",
       "requiresNeurox": true,
       "installStrategy": "git_checkout_setup_script"
-    },
-    "neurox": {
-      "displayName": "Neurox",
-      "repoUrl": "https://github.com/joeldevz/neurox.git",
-      "adapter": "neurox_binary",
-      "supportedTargets": ["claude", "opencode"],
-      "defaultVersion": "latest",
-      "requiresNeurox": false,
-      "installStrategy": "git_checkout_go_build"
     }
   }
 }

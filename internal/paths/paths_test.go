@@ -43,36 +43,12 @@ func TestStateDir_Unix(t *testing.T) {
 	}
 }
 
-func TestNeuroxBinDir_Unix(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Unix-only test")
-	}
-	got := paths.NeuroxBinDir()
-	if got == "" {
-		t.Error("NeuroxBinDir() returned empty string")
-	}
-}
-
-func TestNeuroxBinName(t *testing.T) {
-	got := paths.NeuroxBinName()
-	if runtime.GOOS == "windows" {
-		if got != "neurox.exe" {
-			t.Errorf("NeuroxBinName() = %q, want neurox.exe on Windows", got)
-		}
-	} else {
-		if got != "neurox" {
-			t.Errorf("NeuroxBinName() = %q, want neurox on non-Windows", got)
-		}
-	}
-}
-
 func TestNoDirEmpty(t *testing.T) {
 	// All dirs must be non-empty
 	fns := map[string]func() string{
-		"ClaudeDir":    paths.ClaudeDir,
-		"OpencodeDir":  paths.OpencodeDir,
-		"StateDir":     paths.StateDir,
-		"NeuroxBinDir": paths.NeuroxBinDir,
+		"ClaudeDir":   paths.ClaudeDir,
+		"OpencodeDir": paths.OpencodeDir,
+		"StateDir":    paths.StateDir,
 	}
 	for name, fn := range fns {
 		if got := fn(); got == "" {
