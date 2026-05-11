@@ -1,0 +1,19 @@
+id: sec_xss
+item: security
+type: positive
+agent: security
+input: "Security review src/render.ts for XSS vulnerabilities."
+fixture: sec/xss
+checks:
+  - name: detects_xss
+    type: contains_any
+    patterns: ["XSS", "cross-site scripting", "innerHTML", "unsanitized", "injection"]
+  - name: file_reference
+    type: regex_match
+    pattern: 'render\.ts(:\d+)?'
+  - name: remediation_present
+    type: contains_any
+    patterns: ["sanitize", "escape", "textContent", "DOMPurify", "encode"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

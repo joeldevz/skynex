@@ -1,0 +1,16 @@
+id: skv_passes_clean
+item: skill-validator
+type: positive
+agent: skill-validator
+input: "Validate the recent changes against project skills. Implementation has corresponding tests."
+fixture: skv/clean
+checks:
+  - name: reports_compliant
+    type: contains_any
+    patterns: ["compliant", "pass", "no violation", "all good", "meets"]
+  - name: no_false_violation
+    type: not_contains
+    patterns: ["violation", "blocked", "non-compliant", "fail"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, cost_usd]

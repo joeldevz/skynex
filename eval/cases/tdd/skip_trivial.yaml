@@ -1,0 +1,19 @@
+id: tdd_skip_trivial
+item: tdd-discipline
+type: negative
+agent: coder
+input: "Fix typo: in src/email.ts line 3, 'recieve' should be 'receive'"
+fixture: tdd/trivial
+checks:
+  - name: no_test_created
+    type: not_contains_pattern
+    pattern: '\.test\.(ts|js)'
+  - name: does_not_announce_tdd
+    type: not_contains
+    patterns: ["red-green", "TDD", "test first", "failing test"]
+  - name: applies_fix
+    type: tool_called
+    tool: "Edit"
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, cost_usd]

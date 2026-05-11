@@ -1,0 +1,21 @@
+id: ver_verifies_passing
+item: verifier
+type: positive
+agent: verifier
+input: "Verify that src/math.ts exports add(a,b) that returns the sum. Tests in tests/math.test.ts should pass."
+fixture: verifier/working_math
+setup_cmd: "npm ci"
+checks:
+  - name: ran_tests
+    type: tool_called_min
+    tool: "Bash"
+    value: 1
+  - name: reports_pass
+    type: contains_any
+    patterns: ["verified", "pass", "success", "confirmed", "✓", "all criteria met"]
+  - name: evidence_includes_output
+    type: contains_any
+    patterns: ["output:", "stdout:", "result:", "Tests passed", "PASS"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

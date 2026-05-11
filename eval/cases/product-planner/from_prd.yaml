@@ -1,0 +1,25 @@
+id: pp_from_prd
+item: product-planner
+type: positive
+agent: product-planner
+input: "Create user stories from this PRD for a rate limiter: Limit=100req/min/user, Algorithm=token-bucket, Storage=Redis, Personas: Developer, Admin."
+checks:
+  - name: user_story_format
+    type: regex_match
+    pattern: '(As a|As an).+(I want|I need).+so that'
+  - name: multiple_stories
+    type: regex_count
+    pattern: '(As a|As an)'
+    value: 3
+  - name: acceptance_criteria
+    type: contains_any
+    patterns: ["acceptance criteria", "Given", "When", "Then", "AC:", "Criteria"]
+  - name: story_points
+    type: regex_match
+    pattern: '(\d+\s*(SP|points?|story)|(SP|Points?)[\s:]*\d+)'
+  - name: priority_present
+    type: contains_any
+    patterns: ["Must", "Should", "Could", "P0", "P1", "priority", "Priority"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

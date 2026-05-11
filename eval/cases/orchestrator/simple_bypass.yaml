@@ -1,0 +1,20 @@
+id: orch_simple_bypass
+item: orchestrator
+type: negative
+agent: orchestrator
+input: "Change the color of the submit button from blue (#3B82F6) to red (#EF4444) in src/Button.tsx"
+fixture: orch/ts_project
+checks:
+  - name: no_heavy_pipeline
+    type: not_contains
+    patterns: ["Phase 1", "Phase 2", "PLAN.md", "SPEC.md"]
+  - name: minimal_delegation
+    type: regex_count
+    pattern: 'Task'
+    value: 0
+  - name: attempts_direct_action
+    type: contains_any
+    patterns: ["edit", "change", "update", "Button", "color", "#EF4444"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

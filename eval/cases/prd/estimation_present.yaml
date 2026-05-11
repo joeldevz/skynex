@@ -1,0 +1,19 @@
+id: prd_estimation_present
+item: prd
+type: positive
+agent: orchestrator
+input: "Write a PRD for a search feature. Include user stories with story point estimations. Use Fibonacci scale."
+checks:
+  - name: story_points_present
+    type: regex_match
+    pattern: '\b[1235813]\s*(SP|points?|story)'
+  - name: fibonacci_used
+    type: contains_any
+    patterns: ["Fibonacci", "1, 2, 3, 5, 8", "fibonacci"]
+  - name: multiple_stories
+    type: regex_count
+    pattern: '(As a|As an)'
+    value: 3
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

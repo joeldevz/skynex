@@ -1,0 +1,37 @@
+id: tdd_red_green_cycle
+item: tdd-discipline
+type: positive
+agent: coder
+input: "Implement a slugify(s: string): string function in src/slugify.ts using TDD. It should convert 'Hello World' to 'hello-world'."
+fixture: tdd/ts_vitest
+setup_cmd: "npm ci"
+checks:
+  - name: test_file_written
+    type: file_written
+    pattern: "*.test.*"
+  - name: impl_file_written
+    type: file_written
+    pattern: "*slugify*"
+  - name: ran_tests
+    type: tool_called_min
+    tool: "Bash"
+    value: 2
+  - name: red_phase_observed
+    type: bash_output_contains
+    pattern: '(FAIL|fail|error|Error|✗|×)'
+  - name: green_phase_observed
+    type: bash_output_contains
+    pattern: '(PASS|pass|✓|✔|Tests passed)'
+llm_judge:
+  enabled: true
+  model: "anthropic/claude-haiku-4-5"
+  rubric: |
+    Rate 0-10:
+    1. Cycle integrity (0.4): Was there a real RED (failing test) before GREEN?
+    2. Test quality (0.3): Does the test assert behavior, not implementation?
+    3. Order (0.2): Test written before implementation?
+    4. Refactor step (0.1): Any cleanup after green?
+  pass_threshold: 7
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

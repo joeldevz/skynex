@@ -1,0 +1,19 @@
+id: pp_dependencies
+item: product-planner
+type: positive
+agent: product-planner
+input: "Plan user stories for a checkout flow with 3 subsystems: payment processing, inventory management, and email notifications. Show dependencies."
+checks:
+  - name: multiple_stories
+    type: regex_count
+    pattern: '(As a|As an)'
+    value: 3
+  - name: dependencies_identified
+    type: contains_any
+    patterns: ["depends on", "blocks", "prerequisite", "after", "before", "dependency"]
+  - name: covers_all_subsystems
+    type: contains_all
+    patterns: ["payment", "inventory", "email"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

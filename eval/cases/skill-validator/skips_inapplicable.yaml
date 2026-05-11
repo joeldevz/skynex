@@ -1,0 +1,16 @@
+id: skv_skips_inapplicable
+item: skill-validator
+type: positive
+agent: skill-validator
+input: "Validate skills for a docs-only change: updated README.md with installation instructions."
+fixture: skv/docs_only
+checks:
+  - name: marks_na
+    type: contains_any
+    patterns: ["not applicable", "N/A", "skip", "docs only", "no code"]
+  - name: no_violation_reported
+    type: not_contains
+    patterns: ["violation", "blocked", "fail"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, cost_usd]

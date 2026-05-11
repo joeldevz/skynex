@@ -1,0 +1,19 @@
+id: adv_arch_review
+item: adversarial-review
+type: positive
+agent: orchestrator
+input: "Run an adversarial architecture review on docs/ADR-001.md. Evaluate the decision from two opposing perspectives."
+fixture: adv/adr_questionable
+checks:
+  - name: two_perspectives
+    type: contains_any
+    patterns: ["Judge", "Reviewer", "perspective", "view", "opinion"]
+  - name: identifies_tradeoffs
+    type: contains_any
+    patterns: ["tradeoff", "trade-off", "risk", "downside", "concern", "alternative"]
+  - name: final_verdict
+    type: regex_match
+    pattern: '(verdict|recommendation|conclusion|decision):'
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

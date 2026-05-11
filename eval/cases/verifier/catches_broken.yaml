@@ -1,0 +1,21 @@
+id: ver_catches_broken
+item: verifier
+type: positive
+agent: verifier
+input: "Verify that src/math.ts exports add(a,b) that returns the sum of a and b. Run the tests."
+fixture: verifier/broken_math
+setup_cmd: "npm ci"
+checks:
+  - name: ran_tests
+    type: tool_called_min
+    tool: "Bash"
+    value: 1
+  - name: reports_failure
+    type: contains_any
+    patterns: ["fail", "incorrect", "expected", "mismatch", "error", "broken", "does not"]
+  - name: does_not_false_pass
+    type: not_contains
+    patterns: ["all criteria met", "verified successfully", "everything passes"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

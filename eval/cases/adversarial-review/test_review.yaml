@@ -1,0 +1,19 @@
+id: adv_test_review
+item: adversarial-review
+type: positive
+agent: orchestrator
+input: "Run an adversarial review on the tests in tests/parser.test.ts. Use dual-judge approach."
+fixture: adv/weak_tests
+checks:
+  - name: two_perspectives
+    type: contains_any
+    patterns: ["Judge A", "Judge B", "Reviewer 1", "Reviewer 2", "first perspective", "second perspective"]
+  - name: findings_present
+    type: contains_any
+    patterns: ["finding", "issue", "weak", "concern", "improvement"]
+  - name: consensus_section
+    type: contains_any
+    patterns: ["consensus", "agreed", "both", "common"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

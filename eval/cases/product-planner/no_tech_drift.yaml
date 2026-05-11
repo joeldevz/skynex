@@ -1,0 +1,18 @@
+id: pp_no_tech_drift
+item: product-planner
+type: positive
+agent: product-planner
+input: "Plan user stories for a user search feature. Focus on product requirements only."
+checks:
+  - name: has_user_stories
+    type: regex_match
+    pattern: '(As a|As an)'
+  - name: no_specific_tech
+    type: not_contains
+    patterns: ["PostgreSQL", "Redis", "React", "Express", "Lambda", "DynamoDB", "MongoDB"]
+  - name: product_focused
+    type: contains_any
+    patterns: ["user", "search", "result", "filter", "experience"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

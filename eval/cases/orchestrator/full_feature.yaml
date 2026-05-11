@@ -1,0 +1,36 @@
+id: orch_full_feature
+item: orchestrator
+type: positive
+agent: orchestrator
+input: "Add a slugify(s: string): string function to this TS project. Use TDD. It should convert 'Hello World' to 'hello-world'."
+fixture: orch/ts_project
+setup_cmd: "npm ci"
+turns:
+  - answer: "use recommended"
+  - answer: "use recommended"
+  - answer: "use recommended"
+max_turns: 10
+checks:
+  - name: delegates_to_subagents
+    type: tool_called_min
+    tool: "Task"
+    value: 2
+  - name: does_not_write_code_directly
+    type: not_contains_pattern
+    pattern: 'function slugify'
+  - name: pipeline_completes
+    type: contains_any
+    patterns: ["complete", "done", "implemented", "finished", "success"]
+llm_judge:
+  enabled: true
+  model: "anthropic/claude-sonnet-4-6"
+  rubric: |
+    Rate 0-10:
+    1. Routing (0.3): Did it delegate to appropriate subagents (planner, coder, verifier)?
+    2. Sequencing (0.2): Logical phase order (plan before code, verify after)?
+    3. Aggregation (0.2): Does final output summarize each phase?
+    4. Failure handling (0.3): Would it propagate failures honestly?
+  pass_threshold: 7
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, tokens_output, duration_ms, tool_calls_count, cost_usd]

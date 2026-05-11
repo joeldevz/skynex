@@ -1,0 +1,19 @@
+id: tp_with_existing_code
+item: tech-planner
+type: positive
+agent: tech-planner
+input: "Plan slices for adding string helper functions (capitalize, truncate, camelCase) to the existing utils module."
+fixture: tp/ts_with_utils
+checks:
+  - name: references_existing
+    type: contains_any
+    patterns: ["utils", "existing", "src/utils"]
+  - name: reads_codebase
+    type: tool_called
+    tool: "Read"
+  - name: slices_present
+    type: regex_match
+    pattern: '(slice|Slice|step|Step)'
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

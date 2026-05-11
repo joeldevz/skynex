@@ -1,0 +1,16 @@
+id: grill_negative_clear_specs
+item: grill-me
+type: negative
+agent: orchestrator
+input: "Add a console.log('hello') to the first line of src/index.ts"
+checks:
+  - name: no_grilling
+    type: regex_count
+    pattern: '\?'
+    value: 0
+  - name: executes_directly
+    type: tool_called
+    tool: "Edit"
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, cost_usd]

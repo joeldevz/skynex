@@ -1,0 +1,19 @@
+id: skv_detects_tdd_violation
+item: skill-validator
+type: positive
+agent: skill-validator
+input: "Validate the recent changes against project skills. The implementation in src/calc.ts was written without any tests."
+fixture: skv/tdd_violation
+checks:
+  - name: detects_violation
+    type: contains_any
+    patterns: ["violation", "non-compliant", "missing test", "TDD", "no test"]
+  - name: references_skill
+    type: contains_any
+    patterns: ["tdd-discipline", "tdd", "test-driven"]
+  - name: has_file_reference
+    type: regex_match
+    pattern: '[\w/.-]+\.(ts|js|go|py)'
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

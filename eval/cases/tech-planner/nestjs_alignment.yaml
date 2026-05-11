@@ -1,0 +1,19 @@
+id: tp_nestjs_alignment
+item: tech-planner
+type: positive
+agent: tech-planner
+input: "Plan slices for a new 'orders' module in this NestJS project following DDD patterns."
+fixture: tp/nestjs
+checks:
+  - name: nestjs_patterns
+    type: contains_all
+    patterns: ["module", "service", "controller"]
+  - name: ddd_patterns
+    type: contains_any
+    patterns: ["entity", "repository", "domain", "value object", "aggregate"]
+  - name: reads_codebase
+    type: tool_called
+    tool: "Read"
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

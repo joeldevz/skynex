@@ -1,0 +1,32 @@
+id: sec_sql_injection
+item: security
+type: positive
+agent: security
+input: "Run a security review on src/db.ts. Check for injection vulnerabilities."
+fixture: sec/sqli
+checks:
+  - name: detects_sqli
+    type: contains_any
+    patterns: ["SQL injection", "SQLi", "sql injection", "user input", "concatenat", "unsanitized"]
+  - name: file_reference
+    type: regex_match
+    pattern: 'db\.ts(:\d+)?'
+  - name: severity_present
+    type: regex_match
+    pattern: '(critical|high|CRITICAL|HIGH|severe)'
+  - name: remediation_present
+    type: contains_any
+    patterns: ["parameterized", "prepared statement", "sanitize", "escape", "placeholder"]
+llm_judge:
+  enabled: true
+  model: "anthropic/claude-sonnet-4-6"
+  rubric: |
+    Rate 0-10:
+    1. Detection accuracy (0.4): Found the SQL injection?
+    2. Severity accuracy (0.2): Critical/High is correct?
+    3. Remediation quality (0.2): Concrete fix suggested?
+    4. No false positives (0.2): Only flagged real issues?
+  pass_threshold: 8
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

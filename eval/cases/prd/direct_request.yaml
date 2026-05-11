@@ -1,0 +1,18 @@
+id: prd_direct_request
+item: prd
+type: positive
+agent: orchestrator
+input: "Write a PRD for adding two-factor authentication (2FA) to our user login system. Assume SMS and TOTP as methods."
+checks:
+  - name: prd_sections_present
+    type: contains_all
+    patterns: ["Problem", "Goal", "Requirement", "Acceptance"]
+  - name: mentions_2fa_methods
+    type: contains_all
+    patterns: ["SMS", "TOTP"]
+  - name: has_user_stories
+    type: regex_match
+    pattern: '(As a|As an).+(I want|I need)'
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

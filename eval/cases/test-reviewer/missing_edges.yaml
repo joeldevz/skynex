@@ -1,0 +1,19 @@
+id: tr_missing_edges
+item: test-reviewer
+type: positive
+agent: test-reviewer
+input: "Review tests/calc.test.ts for missing edge cases and coverage gaps."
+fixture: tr/missing_edges
+checks:
+  - name: identifies_missing
+    type: contains_any
+    patterns: ["missing", "edge case", "not tested", "gap", "absent", "lacks"]
+  - name: suggests_specific_cases
+    type: contains_any
+    patterns: ["null", "empty", "zero", "negative", "boundary", "overflow", "undefined"]
+  - name: actionable_suggestions
+    type: contains_any
+    patterns: ["add", "include", "test for", "should cover", "consider testing"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

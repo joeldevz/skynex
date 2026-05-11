@@ -1,0 +1,16 @@
+id: tr_clean_tests
+item: test-reviewer
+type: positive
+agent: test-reviewer
+input: "Review tests/quality.test.ts for quality issues. Report any blocking problems."
+fixture: tr/clean
+checks:
+  - name: low_noise
+    type: not_contains
+    patterns: ["critical", "blocking", "must fix", "CRITICAL"]
+  - name: acknowledges_quality
+    type: contains_any
+    patterns: ["good", "well-written", "solid", "clean", "no major", "minor"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

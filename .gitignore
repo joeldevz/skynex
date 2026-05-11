@@ -2,6 +2,11 @@ scripts/__pycache__/
 **/__pycache__/
 *.pyc
 .build/
+bin/
+
+# Compiled binaries (root)
+/skynex
+/skynex-eval
 
 # Generated embed assets (populated by make embed / go run ./cmd/tools/sync-assets/)
 internal/assets/data/*

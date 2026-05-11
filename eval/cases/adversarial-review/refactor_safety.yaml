@@ -1,0 +1,16 @@
+id: adv_refactor_safety
+item: adversarial-review
+type: positive
+agent: orchestrator
+input: "Review the safety of this refactor. The entire user service was split into 3 smaller modules. Evaluate risks from two perspectives."
+fixture: adv/refactor_diff
+checks:
+  - name: two_perspectives
+    type: contains_any
+    patterns: ["Judge", "Reviewer", "perspective", "first", "second"]
+  - name: risk_analysis
+    type: contains_any
+    patterns: ["risk", "breaking", "regression", "compatibility", "interface"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

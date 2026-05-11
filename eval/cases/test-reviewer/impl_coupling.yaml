@@ -1,0 +1,16 @@
+id: tr_impl_coupling
+item: test-reviewer
+type: positive
+agent: test-reviewer
+input: "Review tests/service.test.ts for implementation coupling. Are tests testing behavior or internal details?"
+fixture: tr/coupled
+checks:
+  - name: detects_coupling
+    type: contains_any
+    patterns: ["coupling", "implementation detail", "internal", "private", "brittle"]
+  - name: suggests_behavior_testing
+    type: contains_any
+    patterns: ["behavior", "public API", "contract", "output", "observable"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

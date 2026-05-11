@@ -1,0 +1,24 @@
+id: vbc_passes_with_evidence
+item: verification-before-completion
+type: positive
+agent: verifier
+input: "Verify that src/math.ts:add(a,b) returns the correct sum. Tests are in tests/math.test.ts. Run them."
+fixture: vbc/passing_tests
+setup_cmd: "npm ci"
+checks:
+  - name: ran_tests
+    type: tool_called
+    tool: "Bash"
+  - name: criteria_enumerated
+    type: regex_match
+    pattern: '(criteria|criterion|acceptance|verify)'
+  - name: evidence_present
+    type: contains_any
+    patterns: ["pass", "PASS", "success", "verified", "✓"]
+  - name: ran_actual_command
+    type: tool_called_min
+    tool: "Bash"
+    value: 1
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

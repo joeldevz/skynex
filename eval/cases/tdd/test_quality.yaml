@@ -1,0 +1,24 @@
+id: tdd_test_quality
+item: tdd-discipline
+type: positive
+agent: coder
+input: "Add comprehensive tests for the existing src/parser.ts:parse(input: string) function. It parses 'key=value' pairs separated by '&'."
+fixture: tdd/ts_vitest_existing
+setup_cmd: "npm ci"
+checks:
+  - name: test_file_written
+    type: file_written
+    pattern: "*.test.*"
+  - name: ran_tests
+    type: tool_called_min
+    tool: "Bash"
+    value: 1
+  - name: no_trivial_assertions
+    type: not_contains_pattern
+    pattern: 'expect\(true\)'
+  - name: tests_edge_cases
+    type: contains_any
+    patterns: ["empty", "null", "undefined", "edge", "boundary", "invalid"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

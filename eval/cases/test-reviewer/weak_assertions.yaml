@@ -1,0 +1,19 @@
+id: tr_weak_assertions
+item: test-reviewer
+type: positive
+agent: test-reviewer
+input: "Review the test quality of tests/parser.test.ts. Identify weak assertions and suggest improvements."
+fixture: tr/weak
+checks:
+  - name: detects_weak
+    type: contains_any
+    patterns: ["toBeTruthy", "toBeDefined", "weak", "non-specific", "vague"]
+  - name: line_references
+    type: regex_match
+    pattern: '(line\s*\d+|:\d+)'
+  - name: suggests_improvements
+    type: contains_any
+    patterns: ["instead", "replace", "should use", "consider", "toEqual", "toBe"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

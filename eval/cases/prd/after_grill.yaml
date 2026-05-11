@@ -1,0 +1,32 @@
+id: prd_after_grill
+item: prd
+type: positive
+agent: orchestrator
+input: "Write the PRD for a rate limiter feature. Here's the design tree: Algorithm=token-bucket, Limit=100req/min/user, Storage=Redis, Scope=API-only."
+fixture: prd/with_design_tree
+checks:
+  - name: prd_sections_present
+    type: contains_all
+    patterns: ["Problem", "Goal", "Requirement", "Acceptance Criteria"]
+  - name: story_points_present
+    type: regex_match
+    pattern: '(SP|Story Point|Points?)[\s:]*\d+'
+  - name: testable_criteria
+    type: regex_match
+    pattern: '(Given|When|Then|must|should|shall)'
+  - name: references_decisions
+    type: contains_any
+    patterns: ["token-bucket", "100", "Redis", "rate limit"]
+llm_judge:
+  enabled: true
+  model: "anthropic/claude-sonnet-4-6"
+  rubric: |
+    Rate 0-10:
+    1. Coherence (0.25): Do goals/requirements/criteria align?
+    2. Specificity (0.25): Are requirements concrete (numbers, names)?
+    3. Testability (0.25): Can each AC be verified mechanically?
+    4. Faithfulness (0.25): No invented facts beyond input?
+  pass_threshold: 7
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, tokens_output, duration_ms, cost_usd]

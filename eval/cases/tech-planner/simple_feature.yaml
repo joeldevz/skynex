@@ -1,0 +1,22 @@
+id: tp_simple_feature
+item: tech-planner
+type: positive
+agent: tech-planner
+input: "Plan technical slices for adding a slugify utility function with full test coverage to this TypeScript project."
+fixture: tp/ts_minimal
+checks:
+  - name: slices_present
+    type: regex_match
+    pattern: '(slice|Slice|step|Step)\s*\d+'
+  - name: files_mentioned
+    type: regex_match
+    pattern: '[\w/.-]+\.(ts|js)'
+  - name: tdd_flag
+    type: contains_any
+    patterns: ["tdd", "TDD", "test", "Test"]
+  - name: reads_codebase
+    type: tool_called
+    tool: "Read"
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

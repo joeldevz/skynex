@@ -1,0 +1,21 @@
+id: orch_handles_failure
+item: orchestrator
+type: positive
+agent: orchestrator
+input: "Implement a divide(a, b) function with TDD. It should handle division by zero."
+fixture: orch/ts_project_failing
+setup_cmd: "npm ci"
+turns:
+  - answer: "use recommended"
+  - answer: "use recommended"
+max_turns: 10
+checks:
+  - name: surfaces_failure
+    type: contains_any
+    patterns: ["fail", "error", "blocked", "did not pass", "issue", "problem"]
+  - name: does_not_claim_success_falsely
+    type: not_contains
+    patterns: ["all tests pass", "successfully implemented", "done without issues"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

@@ -1,0 +1,16 @@
+id: sec_clean_code
+item: security
+type: positive
+agent: security
+input: "Run a security review on src/safe.ts. Report any vulnerabilities found."
+fixture: sec/safe
+checks:
+  - name: no_critical_findings
+    type: not_contains
+    patterns: ["critical", "CRITICAL", "high severity", "HIGH"]
+  - name: reports_clean
+    type: contains_any
+    patterns: ["no critical", "no vulnerabilities", "secure", "pass", "clean", "no issues"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, cost_usd]

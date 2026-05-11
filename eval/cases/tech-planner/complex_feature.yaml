@@ -1,0 +1,20 @@
+id: tp_complex_feature
+item: tech-planner
+type: positive
+agent: tech-planner
+input: "Plan slices for adding a rate limiter middleware with Redis backing. Include risk analysis."
+fixture: tp/ts_complex
+checks:
+  - name: multiple_slices
+    type: regex_count
+    pattern: '(slice|Slice|step|Step)\s*\d+'
+    value: 2
+  - name: risks_section
+    type: contains_any
+    patterns: ["risk", "Risk", "unknown", "assumption", "caveat"]
+  - name: dependencies_noted
+    type: contains_any
+    patterns: ["Redis", "redis", "dependency", "external"]
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

@@ -1,0 +1,22 @@
+id: orch_security_path
+item: orchestrator
+type: positive
+agent: orchestrator
+input: "Implement a JWT token verifier for our Express API. It should validate tokens from the Authorization header."
+fixture: orch/jwt_starter
+turns:
+  - answer: "use recommended"
+  - answer: "use recommended"
+  - answer: "use recommended"
+max_turns: 10
+checks:
+  - name: invokes_security
+    type: contains_any
+    patterns: ["security", "Security", "vulnerability", "review"]
+  - name: delegates_work
+    type: tool_called_min
+    tool: "Task"
+    value: 1
+n_runs: 3
+aggregation: median
+metrics: [tokens_total, duration_ms, tool_calls_count, cost_usd]

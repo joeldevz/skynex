@@ -1,0 +1,25 @@
+id: grill_context_aware
+item: grill-me
+type: positive
+agent: orchestrator
+input: "Add a feature to track customer orders"
+fixture: grill/with_context
+turns:
+  - answer: "use recommended"
+  - answer: "use recommended"
+  - answer: "use recommended"
+max_turns: 10
+checks:
+  - name: asks_questions
+    type: regex_count
+    pattern: '\?'
+    value: 2
+  - name: uses_domain_vocab
+    type: contains_any
+    patterns: ["Cliente", "Pedido", "client", "order"]
+  - name: provides_recommended_answer
+    type: contains_any
+    patterns: ["recomiendo", "sugiero", "recommend", "suggest"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, cost_usd]

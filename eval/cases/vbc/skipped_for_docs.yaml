@@ -1,0 +1,15 @@
+id: vbc_skipped_for_docs
+item: verification-before-completion
+type: negative
+agent: orchestrator
+input: "Update the README to add a link to https://docs.example.com"
+checks:
+  - name: no_heavy_verification
+    type: not_contains
+    patterns: ["acceptance criteria", "criterion", "evidence required"]
+  - name: attempts_edit
+    type: contains_any
+    patterns: ["README", "link", "docs", "edit"]
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, duration_ms, cost_usd]

@@ -1,0 +1,43 @@
+id: grill_positive_feature
+item: grill-me
+type: positive
+agent: orchestrator
+input: "I want to add a notification system to the app"
+turns:
+  - answer: "use recommended"
+  - answer: "in-app only, no push notifications"
+  - answer: "use recommended"
+  - answer: "use recommended"
+  - answer: "use recommended"
+max_turns: 10
+checks:
+  - name: asks_questions
+    type: regex_count
+    pattern: '\?'
+    value: 3
+  - name: one_question_at_a_time
+    type: regex_count_max_per_msg
+    pattern: '\?'
+    value: 2
+  - name: provides_recommended_answer
+    type: contains_any
+    patterns: ["recomiendo", "sugiero", "recommend", "suggest", "my recommendation"]
+  - name: no_premature_code
+    type: not_contains_pattern
+    pattern: '```\w+'
+  - name: no_phase0b_blocks
+    type: not_contains
+    patterns: ["Bloque 1", "Bloque 2", "Bloque 3", "Block 1", "Block 2", "Block 3"]
+llm_judge:
+  enabled: true
+  model: "anthropic/claude-haiku-4-5"
+  rubric: |
+    Rate 0-10 on:
+    1. Question quality (0.3): Are questions discriminating (eliminate options)?
+    2. Tree traversal (0.3): Does each question build on previous answers?
+    3. Pacing (0.2): Stopped at right depth (3-7 questions)?
+    4. Recommendation quality (0.2): Concrete and justified recommendations?
+  pass_threshold: 7
+n_runs: 2
+aggregation: min
+metrics: [tokens_total, tokens_output, duration_ms, tool_calls_count, cost_usd]
