@@ -11,3 +11,6 @@ bin/
 # Generated embed assets (populated by make embed / go run ./cmd/tools/sync-assets/)
 internal/assets/data/*
 !internal/assets/data/README.md
+
+# Local backups (no version)
+*.backup-*

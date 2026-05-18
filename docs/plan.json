@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "generated": "2026-05-18",
+  "source_plan": "docs/IMPROVEMENT-PLAN.md",
+  "description": "Backlog ejecutable estructurado. Cada item es procesable por un agente: tiene archivos exactos, criterios de aceptación, evidencia requerida y dependencias.",
+  "conventions": {
+    "id_format": "{phase}-{order} (e.g. QW7, GA12, A20)",
+    "status_values": ["pending", "in-progress", "blocked", "done"],
+    "priority_values": ["P0", "P1", "P2"],
+    "effort_unit": "minutes",
+    "human_review": "Toda tarea con human_review:true requiere aprobación humana antes de mergear"
+  },
+  "items": [
+    {
+      "id": "D1",
+      "title": "Plantilla .gitmessage con Why + Rejected alternatives",
+      "phase": "disciplina",
+      "priority": "P0",
+      "status": "done",
+      "completed_at": "2026-05-18",
+      "effort_minutes": 15,
+      "human_review": false,
+      "principle": "Un commit = una decisión atómica con trazabilidad de razonamiento (industria estándar + decisión 2026-05-18)",
+      "rationale": "El caso de uso real que dolía 3+ veces era '¿por qué X vs Y?'. Git commit message con secciones Why + Rejected alternatives resuelve esto sin sistema de trazas paralelo. Reemplaza a QW7 (banner) que era decoración sin problema real.",
+      "files": [
+        {
+          "path": ".gitmessage",
+          "action": "create",
+          "operation": "Crear template de commit con secciones: subject, body (qué problema resolvía), rejected alternatives"
+        },
+        {
+          "path": ".git/config",
+          "action": "edit",
+          "operation": "git config commit.template .gitmessage (local config, no se versiona)"
+        }
+      ],
+      "specification": {
+        "template": "{type}({scope}): {subject in imperative, ≤72 chars}\n\n# Why — Qué problema resolvía / contexto que importa\n\n\n# Rejected alternatives (opcional, solo si hubo decisiones de diseño)\n# - Opción X: rechazada porque ...\n# - Opción Y: rechazada porque ...\n\n# Refs — issues, ADRs, docs (no Neurox IDs)\n",
+        "types_allowed": ["feat", "fix", "refactor", "docs", "test", "chore", "style", "perf"],
+        "rules": [
+          "Un commit = una decisión atómica (revertible en aislamiento)",
+          "Subject en imperativo ≤72 chars",
+          "Sección Why obligatoria si el commit no es trivial",
+          "Rejected alternatives solo cuando hubo trade-offs reales",
+          "NO incluir Neurox IDs (acoplamiento + ruido)",
+          "Neurox guarda decisiones que sobreviven al commit (patrones, gotchas, preferencias)"
+        ],
+        "examples_good": [
+          "fix(orchestrator): replace inline Phase 0b with grill-me delegation",
+          "refactor(skills): dedup prd between skills/ and opencode/skills/",
+          "feat(commands): add /pr --chain mode for stacked PRs"
+        ]
+      },
+      "acceptance_criteria": [
+        "Archivo .gitmessage existe en raíz del repo",
+        "git config commit.template apunta a .gitmessage (verificable con git config --get commit.template)",
+        "Template incluye secciones: subject, Why, Rejected alternatives, Refs",
+        "Template NO menciona Neurox IDs (decisión explícita)",
+        "Documentado en CONVENTIONS.md sección Commits"
+      ],
+      "verification": [
+        "ls .gitmessage existe",
+        "git config --get commit.template devuelve .gitmessage",
+        "Probar: git commit (sin -m) abre editor con el template",
+        "grep -i 'neurox' .gitmessage devuelve 0 matches"
+      ],
+      "depends_on": [],
+      "neurox_refs": ["01KRWZVEJ5FA2MHZ5AN6MY6W4Z"],
+      "replaces": "QW7 (banner visual) — eliminado 2026-05-18"
+    },
+    {
+      "id": "QW8",
+      "title": "Fix duplicación grill-me en Phase 0b del orchestrator",
+      "phase": "fase-0-quick-wins",
+      "priority": "P0",
+      "status": "done",
+      "completed_at": "2026-05-18",
+      "completion_notes": "Bonus: orchestrator migrated to opencode/agents/orchestrator.md (Camino B). STEP 0b (1297 chars MANDATORY QUESTIONS block) replaced by DISCOVERY GRILLING that delegates to grill-me skill (454 chars). opencode.json now references {file:./agents/orchestrator.md}. JSON shrunk from 62986 to 49796 bytes. Backup: opencode.json.backup-20260518-130513.",
+      "effort_minutes": 30,
+      "human_review": true,
+      "principle": "Single source of truth para skills (Description Trap + delegación real)",
+      "rationale": "Diagnóstico forense en Neurox confirma que el orchestrator tiene Phase 0b MANDATORY QUESTIONS inline que duplica grill-me con peor implementación (bloques temáticos en vez de one-question-at-a-time). El skill grill-me existe (67L, bien) pero nunca se invoca.",
+      "files": [
+        {
+          "path": "opencode/opencode.json",
+          "action": "edit",
+          "target": "agent.orchestrator.prompt",
+          "operation": "Eliminar bloque 'Phase 0b — MANDATORY QUESTIONS' completo. Reemplazar por delegación al skill grill-me cuando la tarea es no trivial."
+        }
+      ],
+      "specification": {
+        "replacement_text": "Phase 0b — DISCOVERY GRILLING (delega a grill-me skill):\n  Si la tarea NO es trivial (no es typo, no es bugfix crystal-clear), invoca el skill grill-me.\n  El skill grill-me hará preguntas one-at-a-time con recommended answer.\n  NO repliques aquí la lógica de grilling — el skill es la única fuente.\n  Excepción: si Neurox + file context resuelven completamente el design tree, skip grill-me.",
+        "current_phase_0b_to_remove": "Block 1 PURPOSE / Block 2 SCOPE / Block 3 CONSTRAINTS (thematic blocks)"
+      },
+      "acceptance_criteria": [
+        "El prompt del orchestrator NO contiene las palabras 'Block 1 — PURPOSE', 'Block 2 — SCOPE', 'Block 3 — CONSTRAINTS'",
+        "El prompt contiene una referencia explícita a invocar el skill grill-me",
+        "grep 'PURPOSE.*WHAT\\|SCOPE.*WHERE' opencode/opencode.json devuelve 0 matches",
+        "El skill grill-me en opencode/skills/grill-me/SKILL.md no se modifica"
+      ],
+      "verification": [
+        "grep -c 'Block 1' opencode/opencode.json debe ser 0",
+        "grep -c 'grill-me' opencode/opencode.json debe ser >= 1",
+        "Prueba conversacional: pedir feature no trivial y verificar que el agente invoca grill-me en vez de hacer preguntas temáticas inline"
+      ],
+      "depends_on": [],
+      "neurox_refs": ["01KQFT5TW6ZR9N69P7TFEC2RPS"]
+    },
+    {
+      "id": "E1",
+      "title": "Deduplicar skills/prd con opencode/skills/prd",
+      "phase": "limpieza",
+      "priority": "P0",
+      "status": "done",
+      "completed_at": "2026-05-18",
+      "completion_notes": "Files differed only in frontmatter name field (ai-prd-agent vs prd). Canonical = opencode/skills/prd (name=prd). Legacy skills/prd/ removed.",
+      "effort_minutes": 5,
+      "human_review": false,
+      "principle": "Single source of truth + doc rot prohibido (compromiso #6)",
+      "rationale": "Existen 2 copias idénticas de prd/SKILL.md (167L cada una). Una en skills/prd/ (path histórico) y otra en opencode/skills/prd/ (path canónico OpenCode). Debe quedar solo la de opencode/.",
+      "files": [
+        {
+          "path": "skills/prd/SKILL.md",
+          "action": "delete-if-duplicate",
+          "operation": "Comparar con opencode/skills/prd/SKILL.md. Si son iguales (diff vacío), borrar skills/prd/ completo. Si difieren, mergear primero a opencode/skills/prd/ y luego borrar."
+        }
+      ],
+      "specification": {
+        "compare_command": "diff -q skills/prd/SKILL.md opencode/skills/prd/SKILL.md",
+        "delete_command": "rm -rf skills/prd/"
+      },
+      "acceptance_criteria": [
+        "skills/prd/ no existe después de la operación",
+        "opencode/skills/prd/SKILL.md sigue existiendo",
+        "grep -r 'skills/prd' --include='*.md' --include='*.json' .  devuelve 0 referencias rotas"
+      ],
+      "verification": [
+        "ls skills/prd/ debe fallar (no such directory)",
+        "ls opencode/skills/prd/SKILL.md debe existir",
+        "No hay referencias rotas en docs"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "GA12",
+      "title": "Skill review-workload (límite de PRs grandes)",
+      "phase": "fase-1.6-sprint-0.5b",
+      "priority": "P1",
+      "status": "pending",
+      "effort_minutes": 120,
+      "human_review": true,
+      "principle": "Review Workload Harness #18 (Gentle) — proteger al reviewer humano",
+      "rationale": "PRs >400 líneas son deuda de revisión, no productividad. Hoy nada en el sistema detecta que un slice va a generar un PR demasiado grande. Esta skill se invoca antes de cerrar el slice o crear PR.",
+      "files": [
+        {
+          "path": "opencode/skills/review-workload/SKILL.md",
+          "action": "create",
+          "operation": "Nuevo skill ≤120 líneas con frontmatter Description Trap + workflow + thresholds"
+        }
+      ],
+      "specification": {
+        "frontmatter": {
+          "name": "review-workload",
+          "description": "Use before manager closes a slice or /pr creates the PR to evaluate review burden and recommend split strategy."
+        },
+        "thresholds": {
+          "single_pr_ok": "<=400 changed lines",
+          "warn": "401-700 changed lines",
+          "must_chain": "701-1500 changed lines",
+          "exception_required": ">1500 changed lines"
+        },
+        "output_format": {
+          "pr_strategy": "single | chain | feature-track | exception",
+          "reason": "string",
+          "suggested_splits": "array of {title, files, est_lines}",
+          "areas_touched": "array of paths"
+        },
+        "triggers": [
+          "manager about to mark slice done",
+          "/pr command invoked",
+          "tech-planner finishing PLAN.md with large slices"
+        ]
+      },
+      "acceptance_criteria": [
+        "Archivo opencode/skills/review-workload/SKILL.md existe",
+        "Líneas ≤120",
+        "Frontmatter description sigue Description Trap (Use when X)",
+        "Skill genera output con pr_strategy + reason + suggested_splits",
+        "Integrado en /pr command y en manager"
+      ],
+      "verification": [
+        "wc -l opencode/skills/review-workload/SKILL.md devuelve <=120",
+        "Prueba: simular slice con 800 líneas modificadas → skill recomienda chain",
+        "Prueba: simular slice con 150 líneas → skill recomienda single"
+      ],
+      "depends_on": ["QW8"],
+      "neurox_refs": ["01KRWZVEJ5FA2MHZ5AN6MY6W4Z"]
+    },
+    {
+      "id": "GA13",
+      "title": "Extender /pr con --chain y --feature-track",
+      "phase": "fase-1.6-sprint-0.5b",
+      "priority": "P1",
+      "status": "pending",
+      "effort_minutes": 180,
+      "human_review": true,
+      "principle": "Chain Strategy + Delivery Strategy #19/20 (Gentle)",
+      "rationale": "Hoy /pr solo soporta single PR. Para slices grandes necesitamos estrategias: stacked PRs (chain) o feature track (rama vacía intermedia). Trabaja en conjunto con GA12 (review-workload) que recomienda la estrategia.",
+      "files": [
+        {
+          "path": "opencode/commands/pr.md",
+          "action": "edit",
+          "operation": "Añadir modos --single (default), --chain, --feature-track con instrucciones de git para cada modo"
+        }
+      ],
+      "specification": {
+        "modes": {
+          "single": {
+            "default": true,
+            "trigger": "diff <=400 lines OR explicit --single",
+            "behavior": "PR normal contra main"
+          },
+          "chain": {
+            "trigger": "GA12 recommends chain OR explicit --chain",
+            "behavior": "Stacked PRs: cada slice es una branch que apunta a la branch anterior, no a main. Mergea en orden.",
+            "git_pattern": "branch-S1 → branch-S2 → branch-S3 → main"
+          },
+          "feature-track": {
+            "trigger": "explicit --feature-track NAME",
+            "behavior": "Rama vacía intermedia (feature/NAME). Slices van a esa rama. Cuando feature completa, se mergea feature/NAME → main en un único PR (con rollback simple).",
+            "git_pattern": "branch-Sn → feature/NAME → main"
+          },
+          "exception": {
+            "trigger": "explicit --exception with justification",
+            "behavior": "Permite PR único >1500 líneas con razón documentada (migración, refactor que no se puede partir)",
+            "required_field": "justification (string min 50 chars)"
+          }
+        },
+        "integration": {
+          "consumes": "GA12 review-workload output (pr_strategy field)",
+          "fallback": "Si GA12 no se ejecutó, /pr corre review-workload primero"
+        }
+      },
+      "acceptance_criteria": [
+        "Comando /pr soporta flags --single, --chain, --feature-track NAME, --exception JUSTIFICATION",
+        "Sin flags y con diff >400 líneas, /pr invoca review-workload primero",
+        "Modo --chain crea branches encadenadas correctamente",
+        "Modo --feature-track crea o usa la rama intermedia"
+      ],
+      "verification": [
+        "Leer opencode/commands/pr.md y confirmar los 4 modos documentados",
+        "Prueba: slice de 200 líneas + /pr → single PR",
+        "Prueba: 3 slices de 400 líneas cada uno + /pr --chain → 3 branches encadenadas",
+        "Prueba: /pr --feature-track export-csv → branch feature/export-csv creada"
+      ],
+      "depends_on": ["GA12"],
+      "neurox_refs": ["01KRWZVEJ5FA2MHZ5AN6MY6W4Z"]
+    },
+    {
+      "id": "GA14",
+      "title": "Diseño compaction-recovery.md (solo documento de diseño)",
+      "phase": "fase-1.6-sprint-0.5b",
+      "priority": "P2",
+      "status": "pending",
+      "effort_minutes": 120,
+      "human_review": true,
+      "principle": "Session Summary + Compaction Recovery #30 (Gentle) + Memento problem (Matt Pocock)",
+      "rationale": "Hoy tenemos smart-zone-budget (QW4) que dice qué hacer cuando se llega a 100K. Pero NO tenemos diseño explícito de qué se guarda en Neurox antes del /clear, ni cómo el orchestrator restaura la sesión al volver. Sin esto, la 'recovery' es vaga.",
+      "files": [
+        {
+          "path": "docs/design/compaction-recovery.md",
+          "action": "create",
+          "operation": "Documento de diseño (no implementación) ≤200 líneas que define el protocolo de recovery"
+        }
+      ],
+      "specification": {
+        "sections": [
+          "Goal — qué problema resuelve",
+          "Trigger conditions — 80K warning, 100K hard cap, session timeout, user /clear",
+          "Pre-clear save protocol — qué debe ir a Neurox antes del clear (slice_id, current_phase, pending_steps, decisions_made, open_questions)",
+          "Restore protocol — cómo el orchestrator detecta una sesión previa interrumpida y la restaura",
+          "Topic_key convention — cómo nombrar las observaciones de recovery (session-state/{slice_id})",
+          "Anti-patterns — qué NO guardar (exploración inútil, logs verbosos, código intermedio)",
+          "Integration with smart-zone-budget — relación con QW4",
+          "Implementation roadmap — qué Sprint implementa cada parte"
+        ],
+        "neurox_save_format": {
+          "topic_key": "session-state/{slice_id}",
+          "observation_type": "config",
+          "content_template": "What: / Why: / Current phase: / Pending steps: / Decisions: / Open questions: / Next action: /"
+        }
+      },
+      "acceptance_criteria": [
+        "Archivo docs/design/compaction-recovery.md existe",
+        "Líneas ≤200",
+        "Documenta las 8 secciones especificadas",
+        "Define topic_key convention con ejemplos",
+        "Lista anti-patterns explícitos",
+        "Plan de implementación referencia Sprints concretos"
+      ],
+      "verification": [
+        "ls docs/design/compaction-recovery.md existe",
+        "wc -l devuelve <=200",
+        "El doc menciona explícitamente smart-zone-budget.md y se integra con él",
+        "El doc define formato JSON o template del observation Neurox a guardar"
+      ],
+      "depends_on": [],
+      "neurox_refs": ["01KRWZVEJ5FA2MHZ5AN6MY6W4Z"]
+    }
+  ],
+  "execution_order": {
+    "today_50min": ["QW8", "D1", "E1"],
+    "this_week_7h": ["GA12", "GA13", "GA14"],
+    "blocked_until_today_done": [],
+    "parallel_safe": [
+      ["D1", "E1"],
+      ["GA12", "GA14"]
+    ],
+    "sequential_required": [
+      ["QW8"],
+      ["GA12", "GA13"]
+    ],
+    "notes": {
+      "QW8_sequential": "QW8 toca opencode/opencode.json igual que cualquier futuro edit del prompt orchestrator. Si se mete otro item que toque ese archivo, NO paralelizar.",
+      "D1_E1_parallel": "D1 toca .gitmessage (nuevo), E1 toca skills/prd/ (delete). Sin overlap.",
+      "QW7_removed": "QW7 banner eliminado 2026-05-18. Reemplazado por D1 (disciplina commits)."
+    }
+  },
+  "open_questions": [
+    {
+      "id": "OQ2",
+      "question": "¿GA12 review-workload usa diff real (git diff stats) o estimación del tech-planner?",
+      "blocking": false,
+      "default": "Usar git diff stats cuando el slice ya tiene código; estimación del tech-planner cuando es planning phase"
+    },
+    {
+      "id": "OQ3",
+      "question": "¿GA13 chain strategy crea las branches automáticamente o solo recomienda al humano?",
+      "blocking": true,
+      "default": "Auto-crear branches en --chain con confirmación HITL antes de cada push"
+    }
+  ],
+  "non_goals": [
+    "NO implementar SDD 9 fases (decisión #9 del plan)",
+    "NO copiar judgment-day literal (decisión #9)",
+    "NO TUI separado tipo gentle-py (skilar ya es TUI Go)",
+    "NO MCP injection harness con gating por fase (overengineering)",
+    "NO command wrapper harness sin caso de uso claro"
+  ],
+  "memory_protocol": {
+    "session_start_namespace": "skills",
+    "save_after_each_item": true,
+    "save_format": {
+      "title": "{item.id}: {item.title} — {status}",
+      "topic_key": "improvement-plan/{item.id}",
+      "observation_type": "decision",
+      "content": "What: / Why: / Where: / Learned: / Risks:"
+    },
+    "cross_namespace_search": [
+      "skynex namespace for adapter/CLI context",
+      "default namespace for personal preferences"
+    ]
+  }
+}
