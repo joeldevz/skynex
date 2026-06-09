@@ -1,5 +1,5 @@
 ---
-name: Grill Me
+name: grill-me
 description: Use when the user requests a non-trivial feature, change, or design decision before writing a PRD or plan. Do NOT use for trivial bug fixes, typos, or tasks crystal-clear from context.
 license: Complete terms in LICENSE.txt
 ---
