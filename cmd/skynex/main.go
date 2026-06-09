@@ -591,6 +591,15 @@ func handleUpdate(pkg string, stateDir string) {
 		stateDir = paths.StateDir()
 	}
 
+	// Self-upgrade binary when updating all packages
+	if pkg == "" {
+		fmt.Println("\n  Checking for binary updates...")
+		if err := selfUpgrade(); err != nil {
+			fmt.Fprintf(os.Stderr, "  Warning: binary upgrade failed: %v\n", err)
+			fmt.Fprintln(os.Stderr, "  Continuing with package update...")
+		}
+	}
+
 	// Load existing config to know what was installed
 	cfg := config.LoadOrDefault(stateDir + "/skills.config.json")
 	pkgsMap, ok := cfg["packages"].(map[string]interface{})
