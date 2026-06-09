@@ -219,6 +219,11 @@
       "type": "remote",
       "url": "https://mcp.jina.ai/v1"
     },
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app/mcp",
+      "enabled": true
+    },
     "neurox": {
       "command": [
         "neurox",
