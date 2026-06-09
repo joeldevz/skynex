@@ -21,6 +21,27 @@
       },
       "model": "anthropic/claude-sonnet-4-6"
     },
+    "linear-orchestrator": {
+      "description": "Linear-driven orchestrator — drives a single Linear issue end-to-end with strict TDD and human gates. Reads/clarifies the issue, writes 6 phase comments, spawns parallel sub-agents to write failing tests (red), waits for explicit human validation, implements to green, and opens a PR. Never writes code itself.",
+      "mode": "all",
+      "prompt": "{file:./agents/linear-orchestrator.md}",
+      "tools": {
+        "bash": true,
+        "edit": true,
+        "read": true,
+        "write": true,
+        "glob": true,
+        "grep": true,
+        "linear*": true,
+        "neurox_session_start": true,
+        "neurox_context": true,
+        "neurox_recall": true,
+        "neurox_save": true,
+        "neurox_update": true,
+        "neurox_session_end": true
+      },
+      "model": "anthropic/claude-sonnet-4-6"
+    },
     "advisor": {
       "description": "Senior strategic advisor for complex decisions. Pure thinking — no file tools.",
       "model": "anthropic/claude-opus-4-6",
