@@ -41,7 +41,7 @@ A single agent doing both jobs in one prompt risks:
 
 **Inputs**:
 - `modified_files`: same set
-- `project_standards`: from skill registry (`.atl/skill-registry.md`)
+- `project_standards`: from skill registry (`.skynex/skill-registry.md`)
 - `language`: detected from file extensions
 
 **Output**:

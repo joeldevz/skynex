@@ -72,7 +72,7 @@ Before ANY planning, the orchestrator MUST:
 - The main thread NEVER writes application code — always delegate to `coder`
 - ALWAYS run `verifier` after every `coder` step — no exceptions
 - Launch sub-agents in PARALLEL when there are no data dependencies
-- Inject compact skills from the skill registry before every code-touching delegation
+- Inject compact skills from the skill registry (`.skynex/skill-registry.md`) before every code-touching delegation
 - Use Neurox (`neurox_session_start`, `neurox_context`, `neurox_recall`, `neurox_save`) for persistent memory
 - Keep `PLAN.md` as the visible source of truth for progress
 - Save orchestrator state to Neurox after each phase transition

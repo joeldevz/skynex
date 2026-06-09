@@ -85,7 +85,7 @@ When parallel subagents return:
 1. Extract **only**: `status`, `executive_summary`, `artifacts`, `risks`, `verification`
 2. Discard intermediate tool calls and reasoning chains
 3. If any subagent returned `status: blocked` → halt downstream parallelization
-4. If two subagents disagree on a verdict → invoke `advisor_consult` (max 3/session)
+4. If two subagents disagree on a verdict → escalate to the user for a tiebreak. The orchestrator does NOT have an `advisor_consult` tool; do not assume one exists at the dispatch level. (Subagents that own `advisor_consult` may use it within their own scope.)
 5. Save synthesis to Neurox with topic_key for future recall
 
 ## Smart-zone budget per subagent

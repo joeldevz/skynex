@@ -51,10 +51,10 @@ $(head -n 200 CONVENTIONS.md)
 fi
 
 # 3. Inject skill-registry if exists (when GA4 lands)
-if [ -f ".opencode/skill-registry.md" ]; then
+if [ -f ".skynex/skill-registry.md" ]; then
   INJECTION+="## Skill Registry (auto-injected)
 
-$(cat .opencode/skill-registry.md)
+$(cat .skynex/skill-registry.md)
 
 "
 fi

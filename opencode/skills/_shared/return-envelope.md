@@ -32,7 +32,7 @@ Usar siempre al final de la respuesta:
 - `partial`: el agente completó parte del trabajo pero encontró un bloqueador menor. Describe qué falta en `risks`.
 - `blocked`: el agente no puede continuar sin intervención. El orchestrator debe pausar y reportar al usuario.
 - `skill_resolution: injected`: el orchestrator inyectó compact rules en el prompt. Es el camino ideal.
-- `skill_resolution: fallback-registry`: el agente no recibió rules inyectadas y tuvo que buscarlas en `.atl/skill-registry.md` o Neurox.
+- `skill_resolution: fallback-registry`: el agente no recibió rules inyectadas y tuvo que buscarlas en `.skynex/skill-registry.md` o Neurox.
 - `skill_resolution: none`: no se encontraron skills. El agente trabajó sin project standards — registrar como riesgo.
 
 ## Anti-compaction

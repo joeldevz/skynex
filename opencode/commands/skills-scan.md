@@ -5,7 +5,7 @@ description: Use when the skill registry needs to be regenerated after adding/re
 
 # `/skills:scan` — Regenerate physical skill registry
 
-Scans `opencode/skills/` and `skills/` recursively, reads each `SKILL.md` frontmatter, and writes a compact registry to `.opencode/skill-registry.md`.
+Scans `opencode/skills/` and `skills/` recursively, reads each `SKILL.md` frontmatter, and writes a compact registry to `.skynex/skill-registry.md`.
 
 ## Why physical (not conceptual)
 
@@ -52,7 +52,7 @@ The orchestrator (or a delegated subagent) does:
    - Validate Description Trap: `description` should start with "Use when X" (warning if it summarizes workflow)
    - Validate line cap (≤120)
    - Extract first "Rules" or "Protocol" section as compact summary
-3. Write `.opencode/skill-registry.md` with the structure above
+3. Write `.skynex/skill-registry.md` with the structure above
 4. Save in Neurox: `neurox_save(topic_key: "skill-registry/scan", kind: "config")`
 
 ## Anti-pattern detection
@@ -68,7 +68,7 @@ Flag (warning, not error):
 ## Integration
 
 - **Pre-commit hook** (when GA3 lands): runs `/skills:scan` if any `SKILL.md` was modified
-- **Session-start hook** (`opencode/hooks/session-start.sh`): injects `.opencode/skill-registry.md` at session start
+- **Session-start hook** (`opencode/hooks/session-start.sh`): injects `.skynex/skill-registry.md` at session start
 - **`skill-validator` agent**: uses the registry as ground truth for compliance checks
 
 ## Cultural rules

@@ -17,7 +17,7 @@ Workflow:
    d. Start Neurox with `neurox_session_start`, then call `neurox_context` and `neurox_recall` for both project-specific and cross-namespace product context before any other validation work
 
 2. **Resolve applicable skills / standards**
-   a. Read the skill registry if available (`.atl/skill-registry.md` or Neurox recall)
+    a. Read the skill registry if available (`.skynex/skill-registry.md` or Neurox recall)
    b. Determine which skills apply to the changed files and feature area
    c. Build compact project standards for any skill-touching agents you will delegate to
 
