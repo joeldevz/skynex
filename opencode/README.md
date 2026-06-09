@@ -214,7 +214,9 @@ Reglas de Conventional Commits y estructura de PR.
 - `grill-me` — alineación humano-AI antes del PRD (Brooks shared design concept)
 - `prd` — generación de PRDs tras grilling
 - `security` — adversarial dual-judge security review
-- `verification-before-completion` — evidence-based completion claims
+- `write-a-skill` — create new agent skills with proper structure
+- `diagnose` — disciplined diagnosis loop for hard bugs and perf regressions
+- `triage` — triage issues through a state-machine of roles (bug/enhancement + states)
 
 Compartidas en `_shared/`:
 - `advisor-protocol.md`, `neurox-protocol.md`, `return-envelope.md`, `skill-resolver.md`, `smart-zone-budget.md`

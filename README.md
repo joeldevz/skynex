@@ -275,7 +275,7 @@ skills/
 ├── opencode/
 │   ├── opencode.json          # configuracion base de agentes y MCPs
 │   ├── commands/              # 7 slash commands reales
-│   ├── skills/                # grill-me, prd, security, verification-before-completion + _shared
+│   ├── skills/                # grill-me, prd, security, write-a-skill, diagnose, triage + _shared
 │   ├── templates/             # convenciones, commits, 5 tipos de plan
 │   ├── evals/                 # 9 golden tests de regresion
 │   └── plugins/

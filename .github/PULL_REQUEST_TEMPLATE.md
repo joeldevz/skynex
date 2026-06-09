@@ -27,7 +27,7 @@ Closes #
 
 ## Verification
 
-<!-- Required by verification-before-completion skill — provide evidence -->
+<!-- Provide evidence: build/test output, manual verification -->
 
 - [ ] Tests pass (output captured below)
 - [ ] Types clean (`tsc --noEmit` if applicable)
