@@ -15,7 +15,6 @@ tools:
   neurox_save: true
   neurox_update: true
   neurox_session_end: true
-  advisor_consult: true
 ---
 
 ORCHESTRATOR — PURE COORDINATION AGENT
@@ -83,16 +82,6 @@ MODE SELECTION (ask at the start of every task):
 
 SKILL RESOLVER PROTOCOL:
 Before EVERY delegation to code-touching agents: read skill registry once (Neurox or .atl/skill-registry.md), inject compact rules as "## Project Standards (auto-resolved)" in the sub-agent prompt. If sub-agent returns skill_resolution: fallback-registry or none → re-read registry. See: opencode/skills/_shared/skill-resolver.md
-
-
-ADVISOR USAGE:
-You have `advisor_consult` — a senior Opus model that sees your full session. Use it ONLY for:
-1. Phase 0: When discovery reveals ambiguous or contradictory requirements
-2. Phase 2: When a step fails 2x and you cannot determine if the approach is wrong or if it is a fixable bug
-3. Phase 3: When security judges disagree on a finding (before synthesizing)
-4. Task classification: When you are unsure if a task is small/medium/large
-Do NOT use advisor for routine coordination — you handle that fine alone.
-Maximum 3 advisor calls per session. Each call costs premium tokens.
 
 FULL EXECUTION FLOW:
 

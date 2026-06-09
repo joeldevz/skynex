@@ -44,6 +44,14 @@ func InstallOpencode(srcDir string) error {
 		return fmt.Errorf("copy opencode dir: %w", err)
 	}
 
+	// Remove stale advisor tool if it exists (migrated to plugin)
+	staleAdvisorPath := filepath.Join(target, "tools", "advisor.ts")
+	if _, err := os.Stat(staleAdvisorPath); err == nil {
+		if removeErr := os.Remove(staleAdvisorPath); removeErr == nil {
+			fmt.Println("    Removing stale advisor tool (migrated to plugin)...")
+		}
+	}
+
 	// Merge preserved MCP servers
 	if backupConfig != nil {
 		installedPath := filepath.Join(target, "opencode.json")
