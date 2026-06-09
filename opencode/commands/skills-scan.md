@@ -3,17 +3,40 @@ name: skills:scan
 description: Use when the skill registry needs to be regenerated after adding/removing/modifying skills.
 ---
 
-# `/skills:scan` — Regenerate physical skill registry
+# `/skills:scan` — Regenerate the physical skill registry
 
-Scans `opencode/skills/` and `skills/` recursively, reads each `SKILL.md` frontmatter, and writes a compact registry to `.skynex/skill-registry.md`.
+Scans every skill and convention source available to the current project — across **all CLIs** (opencode and claude-code), both global installs and project-local files — reads each `SKILL.md` frontmatter, and writes a single compact registry to `.skynex/skill-registry.md` (the CLI-agnostic location).
 
 ## Why physical (not conceptual)
 
 The skill-resolver protocol is conceptual; the registry must be a real file so:
+
 1. Other agents can `read` it without re-scanning
 2. Pre-commit hooks can validate against it
 3. Description Trap violations are visible in diffs
 4. The orchestrator can inject it as `## Project Standards (auto-resolved)` at session start (via the `session-start.sh` hook)
+
+## Scan locations (generic — precedence matters)
+
+Scan ALL of the following that exist. **Project-local sources override global ones** on a `name` collision, so a project can specialise a globally-installed skill.
+
+Project-local (relative to the project root):
+
+- `.skynex/skills/*/SKILL.md`
+- `.opencode/skills/*/SKILL.md`
+- `.claude/skills/*/SKILL.md`
+- `opencode/skills/*/SKILL.md` and `skills/*/SKILL.md` — only when working inside the skynex repo itself (dev mode)
+
+Global (installed once per machine):
+
+- `~/.config/opencode/skills/*/SKILL.md`
+- `~/.claude/skills/*/SKILL.md`
+- `~/.agents/skills/*/SKILL.md`
+
+Conventions (not skills, but feed the registry):
+
+- `CONVENTIONS.md` (project root)
+- `.skynex/*.md` (project-local conventions, excluding `skill-registry.md` itself)
 
 ## Output format
 
@@ -25,13 +48,16 @@ The skill-resolver protocol is conceptual; the registry must be a real file so:
 
 ## Active Skills
 
-### `<skill-name>` — <path>
+### `<skill-name>` — <source> (<path>)
 - **description**: <description>
 - **lines**: <count>
 - **complies_description_trap**: yes | no
 - **complies_line_cap**: yes | no (max 120)
 
-(repeat per skill)
+(repeat per skill; `<source>` = opencode-global | opencode-project | claude-global | claude-project | agents-global | skynex-dev)
+
+## Project Conventions
+(compact summary extracted from CONVENTIONS.md and .skynex/*.md)
 
 ## Violations summary
 - N skills exceed 120 lines: [<list>]
@@ -45,15 +71,20 @@ The skill-resolver protocol is conceptual; the registry must be a real file so:
 
 The orchestrator (or a delegated subagent) does:
 
-1. Glob `opencode/skills/*/SKILL.md` and `skills/*/SKILL.md`
-2. For each file:
+1. Glob every path in "Scan locations" above; collect all `SKILL.md` files that exist (project-local and global, opencode and claude-code).
+2. Deduplicate by skill `name` (frontmatter). On collision, keep the project-local source and drop — but note — the overridden global one.
+3. For each surviving skill:
    - Read frontmatter (`name`, `description`, `license`)
+   - Record its source bucket and path
    - Count lines
-   - Validate Description Trap: `description` should start with "Use when X" (warning if it summarizes workflow)
+   - Validate Description Trap: `description` should start with "Use when X" (warning if it summarises workflow)
    - Validate line cap (≤120)
-   - Extract first "Rules" or "Protocol" section as compact summary
-3. Write `.skynex/skill-registry.md` with the structure above
-4. Save in Neurox: `neurox_save(topic_key: "skill-registry/scan", kind: "config")`
+   - Extract the first "Rules" or "Protocol" section as a compact summary
+4. Read `CONVENTIONS.md` and any `.skynex/*.md` (except the registry itself) and summarise project conventions.
+5. Write `.skynex/skill-registry.md` with the structure above.
+6. Save in Neurox: `neurox_save(topic_key: "skill-registry/scan", kind: "config")`.
+
+If no skills or conventions are found anywhere → still write the registry noting "no sources found" and warn the user.
 
 ## Anti-pattern detection
 
