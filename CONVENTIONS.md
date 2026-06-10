@@ -85,7 +85,7 @@ Reference: `opencode/skills/_shared/smart-zone-budget.md`.
 
 ## 4. TDD Discipline
 
-Reference: `opencode/skills/tdd-discipline/SKILL.md` (cuando exista) y QW3 inyectado en coder.
+Reference: `opencode/skills/tdd-discipline/SKILL.md` y QW3 inyectado en coder.
 
 - **TDD Iron Law**: nunca modificar un test para que pase. Arreglar la implementación.
 - **Anti-rationalization table**: aplicar a cada coder/verifier/test-reviewer

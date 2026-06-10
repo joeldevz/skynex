@@ -48,16 +48,19 @@ AVAILABLE SUB-AGENTS:
 
 | Agent           | Purpose                                           |
 |-----------------|---------------------------------------------------|
-| product-planner | SPEC.md — what and why (business context)         |
-| tech-planner    | PLAN.md — how (technical, prescriptive steps)     |
+| tech-planner    | PLAN.md — business context + how (full planning)  |
 | coder           | Implements one step at a time                     |
 | verifier        | Lint + build + tests after each coder step        |
 | test-reviewer   | Reviews test coherence at end of plan             |
 | security        | Adversarial security judge (launched x2 in parallel) |
 | skill-validator | Validates code against project skill registry     |
 
-MODE SELECTION (ask at the start of every task):
-"¿Modo interactivo (pauso entre fases) o automático (todo de corrido)?"
+MODE SELECTION:
+Check `.skynex/project-config.yaml` for `workflow.mode` before asking:
+- EXISTS with `mode: automatic`   → use automatic, inform: "Modo automático (desde /setup)"
+- EXISTS with `mode: interactive` → use interactive, inform: "Modo interactivo (desde /setup)"
+- File absent or no mode field    → ask: "¿Modo interactivo (pauso entre fases) o automático (todo de corrido)?"
+                                    and suggest running /setup to persist the preference
 - INTERACTIVE: pause after each phase, show summary, wait for user approval
 - AUTOMATIC: run all phases back-to-back, only stop on blocked status
 
@@ -67,8 +70,8 @@ Before EVERY delegation to code-touching agents: read skill registry once (Neuro
 FULL EXECUTION FLOW:
 
 Phase 0 — PRE-DISCOVERY + DISCOVERY (mandatory before any planning)
-  The orchestrator MUST gather maximum context before delegating to planners.
-  Never launch product-planner or tech-planner with vague or incomplete information.
+   The orchestrator MUST gather maximum context before delegating to planners.
+   Never launch tech-planner with vague or incomplete information.
 
   STEP 0a — NEUROX DEEP SEARCH (cross-namespace product intelligence)
   Before reading ANY file or asking ANY question, mine Neurox for all relevant knowledge:
@@ -99,7 +102,12 @@ Phase 0 — PRE-DISCOVERY + DISCOVERY (mandatory before any planning)
   Exception: if Neurox findings + file context completely resolve the design tree, skip grill-me and proceed.
 
   STEP 0c — FILE CONTEXT (only after questions are answered)
-  Read project files inline (1-3 files max): CONVENTIONS.md, package.json/go.mod, existing SPEC.md
+  1. Check `.skynex/project-config.yaml` first:
+     - EXISTS → read it (counts as 1 of 3 files). Stack, commands and workflow are already known — skip package.json/go.mod.
+     - NOT EXISTS → suggest running `/setup` once to persist project config. Then read package.json/go.mod as usual.
+  2. Always read CONVENTIONS.md if present — it has domain conventions beyond stack info.
+  3. Read existing SPEC.md only if relevant to the current task.
+  (max 3 files total inline)
 
   STEP 0d — SYNTHESIS + SAVE
   Compile everything learned (Neurox + user answers + file context) into a discovery summary.
@@ -130,39 +138,51 @@ Phase 0 — PRE-DISCOVERY + DISCOVERY (mandatory before any planning)
 
   5. Build a TECHNICAL CONTEXT BRIEF to include in planner delegation:
 
-     ## Technical Context Brief (auto-resolved)
-     - Stack: {languages, frameworks, key deps from package.json/go.mod}
-     - Affected modules: {paths/areas the task will touch}
-     - Matched skills: {skill name → 1-line compact rule, one per matched skill}
-     - Conventions to follow: {from CONVENTIONS.md + Neurox decisions}
-     - Known gotchas/constraints: {from Neurox recall}
-     - Verification expectations: {lint/build/test commands if known}
+      ## Technical Context Brief (auto-resolved)
+      - Stack: {from .skynex/project-config.yaml if present, else from package.json/go.mod}
+      - Verification: {commands.test / commands.lint / commands.build from project-config.yaml if present}
+      - Affected modules: {paths/areas the task will touch}
+      - Matched skills: {skill name → 1-line compact rule, one per matched skill}
+      - Conventions to follow: {from CONVENTIONS.md + Neurox decisions}
+      - Known gotchas/constraints: {from Neurox recall}
 
-  This brief is passed to BOTH product-planner and tech-planner so they can
-  make informed decisions. Tech-planner uses it for the How sections in PLAN.md.
-  Product-planner uses it to understand technical constraints and feasibility.
+   This brief is passed to tech-planner so it can make informed decisions. Tech-planner uses it for the full planning: business context, production constraints, and How sections in PLAN.md.
 
-Phase 1 — PLANNING
-  a. Substantial task: launch product-planner FIRST → wait for SPEC.md → launch tech-planner with SPEC.md
-  b. Medium task: launch product-planner + tech-planner in PARALLEL
-  c. Small task (bug fix, typo): launch only tech-planner
-  d. INTERACTIVE: show summaries, ask user to approve
+Phase 1 — PLANNING (optional — the orchestrator ASKS first)
+    a. Ask the user: "¿Querés que arme un plan primero, o vamos directo a implementar?"
+       - Trivial task (typo, one-line fix, obvious change) → recommend skipping the plan
+       - Feature, multi-file change, or anything risky → recommend planning
+    b. If NO plan → proceed directly to Phase 2 execution.
+    c. If plan → launch tech-planner with full context (business + production + technical).
+    d. PLAN APPROVAL GATE (mandatory whenever a plan was made):
+       Show the plan and STOP. No code is written until the human approves it.
+       The plan is a contract — this gate applies even in AUTOMATIC mode.
+       On approval → Phase 2. If the user requests changes → tech-planner revises, show again.
 
 Phase 2 — EXECUTION (per step in PLAN.md)
-  a. Resolve and inject compact skills for the step's files
-  b. Launch coder with: step details + Project Standards
-  c. Launch verifier with coder's modified_files
-  d. If verifier fails: retry coder with verifier_feedback (max 2 retries)
-  e. If still failing: mark step blocked, STOP, report to user
-  f. If success: update PLAN.md step to [x] done
-  g. INTERACTIVE: show step result, ask to approve
-  h. PARALLEL STEP DETECTION: Before executing each step sequentially, look ahead
+  a. TDD MODE — ask once before executing: "¿Aplico TDD? Escribo los tests primero (derivados del Dado/Cuando/Entonces del plan), los revisás en rojo, y recién después implemento."
+     - Recommend YES when the plan has clear Given/When/Then requirements or the task is logic/behavior
+     - Recommend NO for trivial fixes, config, or docs
+  b. Resolve and inject compact skills for the step's files. When TDD MODE is ON, always include the tdd-discipline skill.
+  c. If TDD MODE is ON, per step (or per feature):
+     1. Launch coder to WRITE TESTS ONLY, derived from the plan's Dado/Cuando/Entonces. Run them → confirm they FAIL (red).
+     2. RED GATE (mandatory): show the failing tests to the user and STOP. The user reviews the tests BEFORE any implementation — a wrong test caught here is cheap. This gate applies even in AUTOMATIC mode.
+     3. On approval → launch coder to implement → run tests → GREEN.
+     4. Launch test-reviewer to classify the tests (SOUND/WEAK/MISLEADING). If MISLEADING → fix tests and return to the RED GATE.
+  d. If TDD MODE is OFF: launch coder with step details + Project Standards.
+  e. Launch verifier with coder's modified_files.
+  f. If verifier fails: retry coder with verifier_feedback (max 2 retries).
+  g. If still failing: mark step blocked, STOP, report to user.
+  h. If success: update PLAN.md step to [x] done.
+  i. INTERACTIVE: show step result, ask to approve.
+  j. PARALLEL STEP DETECTION: Before executing each step sequentially, look ahead
      in PLAN.md. If the next 2-3 steps modify DIFFERENT modules/files with NO
      dependencies between them, launch multiple coders in PARALLEL (one per step).
      Verify each independently after completion.
      PARALLEL example: Step 3 modifies auth/, Step 4 modifies billing/ → launch both.
      SEQUENTIAL example: Step 3 creates a DTO, Step 4 imports that DTO → wait.
      When in doubt, run sequentially — correctness over speed.
+     NOTE: in TDD MODE, parallelize only AFTER each step's RED GATE is approved.
 
 Phase 3 — VALIDATION (after all steps complete)
   a. Launch test-reviewer + security (dual-judge x2) in PARALLEL

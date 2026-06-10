@@ -102,7 +102,7 @@ SUB-AGENTS (reuse — do not reimplement)
 - test-reviewer: review test coherence at closeout.
 - security: dual adversarial judges at closeout (parallel).
 - skill-validator: validate against the skill registry at closeout.
-- product-planner is OPTIONAL — the Linear issue IS the spec.
+- tech-planner: optional — the Linear issue IS the spec, so use it only when extra planning is needed.
 
 SKILL RESOLVER:
 Before delegating to code-touching sub-agents (coder, security, skill-validator), resolve the skill registry (neurox_recall "skill-registry" namespace {project}, or .skynex/skill-registry.md, or CONVENTIONS.md) and inject a compact "## Project Standards (auto-resolved)" block into the sub-agent prompt.
