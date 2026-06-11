@@ -6,10 +6,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/joeldevz/skynex/internal/models"
 )
 
 // InstallOpencode installs OpenCode config from srcDir, preserving user MCP servers.
-func InstallOpencode(srcDir string) error {
+// req contains cleanup preference from CLI flags.
+func InstallOpencode(srcDir string, req *models.InstallRequest) error {
 	sourceDir := filepath.Join(srcDir, "opencode")
 	target := opencodeDir()
 
@@ -44,14 +47,6 @@ func InstallOpencode(srcDir string) error {
 		return fmt.Errorf("copy opencode dir: %w", err)
 	}
 
-	// Remove stale advisor tool if it exists (migrated to plugin)
-	staleAdvisorPath := filepath.Join(target, "tools", "advisor.ts")
-	if _, err := os.Stat(staleAdvisorPath); err == nil {
-		if removeErr := os.Remove(staleAdvisorPath); removeErr == nil {
-			fmt.Println("    Removing stale advisor tool (migrated to plugin)...")
-		}
-	}
-
 	// Merge preserved MCP servers
 	if backupConfig != nil {
 		installedPath := filepath.Join(target, "opencode.json")
@@ -65,6 +60,28 @@ func InstallOpencode(srcDir string) error {
 	if err := installJSDeps(target); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: dependency install failed: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Run manually: cd %s && bun install\n", target)
+	}
+
+	// Handle deprecated file cleanup (adapter-local)
+	deprecated := FindDeprecatedFiles()
+	if len(deprecated) > 0 && deprecated["opencode"] != nil {
+		doCleanup := req.CleanupDeprecated
+		if !doCleanup && req.Interactive {
+			// Interactive mode: prompt user only for this adapter's files
+			if PromptCleanupDeprecated(map[string][]DeprecatedFile{
+				"opencode": deprecated["opencode"],
+			}) {
+				doCleanup = true
+			}
+		}
+
+		if doCleanup {
+			if removed, err := RemoveDeprecatedFiles(deprecated["opencode"]); err != nil {
+				fmt.Fprintf(os.Stderr, "    Warning: cleanup failed: %v\n", err)
+			} else if removed > 0 {
+				fmt.Printf("    Removed %d deprecated files from OpenCode.\n", removed)
+			}
+		}
 	}
 
 	fmt.Printf("    OpenCode installed at %s\n", target)

@@ -92,7 +92,7 @@ func installSkillsRepo(pkg *models.PackageDefinition, req *models.InstallRequest
 		switch target {
 		case "claude":
 			fmt.Println("    Installing Claude Code assets...")
-			if err := InstallClaude(checkoutDir); err != nil {
+			if err := InstallClaude(checkoutDir, req); err != nil {
 				return nil, fmt.Errorf("install claude: %w", err)
 			}
 			artifacts = []string{
@@ -103,7 +103,7 @@ func installSkillsRepo(pkg *models.PackageDefinition, req *models.InstallRequest
 			}
 		case "opencode":
 			fmt.Println("    Installing OpenCode config...")
-			if err := InstallOpencode(checkoutDir); err != nil {
+			if err := InstallOpencode(checkoutDir, req); err != nil {
 				return nil, fmt.Errorf("install opencode: %w", err)
 			}
 			artifacts = []string{paths.OpencodeDir()}
