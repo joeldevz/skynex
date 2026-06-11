@@ -203,34 +203,35 @@ func main() {
 }
 
 type cliArgs struct {
-	Packages       []string
-	Targets        []string
-	Versions       map[string]string
-	NonInteractive bool
-	Yes            bool
-	TrustScripts   bool
-	StateDir       string
-	Help           bool
-	ListPackages   bool
-	ListVersions   string
-	AdvisorModel   string
-	ShowVersion    bool
-	Doctor         bool
-	Install        bool
-	ProfileHelp    bool
-	ProfileList    bool
-	ProfileCreate  bool
-	ProfileEdit    string
-	ProfileDelete  string
-	ProfileDefault string
-	UpProfile      string
-	UpWeb          bool
-	UpPort         int
-	RunUp          bool
-	Update         bool
-	UpdatePkg      string
-	Completion     string // bash, zsh, or fish
-	Status         bool
+	Packages           []string
+	Targets            []string
+	Versions           map[string]string
+	NonInteractive     bool
+	Yes                bool
+	TrustScripts       bool
+	StateDir           string
+	Help               bool
+	ListPackages       bool
+	ListVersions       string
+	AdvisorModel       string
+	ShowVersion        bool
+	Doctor             bool
+	Install            bool
+	ProfileHelp        bool
+	ProfileList        bool
+	ProfileCreate      bool
+	ProfileEdit        string
+	ProfileDelete      string
+	ProfileDefault     string
+	UpProfile          string
+	UpWeb              bool
+	UpPort             int
+	RunUp              bool
+	Update             bool
+	UpdatePkg          string
+	Completion         string // bash, zsh, or fish
+	Status             bool
+	CleanupDeprecated  bool
 }
 
 func parseArgs() *cliArgs {
@@ -361,6 +362,8 @@ func parseArgs() *cliArgs {
 				i++
 				args.AdvisorModel = osArgs[i]
 			}
+		case "--cleanup-deprecated":
+			args.CleanupDeprecated = true
 		case "update":
 			args.Update = true
 			// optional package name
@@ -425,10 +428,11 @@ func resolveNonInteractive(args *cliArgs, cat *models.Catalog, cfg map[string]in
 	}
 
 	req := &models.InstallRequest{
-		Packages:    args.Packages,
-		Targets:     args.Targets,
-		Versions:    versions,
-		Interactive: false,
+		Packages:          args.Packages,
+		Targets:           args.Targets,
+		Versions:          versions,
+		Interactive:       false,
+		CleanupDeprecated: args.CleanupDeprecated,
 	}
 
 	// Advisor config from flag
@@ -653,11 +657,12 @@ func handleUpdate(pkg string, stateDir string) {
 	}
 
 	request := &models.InstallRequest{
-		Packages:    packagesToUpdate,
-		Targets:     targets,
-		Versions:    versions,
-		Interactive: false,
-		StateDir:    stateDir,
+		Packages:          packagesToUpdate,
+		Targets:           targets,
+		Versions:          versions,
+		Interactive:       false,
+		StateDir:          stateDir,
+		CleanupDeprecated: false, // update: default to false unless explicitly set
 	}
 
 	// Preflight
@@ -674,6 +679,23 @@ func handleUpdate(pkg string, stateDir string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\nUpdate failed: %v\n", err)
 		os.Exit(1)
+	}
+
+	// Handle deprecated file cleanup (update: only if --cleanup-deprecated is set)
+	if request.CleanupDeprecated {
+		deprecated := adapters.FindDeprecatedFiles()
+		if len(deprecated) > 0 {
+			var allFiles []adapters.DeprecatedFile
+			for _, files := range deprecated {
+				allFiles = append(allFiles, files...)
+			}
+			removed, err := adapters.RemoveDeprecatedFiles(allFiles)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: cleanup failed: %v\n", err)
+			} else if removed > 0 {
+				fmt.Printf("  Removed %d deprecated files.\n", removed)
+			}
+		}
 	}
 
 	// Save state
@@ -844,18 +866,19 @@ Examples:
   skynex profile backend delete
 
 Options:
-  --package PACKAGE       Package to install (skills). Repeatable.
-  --target TARGET         Target: claude, opencode, or both. Repeatable.
-  --version PKG=VER       Version for a package (e.g., skills=latest). Repeatable.
-  --advisor-model MODEL   Advisor model (e.g., anthropic/claude-opus-4-6).
-  --non-interactive       Skip prompts, require all inputs via flags.
-  --yes, -y               Skip confirmation prompt.
-  --trust-setup-scripts   Trust external setup scripts.
-  --state-dir DIR         State directory (default: ~/.config/skynex).
-  --list-packages         List available packages.
-  --list-versions PKG     List versions for a package.
-  --version               Show version and exit.
-  -h, --help              Show this help.`)
+   --package PACKAGE          Package to install (skills). Repeatable.
+   --target TARGET            Target: claude, opencode, or both. Repeatable.
+   --version PKG=VER          Version for a package (e.g., skills=latest). Repeatable.
+   --advisor-model MODEL      Advisor model (e.g., anthropic/claude-opus-4-6).
+   --cleanup-deprecated       Remove deprecated skynex-managed files (interactive install: prompts; update: flag only).
+   --non-interactive          Skip prompts, require all inputs via flags.
+   --yes, -y                  Skip confirmation prompt.
+   --trust-setup-scripts      Trust external setup scripts.
+   --state-dir DIR            State directory (default: ~/.config/skynex).
+   --list-packages            List available packages.
+   --list-versions PKG        List versions for a package.
+   --version                  Show version and exit.
+   -h, --help                 Show this help.`)
 }
 
 func printProfileUsage() {

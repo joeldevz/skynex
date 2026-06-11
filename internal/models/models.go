@@ -14,12 +14,13 @@ type PackageDefinition struct {
 
 // InstallRequest is the user's resolved install request.
 type InstallRequest struct {
-	Packages    []string
-	Targets     []string
-	Versions    map[string]string
-	Interactive bool
-	StateDir    string
-	Advisor     *AdvisorConfig
+	Packages           []string
+	Targets            []string
+	Versions           map[string]string
+	Interactive        bool
+	StateDir           string
+	Advisor            *AdvisorConfig
+	CleanupDeprecated  bool
 }
 
 // AdvisorConfig holds the advisor strategy configuration.

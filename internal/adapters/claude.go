@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/joeldevz/skynex/internal/models"
 )
 
 const neuroxSkillBlock = `
@@ -47,7 +49,8 @@ var skillMap = map[string][]string{
 
 // InstallClaude installs all Claude Code assets from srcDir.
 // srcDir is the checkout/workspace root (contains opencode/, claude-code/, etc.)
-func InstallClaude(srcDir string) error {
+// req contains cleanup preference from CLI flags.
+func InstallClaude(srcDir string, req *models.InstallRequest) error {
 	target := claudeDir()
 	if err := os.MkdirAll(target, 0o755); err != nil {
 		return fmt.Errorf("create claude dir: %w", err)
@@ -91,6 +94,28 @@ func InstallClaude(srcDir string) error {
 	fmt.Println("    Configuring Neurox MCP...")
 	if err := configureClaudeNeuroxMCP(); err != nil {
 		return fmt.Errorf("configure neurox mcp: %w", err)
+	}
+
+	// Handle deprecated file cleanup (adapter-local)
+	deprecated := FindDeprecatedFiles()
+	if len(deprecated) > 0 && deprecated["claude"] != nil {
+		doCleanup := req.CleanupDeprecated
+		if !doCleanup && req.Interactive {
+			// Interactive mode: prompt user only for this adapter's files
+			if PromptCleanupDeprecated(map[string][]DeprecatedFile{
+				"claude": deprecated["claude"],
+			}) {
+				doCleanup = true
+			}
+		}
+
+		if doCleanup {
+			if removed, err := RemoveDeprecatedFiles(deprecated["claude"]); err != nil {
+				fmt.Fprintf(os.Stderr, "    Warning: cleanup failed: %v\n", err)
+			} else if removed > 0 {
+				fmt.Printf("    Removed %d deprecated files from Claude.\n", removed)
+			}
+		}
 	}
 
 	fmt.Printf("    Claude Code assets installed at %s\n", target)
