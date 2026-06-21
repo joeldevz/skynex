@@ -154,6 +154,19 @@
         "neurox_recall": true,
         "neurox_context": true
       }
+    },
+    "pr-reviewer": {
+      "model": "anthropic/claude-sonnet-4-6",
+      "description": "Adversarial PR review judge for a single 4R+1 dimension (Correctness/Risk/Readability/Reliability/Resilience). Launched in parallel by the orchestrator. Read-only.",
+      "mode": "subagent",
+      "prompt": "{file:./agents/pr-reviewer.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "neurox_recall": true,
+        "neurox_context": true
+      }
     }
   },
   "provider": {},
