@@ -36,6 +36,8 @@ Dispatch FIVE `pr-reviewer` sub-agents IN PARALLEL, one per dimension, each with
 | R3 | Reliability — real tests, edge cases, error handling, timeouts |
 | R4 | Resilience — retries, degradation, observability, cascades |
 
+If a judge returns `status: blocked`, proceed with the remaining judges. In Phase 2 synthesis, note the skipped dimension and its reason explicitly in the report header.
+
 ## Phase 2 — Synthesis
 
 1. Merge findings; de-duplicate (same file:line from two judges → keep the strictest).
@@ -84,13 +86,13 @@ Skip entirely if the input was a branch, commit range, or plain `git diff` (no P
 
 1. Human gate (mandatory, before posting anything): show the verdict — `PR #{pr}: Verdict={APPROVE|FIX REQUIRED|LGTM}. Blocking B · Should-fix S · Nice-to-have N. Post to GitHub? (yes / skip)`. If skip → output the report locally only and stop.
 
-2. Detect: repo = `gh repo view --json nameWithOwner -q .nameWithOwner`; head = `gh pr view {pr} --json headRefOid -q .headRefOid`.
+2. Post ONE summary comment: `gh pr comment {pr} --body "<full verdict report>"`. End with `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`. If this command fails, print the full report to stdout and abort Phase 3 (do not proceed to inline comments or review submit).
 
-3. Post ONE summary comment: `gh pr comment {pr} --body "<full verdict report>"`. End with `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`.
+3. Detect: repo = `gh repo view --json nameWithOwner -q .nameWithOwner`; head = `gh pr view {pr} --json headRefOid -q .headRefOid`.
 
 4. Post inline comments — one `gh api` call per finding that has a `file:line` (this is the ONLY repeating step): `gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments -f body="[R?·Dim] <problem> → <fix>" -f commit_id="{head}" -f path="{file}" -F line={n} -f side="RIGHT"`. Best-effort: if a call errors (422/404 — file not in diff, stale line), skip it and continue; never abort Phase 3 for one failed comment.
 
-5. Submit EXACTLY ONE review (never one per judge — a single command, no loop): `gh pr review {pr}` with `--request-changes` if any Blocking, else `--comment` if only Should-fix/Nice-to-have, else `--approve` if clean. Body = the one-line verdict.
+5. Submit EXACTLY ONE review (never one per judge — a single command, no loop): `gh pr review {pr}` with `--request-changes` if any Blocking, else `--comment` if only Should-fix/Nice-to-have, else `--approve` if clean. Body = the one-line verdict. If `--request-changes` fails (e.g. 422 self-authored PR), retry once with `--comment` and note the fallback in the summary.
 
 ## Rules
 

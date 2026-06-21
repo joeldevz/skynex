@@ -41,7 +41,7 @@ Ask **all three questions in a single message**, never one at a time:
 >
 > **2. Presupuesto de review**
 > ¿Cuántas líneas cambiadas máximo antes de sugerir dividir en PRs encadenadas?
-> Default: `400`
+> Si `.skynex/project-config.yaml` ya existe, mostrá el valor actual como referencia. Default si no hay config: `400`
 >
 > **3. Reglas de review iniciales (opcional)**
 > ¿Hay reglas de proyecto que querés que los agentes verifiquen en cada PR?
@@ -137,7 +137,7 @@ Tell the user: re-run `/setup` anytime to regenerate `project-config.yaml`. The 
 - Ask ALL THREE questions together in one message — never separately
 - Only write values you actually detected — never invent or guess
 - Omit yaml fields that are not applicable to the stack
-- If `.skynex/project-config.yaml` already exists, overwrite it (mention this to the user)
+- If `.skynex/project-config.yaml` already exists, overwrite it (mention this to the user); on rerun, read and display the existing `review_budget` value in question 2 for reference
 - NEVER overwrite `.skynex/review-rules.md` if it already exists
 - In the generated review-rules template, include ONLY the code quality bullets that match the detected stack (do not dump all bullets)
 - Keep the confirmation summary concise — no more than 12 lines
