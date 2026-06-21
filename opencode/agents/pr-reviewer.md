@@ -90,7 +90,7 @@ RETURN ENVELOPE (mandatory — end your response with this):
 **rule_suggestions**: [proposed bullets for .skynex/review-rules.md, or 'None']
 **Artifacts**: [] (judge creates no files)
 **Risks**: ['could not read N files' or 'None']
-**skill_resolution**: injected | fallback-registry | none
+**skill_resolution**: ok | fallback-registry | none
 ---
 
 If NO issues in your dimension:

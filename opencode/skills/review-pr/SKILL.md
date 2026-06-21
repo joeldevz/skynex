@@ -18,13 +18,13 @@ Checklist:
 - [ ] Intent source exists. (none → **blocked**: R0 cannot verify intent)
 - [ ] Behavior change ships tests, or an explicit reason there are none. (missing → flag, not block)
 - [ ] Scope is focused, not several unrelated changes mixed. (mixed → flag)
-- [ ] Size is sane. Warn >400 lines changed, strong-warn >800. (still review; reliability degrades)
+- [ ] Size is sane. Read `workflow.review_budget` from `.skynex/project-config.yaml` if present (default: 400). Warn if lines changed exceed the budget; strong-warn if they exceed 2× the budget. (still review; reliability of the review degrades at scale)
 
 Hard blocker → STOP. Report exactly what's missing to make the PR reviewable. Do not fan out.
 
 ## Phase 1 — Parallel fan-out (5 judges, isolated context)
 
-Read `.skynex/skill-registry.md` and `.skynex/review-rules.md` (fallback `reviewPrd.md`) if present; pass both to every judge as Project Standards + `custom_rules`. A violation of a project rule is always a finding.
+Read `.skynex/skill-registry.md` and `.skynex/review-rules.md` if present; pass both to every judge as Project Standards + `custom_rules`. A violation of a project rule is always a finding.
 
 Dispatch FIVE `pr-reviewer` sub-agents IN PARALLEL, one per dimension, each with `dimension`, `target_files`, `diff`, `intent_source`, and the standards. Isolated context = independent analysis (no cross-contamination).
 

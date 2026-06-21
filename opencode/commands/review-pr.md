@@ -14,7 +14,7 @@ Workflow:
 
 1. **Discovery**
    a. Start Neurox: `neurox_session_start`, then `neurox_context` + `neurox_recall` (project + cross-namespace) for prior review rules, gotchas, and product intent.
-   b. Read `CONVENTIONS.md`, `.skynex/skill-registry.md`, and `.skynex/review-rules.md` (fallback `reviewPrd.md`) if they exist.
+    b. Read `CONVENTIONS.md`, `.skynex/skill-registry.md`, and `.skynex/review-rules.md` if they exist.
    c. Resolve the diff scope and the intent source (PR description / ticket / SPEC / PLAN / commit messages).
 
 2. **Phase 0 — Readiness Gate**
