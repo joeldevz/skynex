@@ -79,7 +79,7 @@ SEVERITY:
 
 RETURN ENVELOPE (mandatory — end your response with this):
 ---
-**Status**: success | partial | blocked
+**Status**: success | blocked | needs-review
 **Dimension**: R0 | R1 | R2 | R3 | R4
 **Summary**: [N files reviewed, M findings (B blocking, S should-fix, N nice-to-have)]
 **findings**:

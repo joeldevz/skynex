@@ -86,9 +86,11 @@ Skip this phase if the input was a branch, commit range, or plain `git diff` (no
 
 2. Post top-level summary: `gh pr comment {pr} --body "..."` with full verdict report (Blocking / Should-fix / Nice-to-have / Verified sections) in GitHub Markdown. End: `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`
 
-3. Post inline review comments for each finding with `file:line`: `gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments -f body="[R?·Dimension] <problem> → <fix>" -f commit_id="{head_commit}" -f path="{file}" -F line={line_number} -f side="RIGHT"`. Skip if file not in diff. Use `line=1` for file-level findings.
+3. Human gate (mandatory): Show verdict to your human partner: `Ready to post PR #{pr}: Verdict = {APPROVE|FIX REQUIRED|LGTM}. Blocking: B, Should-fix: S, Nice-to-have: N. Confirm? (yes / skip GitHub)`. If skipped, post only step 2 comment — do NOT proceed to step 4.
 
-4. Submit GitHub review: `--request-changes` if Blocking, `--comment` if Should-fix only, `--approve` if clean.
+4. Post inline review comments for each finding with `file:line`: `gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments -f body="[R?·Dimension] <problem> → <fix>" -f commit_id="{head_commit}" -f path="{file}" -F line={line_number} -f side="RIGHT"`. Skip if file not in diff. Use `line=1` for file-level findings.
+
+5. Submit GitHub review: `--request-changes` if Blocking, `--comment` if Should-fix only, `--approve` if clean.
 
 ## Rules
 
