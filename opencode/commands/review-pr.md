@@ -26,12 +26,8 @@ Workflow:
 4. **Phase 2 — Synthesis**
     Merge, de-duplicate, group by severity (Blocking / Should-fix / Nice-to-have), surface contradictions for a human call, build the Verified section, and propose new rules for `.skynex/review-rules.md` (human approves).
 
-5. **Phase 3 — Post to GitHub**
-    If the input was a PR number or URL (skip for branch/diff input):
-    a. Get repo name via `gh repo view` and PR head commit via `gh pr view`.
-    b. Post the full verdict report as a PR comment: `gh pr comment {pr} --body "..."`.
-    c. For each finding with a `file:line` reference, post an inline review comment via `gh api` using the actual `line` number and `side: RIGHT`.
-    d. Submit the GitHub review: `--request-changes` if Blocking, `--comment` if Should-fix only, `--approve` if clean.
+5. **Phase 3 — Post to GitHub** (only if input is a PR number/URL; skip for branch/diff)
+   Follow the review-pr SKILL's Phase 3 exactly. Key invariants: human gate BEFORE posting; ONE summary comment; best-effort inline comments (one per file:line finding, skip on API error); and EXACTLY ONE `gh pr review` submission at the end — never one per judge.
 
 6. **Report** using the skill's output format.
 

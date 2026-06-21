@@ -78,19 +78,19 @@ R2 simplification: net: -<N> lines possible
 - Feature / logic change → all 5 judges.
 - 1000+ line refactor → all 5 + call out decomposition under R2.
 
-## Phase 3 — Post to GitHub (PR input only)
+## Phase 3 — Post to GitHub (PR input only; runs ONCE, by the orchestrator, after synthesis)
 
-Skip this phase if the input was a branch, commit range, or plain `git diff` (no PR number/URL available).
+Skip entirely if the input was a branch, commit range, or plain `git diff` (no PR). The judges are read-only and never post — the orchestrator does all of Phase 3 once, after Phase 2.
 
-1. Detect context: `gh repo view --json nameWithOwner -q .nameWithOwner` for repo, `gh pr view {pr} --json headRefOid -q .headRefOid` for head commit.
+1. Human gate (mandatory, before posting anything): show the verdict — `PR #{pr}: Verdict={APPROVE|FIX REQUIRED|LGTM}. Blocking B · Should-fix S · Nice-to-have N. Post to GitHub? (yes / skip)`. If skip → output the report locally only and stop.
 
-2. Post top-level summary: `gh pr comment {pr} --body "..."` with full verdict report (Blocking / Should-fix / Nice-to-have / Verified sections) in GitHub Markdown. End: `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`
+2. Detect: repo = `gh repo view --json nameWithOwner -q .nameWithOwner`; head = `gh pr view {pr} --json headRefOid -q .headRefOid`.
 
-3. Human gate (mandatory): Show verdict to your human partner: `Ready to post PR #{pr}: Verdict = {APPROVE|FIX REQUIRED|LGTM}. Blocking: B, Should-fix: S, Nice-to-have: N. Confirm? (yes / skip GitHub)`. If skipped, post only step 2 comment — do NOT proceed to step 4.
+3. Post ONE summary comment: `gh pr comment {pr} --body "<full verdict report>"`. End with `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`.
 
-4. Post inline review comments for each finding with `file:line`: `gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments -f body="[R?·Dimension] <problem> → <fix>" -f commit_id="{head_commit}" -f path="{file}" -F line={line_number} -f side="RIGHT"`. Skip if file not in diff. Use `line=1` for file-level findings.
+4. Post inline comments — one `gh api` call per finding that has a `file:line` (this is the ONLY repeating step): `gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments -f body="[R?·Dim] <problem> → <fix>" -f commit_id="{head}" -f path="{file}" -F line={n} -f side="RIGHT"`. Best-effort: if a call errors (422/404 — file not in diff, stale line), skip it and continue; never abort Phase 3 for one failed comment.
 
-5. Submit GitHub review: `--request-changes` if Blocking, `--comment` if Should-fix only, `--approve` if clean.
+5. Submit EXACTLY ONE review (never one per judge — a single command, no loop): `gh pr review {pr}` with `--request-changes` if any Blocking, else `--comment` if only Should-fix/Nice-to-have, else `--approve` if clean. Body = the one-line verdict.
 
 ## Rules
 
