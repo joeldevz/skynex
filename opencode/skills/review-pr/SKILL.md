@@ -45,12 +45,18 @@ If a judge returns `status: blocked`, proceed with the remaining judges. In Phas
 3. Contradictions between judges → present both and escalate to your human partner. No auto-tiebreak.
 4. Build **Verified** from every judge's verified checks — tell the human what was already covered.
 5. Collect `rule_suggestions` → propose bullets for `.skynex/review-rules.md`. The human approves; never auto-write rules.
+6. Compute the merge signal:
+   - 🔴 NO MERGE — any Blocking finding present
+   - 🟡 MERGE CON OJO — 0 Blocking AND (Should-fix ≥ 3 OR R1 flagged a sensitive zone: auth, payments, PII, crypto, tenant isolation)
+   - 🟢 MERGE — 0 Blocking, Should-fix < 3, no sensitive zones flagged
+   - Include a one-line reason: e.g. "🟡 MERGE CON OJO — 4 should-fix items" or "🟢 MERGE — clean across all 5 dimensions"
 
 ## Output report
 
 ```
 # PR Review — <scope>
 Verdict: APPROVE | FIX REQUIRED | ESCALATE
+Merge signal: 🟢 MERGE | 🟡 MERGE CON OJO (<reason>) | 🔴 NO MERGE
 Readiness: ok | degraded (<gaps>)
 
 ## Blocking (must fix)
@@ -84,13 +90,13 @@ R2 simplification: net: -<N> lines possible
 
 Skip entirely if the input was a branch, commit range, or plain `git diff` (no PR). The judges are read-only and never post — the orchestrator does all of Phase 3 once, after Phase 2.
 
-1. Human gate (mandatory, before posting anything): show the verdict — `PR #{pr}: Verdict={APPROVE|FIX REQUIRED|LGTM}. Blocking B · Should-fix S · Nice-to-have N. Post to GitHub? (yes / skip)`. If skip → output the report locally only and stop.
+1. Human gate (mandatory, before posting anything): show the verdict — `PR #{pr}: Verdict={APPROVE|FIX REQUIRED|ESCALATE}. Blocking B · Should-fix S · Nice-to-have N. Post to GitHub? (yes / skip)`. If skip → output the report locally only and stop.
 
-2. Post ONE summary comment: `gh pr comment {pr} --body "<full verdict report>"`. End with `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`. If this command fails, print the full report to stdout and abort Phase 3 (do not proceed to inline comments or review submit).
+2. Detect: repo = `gh repo view --json nameWithOwner -q .nameWithOwner`; head = `gh pr view {pr} --json headRefOid -q .headRefOid`.
 
-3. Detect: repo = `gh repo view --json nameWithOwner -q .nameWithOwner`; head = `gh pr view {pr} --json headRefOid -q .headRefOid`.
+3. Post ONE summary comment: `gh pr comment {pr} --body "<full verdict report>"`. End with `*Reviewed by skynex /review-pr · 5 judges (R0–R4) · claude-sonnet-4-6*`. If this command fails, print the full report to stdout (and optionally save to `.skynex/review-{pr}.md`) then abort Phase 3 (do not proceed to inline comments or review submit).
 
-4. Post inline comments — one `gh api` call per finding that has a `file:line` (this is the ONLY repeating step): `gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments -f body="[R?·Dim] <problem> → <fix>" -f commit_id="{head}" -f path="{file}" -F line={n} -f side="RIGHT"`. Best-effort: if a call errors (422/404 — file not in diff, stale line), skip it and continue; never abort Phase 3 for one failed comment.
+4. Post inline comments — one call per finding that has a `file:line` (this is the ONLY repeating step). For safe JSON body handling, escape and pass via temp file to avoid shell interpolation issues: `printf '{"body":"%s","commit_id":"%s","path":"%s","line":%d,"side":"RIGHT"}' "$(printf '%s\n' "[R?·Dim] <problem> → <fix>" | sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/g; $ s/\\n$//')" "{head}" "{file}" {n} > /tmp/comment.json && gh api --method POST /repos/{owner}/{repo}/pulls/{pr}/comments --input /tmp/comment.json`. Best-effort: if a call errors (422/404 — file not in diff, stale line), skip it and continue; never abort Phase 3 for one failed comment.
 
 5. Submit EXACTLY ONE review (never one per judge — a single command, no loop): `gh pr review {pr}` with `--request-changes` if any Blocking, else `--comment` if only Should-fix/Nice-to-have, else `--approve` if clean. Body = the one-line verdict. If `--request-changes` fails (e.g. 422 self-authored PR), retry once with `--comment` and note the fallback in the summary.
 
