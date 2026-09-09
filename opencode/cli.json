@@ -1,0 +1,32 @@
+{
+  "diffs": {
+    "wrap": "word"
+  },
+  "session": {
+    "sidebar": "hide",
+    "scrollbar": true,
+    "thinking": "hide",
+    "terminal": false,
+    "new_location": "launch"
+  },
+  "animations": true,
+  "tabs": {
+    "enabled": false
+  },
+  "terminal": {
+    "copy": "select"
+  },
+  "attention": {
+    "enabled": true,
+    "notifications": false
+  },
+  "debug": {
+    "turn_tokens": true
+  },
+  "prompt": {
+    "editor": true
+  },
+  "theme": {
+    "name": "gruvbox"
+  }
+}

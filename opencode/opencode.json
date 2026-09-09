@@ -1,43 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "agent": {
-    "workflow-orchestrator": {
-      "description": "Dedicated Skynex Workflow V2 coordinator. Uses skynex workflow as the sole workflow authority.",
-      "mode": "all",
-      "model": "openai/gpt-5.6-terra",
-      "prompt": "{file:./agents/workflow-orchestrator.md}",
-      "tools": {"bash": true, "edit": true, "read": true, "write": true, "glob": true, "grep": true, "neurox_context": true, "neurox_recall": true}
-    },
-    "workflow-reviewer": {
-      "description": "Primary read-only reviewer for one Skynex Workflow V2 semantic or lens review.",
-      "mode": "primary",
-      "model": "openai/gpt-5.6-luna",
-      "prompt": "{file:./agents/workflow-reviewer.md}",
-      "tools": {"bash": true, "read": true, "glob": true, "grep": true, "write": false, "edit": false, "task": false}
-    },
-    "workflow-worker": {
-      "description": "Primary non-interactive worker for one fenced Skynex Workflow V2 mutation attempt.",
-      "mode": "primary",
-      "model": "openai/gpt-5.6-luna",
-      "prompt": "{file:./agents/workflow-worker.md}",
-      "tools": {"bash": true, "read": true, "glob": true, "grep": true, "write": false, "edit": false, "task": false}
-    },
-    "orchestrator": {
-      "description": "Orchestrator — pure coordination agent. Delegates all work to sub-agents. NEVER writes code. Reads a few files to decide, launches parallel sub-agents, synthesizes results.",
-      "mode": "all",
-      "prompt": "{file:./agents/orchestrator.md}",
-      "tools": {
-        "bash": true,
-        "edit": true,
-        "read": true,
-        "write": true,
-        "glob": true,
-        "grep": true,
-        "neurox_context": true,
-        "neurox_recall": true
-      },
-      "model": "openai/gpt-5.6-terra"
-    },
     "skynex-orchestrator": {
       "description": "Lean standalone orchestrator — risk-based delegation and lineage-bound results without using the Skynex workflow engine.",
       "mode": "all",
@@ -51,20 +14,26 @@
         "grep": true,
         "task": true,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": true,
+        "neurox_update": true
       },
-      "model": "openai/gpt-5.6-terra"
+      "model": "openai/gpt-6-astra-fast"
     },
     "task-classifier": {
       "description": "Read-only request classifier for the standalone orchestrator.",
       "mode": "subagent",
-      "model": "openai/gpt-5.6-luna",
+      "model": "openai/gpt-5.6-terra-fast#medium",
       "prompt": "{file:./agents/task-classifier.md}",
       "tools": {
         "read": true,
         "glob": true,
         "grep": true,
         "neurox_recall": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false,
         "bash": false,
         "edit": false,
         "write": false,
@@ -74,7 +43,7 @@
     "coder": {
       "description": "Use for one bounded coding task. TDD is mandatory: prove the focused test red, make the minimal change, and hand off only with relevant tests green.",
       "mode": "subagent",
-      "model": "openai/gpt-5.6-luna",
+      "model": "openai/gpt-5.6-luna-fast",
       "prompt": "{file:./agents/coder.md}",
       "tools": {
         "read": true,
@@ -84,14 +53,17 @@
         "glob": true,
         "grep": true,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       }
     },
-
     "infrastructure-engineer": {
       "description": "Owns bounded infrastructure, CI/CD, runtime, deployment, build, and developer-environment work with fresh upstream quality-tool resolution and safe verification.",
       "mode": "subagent",
-      "model": "openai/gpt-5.6-terra",
+      "model": "openai/gpt-6-astra#low",
       "prompt": "{file:./agents/infrastructure-engineer.md}",
       "tools": {
         "bash": true,
@@ -108,11 +80,10 @@
         "neurox_session_end": true
       }
     },
-
     "test-engineer": {
       "description": "Writes the behavior-focused red test contract before coder implementation; never changes production code.",
       "mode": "subagent",
-      "model": "openai/gpt-5.6-luna",
+      "model": "openai/gpt-5.6-luna-fast#xhigh",
       "prompt": "{file:./agents/test-engineer.md}",
       "tools": {
         "bash": true,
@@ -121,13 +92,17 @@
         "edit": true,
         "glob": true,
         "grep": true,
+        "task": false,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       }
     },
-
     "tech-planner": {
-      "model": "openai/gpt-5.6-terra",
+      "model": "openai/gpt-5.6-luna-fast#xhigh",
       "description": "Technical Planner - reads the task (or an existing SPEC), does deep codebase discovery, and produces a prescriptive PLAN.md where every step has a mandatory How section with exact file paths, signatures, and snippets",
       "mode": "subagent",
       "prompt": "{file:./agents/tech-planner.md}",
@@ -137,7 +112,9 @@
         "read": true,
         "write": true,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": true,
+        "neurox_update": true
       }
     },
     "verifier": {
@@ -150,12 +127,31 @@
         "glob": true,
         "grep": true,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       },
-      "model": "openai/gpt-5.6-luna"
+      "model": "openai/gpt-5.6-luna-fast"
+    },
+    "diagnostic-researcher": {
+      "description": "Fresh read-only investigator for an opened autonomous diagnosis circuit.",
+      "mode": "subagent",
+      "prompt": "{file:./agents/diagnostic-researcher.md}",
+      "tools": {
+        "*": false,
+        "read": false,
+        "glob": false,
+        "grep": false,
+        "diagnostic_read": true,
+        "diagnostic_glob": true,
+        "diagnostic_grep": true
+      },
+      "model": "openai/gpt-5.6-luna-fast#medium"
     },
     "test-reviewer": {
-      "model": "openai/gpt-5.6-luna",
+      "model": "openai/gpt-5.6-luna-fast#xhigh",
       "description": "Use after plan completion to review test coherence and quality. Classifies each test file as SOUND, WEAK, or MISLEADING.",
       "mode": "subagent",
       "prompt": "{file:./agents/test-reviewer.md}",
@@ -164,11 +160,15 @@
         "glob": true,
         "grep": true,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       }
     },
     "security": {
-      "model": "openai/gpt-5.6-terra",
+      "model": "openai/gpt-5.6-luna-fast#medium",
       "description": "Use as one of two parallel adversarial security judges. Finds vulnerabilities in injection, auth, data exposure, rate limiting, crypto, dependencies.",
       "mode": "subagent",
       "prompt": "{file:./agents/security.md}",
@@ -178,11 +178,15 @@
         "grep": true,
         "bash": true,
         "neurox_context": true,
-        "neurox_recall": true
+        "neurox_recall": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       }
     },
     "skill-validator": {
-      "model": "openai/gpt-5.6-luna",
+      "model": "openai/gpt-5.6-luna-fast",
       "description": "Skill Validator - validates implemented code against project skill registry at end of plan. Flags deviations from documented patterns, naming conventions, and architectural rules.",
       "mode": "subagent",
       "prompt": "{file:./agents/skill-validator.md}",
@@ -191,11 +195,15 @@
         "glob": true,
         "grep": true,
         "neurox_recall": true,
-        "neurox_context": true
+        "neurox_context": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       }
     },
     "pr-reviewer": {
-      "model": "openai/gpt-5.6-terra",
+      "model": "openai/gpt-5.6-luna",
       "description": "Adversarial PR review judge for a single 4R+1 dimension (Correctness/Risk/Readability/Reliability/Resilience). Launched in parallel by the orchestrator. Read-only.",
       "mode": "subagent",
       "prompt": "{file:./agents/pr-reviewer.md}",
@@ -204,24 +212,28 @@
         "glob": true,
         "grep": true,
         "neurox_recall": true,
-        "neurox_context": true
+        "neurox_context": true,
+        "neurox_save": false,
+        "neurox_update": false,
+        "neurox_session_start": false,
+        "neurox_session_end": false
       }
+    },
+    "general": {
+      "model": "openai/gpt-5.6-luna"
+    },
+    "explore": {
+      "model": "openai/gpt-5.6-luna-fast"
     }
   },
-  "provider": {},
   "mcp": {
-    "atlassian": {
+    "neurox": {
+      "command": [
+        "neurox",
+        "mcp"
+      ],
       "enabled": true,
-      "type": "remote",
-      "url": "https://mcp.atlassian.com/v1/mcp"
-    },
-    "brevo": {
-      "type": "remote",
-      "url": "https://mcp.brevo.com/v1/brevo/mcp",
-      "headers": {
-        "Authorization": "Bearer ${BREVO_API_KEY}"
-      },
-      "enabled": true
+      "type": "local"
     },
     "chrome-devtools": {
       "command": [
@@ -244,7 +256,7 @@
     "context7": {
       "enabled": true,
       "headers": {
-        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
       },
       "type": "remote",
       "url": "https://mcp.context7.com/mcp"
@@ -264,7 +276,7 @@
       "enabled": true,
       "environment": {
         "DO_NOT_TRACK": "1",
-        "FIGMA_API_KEY": "${FIGMA_API_KEY}",
+        "FIGMA_API_KEY": "{env:FIGMA_API_KEY}",
         "FRAMELINK_TELEMETRY": "off"
       },
       "timeout": 15000,
@@ -279,13 +291,17 @@
       "url": "https://mcp.linear.app/mcp",
       "enabled": true
     },
-    "neurox": {
+    "obs": {
+      "type": "local",
       "command": [
-        "neurox",
-        "mcp"
+        "npx",
+        "-y",
+        "@firfi/obs-mcp@0.3.3"
       ],
-      "enabled": true,
-      "type": "local"
+      "environment": {
+        "OBS_WEBSOCKET_URL": "ws://localhost:4455"
+      },
+      "enabled": true
     },
     "slack": {
       "type": "local",
@@ -295,15 +311,31 @@
         "@modelcontextprotocol/server-slack"
       ],
       "environment": {
-        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
-        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+        "SLACK_BOT_TOKEN": "{env:SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "{env:SLACK_TEAM_ID}"
       },
       "enabled": true
+    },
+    "computer-use-linux": {
+      "command": [
+        "computer-use-linux",
+        "mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
+    "servers": {
+      "runpod": {
+        "type": "remote",
+        "url": "https://mcp.getrunpod.io/"
+      }
     }
   },
-  "plugin": [
-    "opencode-anthropic-login-via-cli",
-    "@ex-machina/opencode-anthropic-auth"
-  ],
-  "small_model": "anthropic/claude-haiku-4-5"
+  "compaction": {
+    "auto": true,
+    "buffer": 0
+  },
+  "plugin": [],
+  "provider": {},
+  "small_model": "openai/gpt-5.6-luna"
 }

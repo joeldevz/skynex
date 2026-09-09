@@ -1,6 +1,6 @@
 ---
 name: write-a-skill
-description: Use when the user wants to create, write, or build a new agent skill.
+description: Create new agent skills with proper structure, progressive disclosure, and bundled resources. Use when user wants to create, write, or build a new skill.
 ---
 
 # Writing Skills
@@ -39,7 +39,7 @@ skill-name/
 ```md
 ---
 name: skill-name
-description: Use when [specific triggers].
+description: Brief description of capability. Use when [specific triggers].
 ---
 
 # Skill Name

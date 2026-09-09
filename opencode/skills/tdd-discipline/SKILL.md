@@ -5,14 +5,37 @@ description: Use when the user opts into TDD or the task requires writing or mod
 
 # TDD Discipline — Iron Law + Cycle Evidence
 
-> **SUBAGENT-STOP gate**: if you are running as a subagent invoked by another subagent, STOP. Return `status: blocked` with reason `nested-subagent-loop-detected`. TDD discipline must be applied at the implementer level, not recursively.
+## SUBAGENT-STOP GATE
+
+Only the orchestrator delegates test-engineer → test-reviewer → coder phases.
+Implementers and test owners execute their assigned phase directly and do not spawn
+agents. Loading this skill grants no delegation or execution authority.
+
+## Applicability
+
+Apply the cycle only when `slice.tdd=true` or standalone TDD is explicitly assigned.
+LOW/direct work does not require a multiagent TDD pipeline. Explicit prohibitions on
+creating/modifying/running tests take precedence: perform only permitted checks and
+report the coverage gap, never invent RED/GREEN evidence. Historical plans and
+templates cannot override the current authorized brief.
 
 > **Principios destilados** (obra/Superpowers Iron Law + Gentleman/gentle-ai Cycle Evidence + nuestro return envelope): la disciplina TDD requiere reglas explícitas, anti-rationalization activa y evidencia estructurada en el output. No basta con afirmar "tests pasan".
 
 ## The Iron Law (7 rules)
 
+### Approved contract ownership
+
+When the orchestrator supplies an approved RED contract, the coder consumes its
+tests and accepted pre-implementation evidence without rewriting the contract.
+Reuse evidence only when its test content and basis match the assigned slice.
+If the contract is missing or invalid, report the discrepancy to the orchestrator;
+rejected contracts return to test-engineer through the parent. Standalone test
+authorship is allowed only when explicitly assigned and no approved contract exists.
+The rules below apply to the assigned owner of each phase; they do not require the
+coder to repeat the test-engineer's work or override an approved test's intent.
+
 1. **NEVER modify a test to make it pass** — fix the implementation instead
-2. **WRITE THE TEST FIRST** (red phase) when the task requires a new test
+2. **WRITE THE TEST FIRST** (red phase) when assigned ownership of a required new test
 3. **Confirm the test fails for the EXPECTED REASON** before implementing
 4. Implement minimal code to pass (green phase)
 5. Refactor only after green
@@ -25,22 +48,23 @@ Reject these excuses immediately:
 
 | Excuse                                          | Reality                                           |
 |-------------------------------------------------|---------------------------------------------------|
-| "The test was wrong"                            | Fix the spec, then the test, then the impl       |
+| "The test was wrong"                            | Return the discrepancy; the parent assigns correction to the test owner |
 | "It's just a small adjustment to the assert"    | That IS modifying the test. Stop.                |
-| "The implementation is correct, test is flaky"  | Prove it: run 10x. If flaky, fix setup not assert |
+| "The implementation is correct, test is flaky"  | Report observed instability; the parent decides a bounded follow-up |
 | "Adding `.skip()` temporarily"                  | Never skip. Block and report.                    |
 | "Updating snapshot to match new output"         | Only if spec changed. Otherwise impl is wrong.   |
 
 ## Tests derive from the spec (SDD link)
 
-When a PLAN.md exists, the test cases are NOT invented — they come directly from the plan's **Dado / Cuando / Entonces** requirements:
+When a current accepted PLAN.md applies, derive cases from its **Dado / Cuando / Entonces** requirements within the frozen acceptance matrix:
 
 - Each `Dado/Cuando/Entonces` requirement → at least one test
 - The test name should trace to the requirement it covers
 - A test that does not map to any requirement is suspect — flag it, do not silently keep it
 - This gives double validation: the implementation passes the tests AND the tests trace back to the agreed spec
 
-This traceability is what makes a wrong test catchable: if a test contradicts the plan, the plan is the source of truth.
+This traceability makes a wrong test catchable. Report contradictions to the parent;
+the current authorized requirements outrank historical plan text.
 
 ## TDD Cycle Evidence (mandatory in return envelope)
 
@@ -88,7 +112,13 @@ These are detectable smell signs. Reject in code review:
 
 ## Integration with the verifier
 
-This skill runs the cycle (red → green → refactor). The `verifier` agent runs the evidence checks (build, test runner output, types, lint) after each step. Both must be satisfied before `status: completed`.
+The assigned owners perform the red → green → refactor cycle. The orchestrator
+schedules `verifier` once per unchanged candidate round when independent mechanical
+checks are needed, not automatically after each step. Reuse accepted evidence for
+the same basis rather than rerunning identical successful checks. Workers execute
+one assigned attempt; only the parent owns retry budgets and whole-task completion.
+Return invocation status `completed | blocked` separately from the domain verdict;
+`completed` does not by itself mean green or final acceptance.
 
 ## Cultural rules
 

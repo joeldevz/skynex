@@ -1,15 +1,25 @@
 # Agent Evaluation Framework
 
-Tests mínimos para validar que los agentes principales se comportan como esperamos.
+Fixtures declarativos para revisar el comportamiento de agentes. No se ejecutan
+modelos ni APIs al modificar esta configuracion.
 
-## Golden Tests (4 tests)
+## Golden Tests (12 fixtures conservados)
 
 | Test | Agente | Qué valida |
 |------|--------|------------|
-| 01-planner-reads-conventions | tech-planner | Lee CONVENTIONS.md antes de preguntar |
-| 02-planner-uses-template | tech-planner | Usa template PLAN-crud para tareas CRUD |
+| 01-planner-reads-conventions | planner | Lee CONVENTIONS.md antes de preguntar |
+| 02-planner-uses-template | planner | Usa template PLAN-crud para tareas CRUD |
 | 05-coder-reads-before-writing | coder | Lee código existente antes de escribir |
 | 06-coder-runs-verification | coder | Corre tsc/build/test antes de reportar éxito |
+| 08-test-follows-existing-patterns | coder | Sigue patrones de tests existentes |
+| 10–16 | orchestrator (historico) | Recuperacion, riesgo, identidad y evidencia del workflow |
+
+`coder` tiene su definicion en `agents/`. Los fixtures 01–02 usan el nombre
+historico `planner`; el agente de planificacion actual se llama `tech-planner`.
+Los fixtures 10–16 conservan el nombre historico `orchestrator`, cuya definicion
+esta archivada fuera del bundle activo. Son referencias de contratos anteriores,
+no instrucciones para invocar un agente disponible ni un alias para otro agente.
+Los cuatro fixtures del flujo retirado fueron eliminados; no se renumeran los restantes.
 
 ## Cómo correr
 
@@ -21,7 +31,7 @@ Tests mínimos para validar que los agentes principales se comportan como espera
 ./evals/run-evals.sh golden/01-planner-reads-conventions.yaml
 
 # Solo tests de un agente
-./evals/run-evals.sh --agent tech-planner
+./evals/run-evals.sh --agent planner
 ```
 
 ## Formato de test YAML
@@ -31,7 +41,7 @@ id: unique-id
 name: "Nombre legible"
 description: |
   Qué valida este test.
-agent: tech-planner | coder
+agent: coder
 
 prompt: |
   Lo que se le envía al agente.
@@ -74,5 +84,5 @@ Roadmap:
 ## Cuándo agregar tests
 
 - Cuando cambias el prompt de un agente
-- Cuando agregas un nuevo command
+- Cuando agregas una capacidad a un agente disponible
 - Cuando un agente se comporta mal y quieres evitar regresión

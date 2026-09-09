@@ -17,7 +17,6 @@ opencode/
   .gitignore
   tui.json
   README.md
-  commands/
   evals/            # golden tests para validar comportamiento de agentes
   plugins/
   skills/
@@ -26,19 +25,12 @@ opencode/
 
 ## Agentes
 
-### `planner`
+### `tech-planner`
 
 - corre un **discovery checklist** antes de preguntar: primero inicia memoria con Neurox (`neurox_session_start` + `neurox_context`), luego lee CONVENTIONS.md, package.json, modulos similares, tests, y consulta decisiones previas con `neurox_recall`
 - hace preguntas de negocio y tecnicas en bloques
 - recomienda defaults razonables
 - genera `PLAN.md`
-
-### `infrastructure-engineer`
-
-- gestiona tareas acotadas de infraestructura, CI/CD, runtime y despliegue
-- prepara las herramientas de calidad requeridas desde sus fuentes upstream
-- separa los límites no testeables y ejecuta la verificación relevante
-- conserva el acceso completo a Neurox para registrar decisiones operativas duraderas
 
 Estados de `PLAN.md`:
 
@@ -55,43 +47,39 @@ Estados de `PLAN.md`:
 - consulta **Context7** para docs en vivo cuando trabaja con librerias externas
 - corre verificaciones antes de devolver exito
 
-## Commands
+## Comandos personalizados
 
-La lista canónica es el contenido de `opencode/commands/`:
-
-`/commit`, `/docs`, `/pr`, `/review-pr`, `/rollback`, `/setup` y `/skills-scan`.
-
-Los comandos descritos en documentos antiguos no forman parte de la distribución actual.
+Este bundle ya no incluye comandos personalizados del repositorio. Las skills,
+herramientas y conexiones MCP restantes se conservan de forma independiente.
+No se proporcionan aliases ni agentes de reemplazo para las capacidades retiradas.
 
 ## Flujo recomendado
 
-```text
-/setup
-/docs Go testing
-/review-pr
-/commit
-/pr
-```
+Solicitar la tarea en lenguaje natural al agente disponible apropiado: explorar
+el proyecto, preparar el plan, implementar dentro del alcance autorizado y revisar
+los cambios con verificaciones locales. Pedir aprobacion humana antes de acciones
+Git que la requieran. Consultar los prompts actuales en `agents/` y `opencode.json`;
+este flujo no depende de slash commands personalizados.
 
 ## Setup para cada miembro del equipo
 
 1. Copiar el contenido de `opencode/` a `~/.config/opencode/`
 2. Ejecutar `bun install` dentro de `~/.config/opencode/`
 3. Tener Neurox configurado si quieres memoria persistente
-4. Tener `gh` autenticado si quieres usar `/pr`
+4. Tener `gh` autenticado si quieres gestionar pull requests con esa herramienta
 
 ## Configuracion local opcional
 
 ### Context7
 
-Context7 esta habilitado por defecto pero requiere API key. Cada persona debe editar localmente `~/.config/opencode/opencode.json` y poner su API key real:
+Context7 esta habilitado por defecto pero requiere API key. Define `CONTEXT7_API_KEY` en el entorno del proceso OpenCode; no escribas credenciales reales en archivos versionados:
 
 ```json
 "context7": {
   "type": "remote",
   "url": "https://mcp.context7.com/mcp",
   "headers": {
-    "CONTEXT7_API_KEY": "TU_API_KEY"
+    "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
   },
   "enabled": true
 }
@@ -167,19 +155,9 @@ DTOs si pueden usar primitivos porque son la frontera de serializacion.
 
 ## Eval Framework
 
-9 golden tests en `evals/golden/` que validan el comportamiento esperado de los agentes y commands clave:
-
-| Test | Agente       | Valida                                        |
-| ---- | ------------ | --------------------------------------------- |
-| 01   | planner      | Lee CONVENTIONS.md antes de preguntar         |
-| 02   | planner      | Usa template PLAN-crud para tareas CRUD       |
-| 03   | orchestrator | Lee PLAN.md antes de hacer nada               |
-| 04   | orchestrator | Se detiene tras un paso y pide review         |
-| 05   | coder        | Lee codigo existente antes de escribir        |
-| 06   | coder        | Corre verificacion antes de reportar exito    |
-| 07   | orchestrator | /review lee CONVENTIONS.md y git diff         |
-| 08   | coder        | /test lee tests existentes antes de generar   |
-| 09   | orchestrator | /rollback pide confirmacion antes de revertir |
+12 fixtures declarativos en `evals/golden/`. Los casos 01, 02, 05, 06 y 08
+describen planificacion y codigo; 10–16 conservan contratos historicos del workflow.
+Ver `evals/README.md` para distinguir agentes disponibles de referencias historicas.
 
 ```bash
 # Ver los tests y sus checks
@@ -194,7 +172,7 @@ Hoy la evaluacion es manual (leer output y verificar). El roadmap es automatizar
 ## Que tocar cuando quieras ajustar algo
 
 - `opencode.json` -> comportamiento base de agentes y MCPs
-- `commands/*.md` -> comportamiento puntual de cada slash command
+- `agents/*.md` -> instrucciones de los agentes disponibles
 - `templates/*.md` -> referencia de convenciones, planes, commits y PRs
 - `evals/golden/*.yaml` -> tests de regresion para validar cambios en prompts
 

@@ -38,7 +38,7 @@ constraints:
   smart_zone: 100K hard cap
   retries: max 2
 expected_output:
-  status: completed | blocked | needs-review
+  status: success | blocked | needs-review
   artifacts: <files to be modified>
   envelope_fields: [<required fields>]
 ```
@@ -85,7 +85,7 @@ When parallel subagents return:
 1. Extract **only**: `status`, `executive_summary`, `artifacts`, `risks`, `verification`
 2. Discard intermediate tool calls and reasoning chains
 3. If any subagent returned `status: blocked` → halt downstream parallelization
-4. If two subagents disagree on a verdict → escalate to the user for a tiebreak. There is no advisor agent or `advisor_consult` tool; do not assume one exists at any level.
+4. If two subagents disagree on a verdict → escalate to the user for a tiebreak. Do not invent an escalation tool or replacement agent.
 5. Save synthesis to Neurox with topic_key for future recall
 
 ## Smart-zone budget per subagent
@@ -99,3 +99,4 @@ Each parallel subagent has its own 100K cap. The orchestrator's job is to:
 
 - obra/Superpowers — RELEASE-NOTES on subagent context isolation
 - Matt Pocock — smart zone awareness + DAG canban patterns
+- Anthropic — Advisor Strategy (parallel dispatch with synthesis)
