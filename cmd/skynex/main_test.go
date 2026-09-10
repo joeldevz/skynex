@@ -71,6 +71,16 @@ func TestParseArgsFromVerbose(t *testing.T) {
 	}
 }
 
+func TestStateConfigPathUsesJoinForCleanPaths(t *testing.T) {
+	base := filepath.Join("tmp", "skynex")
+	mixed := strings.ReplaceAll(base, string(filepath.Separator), "/")
+	got := stateConfigPath(mixed)
+	want := filepath.Join(base, "skills.config.json")
+	if got != want {
+		t.Fatalf("stateConfigPath(%q) = %q, want %q", mixed, got, want)
+	}
+}
+
 func TestParseArgsFromForce(t *testing.T) {
 	args := parseArgsFrom([]string{"install", "--force"})
 	if !args.Install || !args.Force {
