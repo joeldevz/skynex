@@ -753,6 +753,14 @@ func handleCompletion(shell string) {
 	}
 }
 
+func stateConfigPath(stateDir string) string {
+	return filepath.Join(stateDir, "skills.config.json")
+}
+
+func stateLockPath(stateDir string) string {
+	return filepath.Join(stateDir, "skills.lock.json")
+}
+
 func handleUpdate(pkg string, stateDir string, cleanupDeprecated bool, trustScripts ...bool) {
 	if stateDir == "" {
 		stateDir = paths.StateDir()
@@ -786,7 +794,8 @@ func handleUpdate(pkg string, stateDir string, cleanupDeprecated bool, trustScri
 	}
 
 	// Load existing config to know what was installed
-	cfg, err := config.LoadOrDefault(stateDir + "/skills.config.json")
+	cfgPath := stateConfigPath(stateDir)
+	cfg, err := config.LoadOrDefault(cfgPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
 		os.Exit(1)
@@ -890,10 +899,10 @@ func handleUpdate(pkg string, stateDir string, cleanupDeprecated bool, trustScri
 				}
 			}
 		}
-		if saveErr := config.SaveConfig(stateDir+"/skills.config.json", request, cfg); saveErr != nil {
+		if saveErr := config.SaveConfig(stateConfigPath(stateDir), request, cfg); saveErr != nil {
 			return saveErr
 		}
-		return config.SaveLock(stateDir+"/skills.lock.json", results, request)
+		return config.SaveLock(stateLockPath(stateDir), results, request)
 	}); err != nil {
 		fmt.Fprintf(os.Stderr, "\nUpdate failed: %v\n", err)
 		os.Exit(1)

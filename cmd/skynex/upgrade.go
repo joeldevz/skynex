@@ -26,7 +26,7 @@ type GitHubRelease struct {
 	TagName string `json:"tag_name"`
 }
 
-const releaseAllowedSigner = "skynex-release ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINUht44Rk/nWIXqcKizh8SWdnECJZOQ5yuPjaxaWxAAF skynex release signing\n"
+const releaseAllowedSigner = "skynex-release ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFyDcCsQ5k4P8zC/qrmMlFi5nfV02DhT+ADQiqX65ynf skynex release signing\n"
 
 const (
 	upgradeHTTPTimeout = 30 * time.Second

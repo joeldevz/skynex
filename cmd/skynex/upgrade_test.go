@@ -8,6 +8,18 @@ import (
 	"testing"
 )
 
+func TestReleaseAllowedSignerMatchesRepositoryKey(t *testing.T) {
+	pubKeyPath := filepath.Join("..", "..", "release", "trust", "skynex-release-signing-key.pub")
+	pubKey, err := os.ReadFile(pubKeyPath)
+	if err != nil {
+		t.Fatalf("read repository public key: %v", err)
+	}
+	want := "skynex-release " + strings.TrimSpace(string(pubKey)) + "\n"
+	if got := string(releaseAllowedSigner); got != want {
+		t.Fatalf("releaseAllowedSigner = %q, want %q", got, want)
+	}
+}
+
 func TestVerifySSHSignatureValidAndRejectsTampering(t *testing.T) {
 	if _, err := exec.LookPath("ssh-keygen"); err != nil {
 		t.Skip("ssh-keygen unavailable")
